@@ -1,0 +1,24 @@
+---
+name: public-repository
+description: This repo is public; protect sensitive data and review changes before committing
+alwaysApply: true
+---
+# Public Repository
+
+**This repository is public.** Anyone can see the source code, commit history, and deleted files that remain in Git history.
+
+## Before Adding Anything
+
+- **Assume everything is visible.** If it could be seen as sensitive (API keys, tokens, personal data, internal docs, draft content), **check with me before adding it.**
+- When in doubt, ask: "Should this be public?" Do not add potentially sensitive data without confirmation.
+
+## Before Committing
+
+- **Read through all changes** (diff) before committing.
+- Verify that no data that should not be public is included (credentials, secrets, PII, internal-only notes, draft content).
+- If anything is unclear or could be sensitive, **ask me** before committing. Do not guess.
+
+## Summary
+
+- Treat the repo as fully public at all times.
+- When unsure about sensitivity, ask the user before adding or committing.

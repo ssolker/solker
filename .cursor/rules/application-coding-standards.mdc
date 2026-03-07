@@ -1,0 +1,114 @@
+---
+description: General coding standards for stability and maintainability (src, components, lib)
+globs: **/src/** **/components/** **/lib/**
+alwaysApply: false
+---
+# Application Coding Standards
+
+Apply these standards when working in `src/`, `components/`, or `lib/`.
+
+---
+
+## Core Principles
+
+- **DECADE-PROOF**: Use LTS versions of languages and frameworks. Prefer mature, well-maintained libraries over trendy ones.
+- **TYPE SAFETY**: Strict TypeScript mode. Absolutely no `any`. Use `unknown` and narrow with type guards when types are dynamic.
+- **REUSE**: If logic already exists, extend it. Do not duplicate. Extract shared logic into `lib/` or shared modules.
+
+---
+
+## Coding Standards
+
+### Backend
+
+- Use **Controller–Service–Repository** pattern.
+- **Controllers**: Handle HTTP only (request/response, validation, status codes). No business logic.
+- **Services**: All business logic. Call repositories; orchestrate transactions.
+- **Repositories**: Data access only. Queries and persistence; no business rules.
+
+### Frontend
+
+- **Tailwind CSS** for styling. No inline styles. Use Tailwind classes and avoid arbitrary values unless necessary.
+- **Functional components only.** No class components. Use hooks for state and side effects.
+
+### Naming
+
+| Context        | Convention   | Example                |
+|----------------|-------------|------------------------|
+| Files          | kebab-case  | `user-profile.tsx`     |
+| Components     | PascalCase  | `UserProfile`          |
+| Variables/fns  | camelCase   | `getUserById`          |
+| Constants      | UPPER_SNAKE or camelCase | `API_BASE_URL` or `defaultPageSize` |
+
+---
+
+## Constraints
+
+- **ERROR HANDLING**: Every API call and database query must be wrapped in `try/catch` with explicit error logging. Re-throw or return a typed error result; do not swallow errors.
+- **DATA ACCESS**: Frontend must never directly access the database. All data goes through APIs (backend services).
+- **ENVIRONMENT**: Use `process.env` (or your env abstraction) for configuration. Hardcode no URLs, keys, or environment-specific values.
+
+---
+
+## Behavior
+
+- **Schema first**: Think through schema and data model changes before writing code. Consider migrations and backward compatibility.
+- **Uncertain workflows**: If unsure about a lab or domain workflow, add `// TODO: Ask Shuaib` and stop rather than guessing.
+
+---
+
+## Additional Practices
+
+- **Single responsibility**: One clear purpose per module, function, or component. Split when a file or function grows beyond a screen or does more than one thing.
+- **Explicit over implicit**: Prefer named exports, explicit return types on public APIs, and clear parameter names. Avoid magic numbers and string literals; use named constants or enums.
+- **Immutability**: Prefer `const` and avoid mutating objects/arrays in place. Use spread, `map`, `filter`, and immutable patterns, especially in Vue reactive state.
+- **Async consistency**: Use async/await. Handle loading and error states in the UI. Do not leave promises unhandled.
+- **Tests**: Write tests for business logic and services. Prefer small, focused tests. Mock I/O at boundaries (repositories, APIs).
+- **Comments**: Comment *why*, not *what*. Document non-obvious decisions, constraints, and "Ask Shuaib" items. Keep comments up to date or remove them.
+
+---
+
+## Examples
+
+```typescript
+// ✅ GOOD: Controller thin, service has logic, error handling and logging
+// controller
+async function getUser(req: Request, res: Response) {
+  try {
+    const user = await userService.getById(req.params.id);
+    res.json(user);
+  } catch (e) {
+    logger.error('getUser failed', { error: e, id: req.params.id });
+    res.status(500).json({ error: 'Failed to load user' });
+  }
+}
+
+// ✅ GOOD: Strict types, no any
+function parsePayload(data: unknown): UserPayload {
+  if (!isUserPayload(data)) throw new ValidationError('Invalid user payload');
+  return data;
+}
+
+// ❌ BAD: any, no error handling, logic in controller
+async function getUser(req: any, res: any) {
+  const user = await db.query('SELECT * FROM users WHERE id = $1', [req.params.id]);
+  res.json(user.rows[0]);
+}
+```
+
+```tsx
+// ✅ GOOD: Functional component, Tailwind, no inline styles
+export function UserCard({ user }: { user: User }) {
+  const [loading, setLoading] = useState(false);
+  return (
+    <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
+      <h2 className="text-lg font-semibold">{user.name}</h2>
+    </div>
+  );
+}
+
+// ❌ BAD: Inline styles, any
+export function UserCard({ user }: any) {
+  return <div style={{ padding: 16, border: '1px solid gray' }}>{user.name}</div>;
+}
+```

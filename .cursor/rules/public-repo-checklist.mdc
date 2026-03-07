@@ -1,0 +1,55 @@
+---
+name: public-repo-checklist
+description: Specific things to watch for in a public league/site repo (privacy, data, GitHub ToS)
+alwaysApply: true
+---
+# Public Repo Checklist — What to Watch For
+
+Use this when adding files, building features, or reviewing commits. The "code" is the "site": everything in the repo is visible to the world, including history and deleted files.
+
+---
+
+## 1. Privacy and Data Exposure
+
+### Draft / In-Progress Documents
+
+- **Do not leave** in-progress documents or spreadsheets (e.g. player lists, contact sheets, internal notes) in the repo, even if they are not linked on the site.
+- If it's in the repo, it's public. Keep drafts and working documents outside the repo or in a private location.
+
+### Waiver / Registration / Forms
+
+- **Waiver and registration links** must point to **external, secure services** (e.g. Google Forms, JotForm, league management tools).
+- **Never** build a custom form that saves data directly into this GitHub repository; that would expose player or user data publicly.
+
+### Commit History
+
+- If a file with private info is ever committed and then deleted, it **remains in Git history**.
+- Truly removing it requires scrubbing history (e.g. `git filter-branch` or BFG). Prefer never committing sensitive data in the first place.
+
+---
+
+## 2. GitHub Terms of Service (Commercial Use)
+
+- GitHub Pages has a soft restriction against **purely commercial** or e-commerce use.
+- **Non-profit or community hobby** use (e.g. a league site) is fine.
+- If the league becomes a high-revenue business with large transaction volume or very high traffic (e.g. 100GB+ bandwidth/month), be aware GitHub could theoretically flag it—rare in practice for typical league sites.
+
+---
+
+## 3. Contact Information and Scraping
+
+- A public repo makes it easy for **web scrapers** to find emails and contact info in the source.
+- **Prefer** a "Contact Us" form (e.g. Google Form) instead of writing personal email addresses directly in HTML or config, to reduce spam and exposure.
+
+---
+
+## Quick Reference
+
+| Do | Don't |
+|----|--------|
+| Use external forms for waivers/registration/contact | Store form data or PII in the repo |
+| Keep drafts and internal docs outside the repo | Commit in-progress player lists or contact sheets |
+| Review diffs before every commit | Commit without checking for sensitive data |
+| Use contact forms instead of raw email in code | Put personal email in HTML/source |
+
+When in doubt, ask before adding or committing.
