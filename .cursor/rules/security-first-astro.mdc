@@ -1,0 +1,69 @@
+---
+name: security-first-astro
+description: Security-first Astro development — API keys, secrets, and deployment safety
+alwaysApply: true
+---
+# Role: Security-First Astro Developer
+
+When working with Astro in this project, follow these security rules.
+
+---
+
+## Protection (Public Repos)
+
+Whenever integrating an **API or external data**, check if the repository is **public**. If it is, **enforce the use of GitHub Secrets** for any credentials or tokens. Do not rely on local `.env` alone for deployment; repository secrets must be used in CI (e.g. GitHub Actions).
+
+---
+
+## Privacy (Client-Side)
+
+- **Never suggest** placing API keys or sensitive tokens in client-side scripts.
+- All **authenticated fetches** must occur in **Astro frontmatter** (`---` blocks) so they run at **build-time** only, not in the browser.
+- Only use `import.meta.env.PUBLIC_*` for values that are safe to expose (e.g. public API base URLs with no secrets).
+
+---
+
+## Validation (Naming)
+
+- If a variable is **sensitive** (key, token, secret), ensure it does **NOT** have the `PUBLIC_` prefix.
+- Astro exposes `import.meta.env.PUBLIC_*` to the client; sensitive variables must use unprefixed env names and only be read in server/build context (e.g. frontmatter).
+
+---
+
+## Git Safety
+
+- **Before** writing any environment-related code, **remind** to add `.env` to `.gitignore` (and confirm it is present).
+- Do not proceed with env usage without this check.
+
+---
+
+## Deployment (GitHub Actions)
+
+When asked to **deploy** (e.g. to GitHub Pages), provide a **GitHub Actions YAML snippet** that:
+
+- Maps **repository secrets** to the Astro build environment (e.g. `env` or `steps.run.env`).
+- Uses those secrets only in the build step, not in artifact or upload steps.
+- Keeps secrets out of logs (avoid `echo` or printing secret values).
+
+Example pattern to include:
+
+```yaml
+# Example: mapping repo secrets to build
+env:
+  MY_API_KEY: ${{ secrets.MY_API_KEY }}
+# Or in a step:
+- run: npm run build
+  env:
+    MY_API_KEY: ${{ secrets.MY_API_KEY }}
+```
+
+---
+
+## Summary
+
+| Do | Don't |
+|----|--------|
+| Use GitHub Secrets for public repos + APIs | Put API keys in client-side code |
+| Run authenticated fetches in Astro frontmatter (build-time) | Expose secrets via `PUBLIC_` env vars |
+| Add `.env` to `.gitignore` before env code | Commit `.env` or hardcode secrets |
+| Provide Actions snippet mapping secrets to build | Log or echo secret values in workflows |

@@ -1,0 +1,43 @@
+---
+name: astro-best-practices
+description: Astro project structure, components, routing, and performance per official docs and conventions
+globs: "**/*.astro **/src/**"
+alwaysApply: false
+---
+# Astro Best Practices
+
+Follow the [Astro project structure](https://docs.astro.build/en/basics/project-structure/): `src/components/`, `src/layouts/`, `src/pages/`, `src/styles/`, and `public/` for unprocessed assets. Only `src/pages/` is required; keep the rest as shown.
+
+## Structure and routing
+
+- Use **file-based routing** in `src/pages/`. Use folder routes (e.g. `src/pages/league/index.astro`) for clean URLs and future sub-routes.
+- Dynamic routes: use `[...slug].astro` and `getStaticPaths()` for static generation.
+- Provide a **404 page**: `src/pages/404.astro` for proper 404 handling.
+
+## Components and data
+
+- Use **`.astro` components** with typed `interface Props` and `Astro.props` for data. Use framework components (React, Vue, Svelte) only when needed.
+- Prefer **static generation** and minimal client JS. Use `client:*` directives only when necessary: `client:load` (critical), `client:idle` (defer), `client:visible` (when in view).
+- Data: use `Astro.props`, `getStaticPaths()`, and `Astro.glob()` for build-time data. Keep sensitive fetches in frontmatter (server/build only).
+
+## Styling
+
+- Use **Tailwind utility classes** in components. No inline styles; no `@apply`. Use responsive utilities (`sm:`, `md:`, `lg:`). Import global CSS in `src/layouts/Layout.astro` from `src/styles/`.
+- Use scoped `<style>` in `.astro` only when Tailwind is insufficient.
+
+## Performance and SEO
+
+- Prioritize **Core Web Vitals**. Use Astro's built-in image optimization for images in `src/`; put non-processed assets in `public/`.
+- Put meta tags and canonical URLs in layout or page `<head>`. Use a consistent title/description pattern (e.g. layout `title` prop).
+
+## Conventions
+
+- **Naming:** kebab-case for files, PascalCase for component names. Descriptive variable names.
+- **TypeScript:** Use strict types; no `any`. Type props and `getStaticPaths()` return values.
+- **Accessibility:** Semantic HTML, ARIA when needed, keyboard support for interactive elements.
+- **Content:** Use Markdown/MDX and content collections for content-heavy pages; use frontmatter and `content.config.ts` when using collections.
+
+## Reference
+
+- [Project structure](https://docs.astro.build/en/basics/project-structure/)
+- Astro integrations (e.g. Tailwind, image) go in `astro.config.mjs`. Use official integrations when available.
