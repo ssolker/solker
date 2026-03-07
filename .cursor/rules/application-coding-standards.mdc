@@ -1,11 +1,11 @@
 ---
 description: General coding standards for stability and maintainability (src, components, lib)
-globs: **/src/** **/components/** **/lib/**
+globs: "**/src/** **/components/** **/lib/**"
 alwaysApply: false
 ---
 # Application Coding Standards
 
-Apply these standards when working in `src/`, `components/`, or `lib/`.
+Apply these standards when working in `src/`, `components/`, or `lib/`. For **Astro** projects (`.astro` files, `src/pages/`, `src/components/`), also follow the **astro-best-practices** rule for structure, routing, and Astro-specific patterns.
 
 ---
 
@@ -28,8 +28,8 @@ Apply these standards when working in `src/`, `components/`, or `lib/`.
 
 ### Frontend
 
-- **Tailwind CSS** for styling. No inline styles. Use Tailwind classes and avoid arbitrary values unless necessary.
-- **Functional components only.** No class components. Use hooks for state and side effects.
+- **Tailwind CSS** for styling. No inline styles. Use Tailwind classes and avoid arbitrary values unless necessary. Do not use `@apply` in Tailwind.
+- **Functional components only** (React/Vue). For Astro: use `.astro` components with props; add framework components only when client interactivity is required.
 
 ### Naming
 

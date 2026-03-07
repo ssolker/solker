@@ -1,0 +1,19 @@
+---
+interface Props {
+  title: string;
+  tagline?: string;
+}
+const { title, tagline } = Astro.props;
+---
+<header class="w-full px-4 py-16 md:py-24 lg:py-32">
+  <div class="mx-auto max-w-4xl text-center">
+    <h1 class="font-heading text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+      {title}
+    </h1>
+    {tagline && (
+      <p class="mt-4 text-lg text-slate-300 md:text-xl">
+        {tagline}
+      </p>
+    )}
+  </div>
+</header>

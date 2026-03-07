@@ -1,0 +1,42 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Section from '../../components/Section.astro';
+---
+
+<Layout title="League — Solker" description="League rules, registration, and waivers.">
+  <main class="px-4 py-8 md:py-12">
+    <div class="mx-auto max-w-3xl">
+      <a
+        href="/"
+        class="mb-8 inline-block text-sm font-medium text-emerald-400 hover:text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+      >
+        ← Back to home
+      </a>
+      <h1 class="font-heading mb-10 text-3xl font-bold text-white md:text-4xl">
+        League
+      </h1>
+
+      <Section title="Rules">
+        <p>
+          League rules and code of conduct will be posted here.
+        </p>
+      </Section>
+
+      <Section title="Registration">
+        <p>
+          Registration will open via an external form when the season is announced.
+          Do not store registration data in this repository; use a secure
+          external service (e.g. Google Forms, JotForm, or a league management
+          tool).
+        </p>
+      </Section>
+
+      <Section title="Waivers">
+        <p>
+          Waivers and eligibility info will be available here. Signing will be
+          done via an external link; no waiver data is stored in this repo.
+        </p>
+      </Section>
+    </div>
+  </main>
+</Layout>
