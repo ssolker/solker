@@ -1,0 +1,16 @@
+---
+const navLinkClass = "rounded px-3 py-2 text-sm font-medium text-taupe hover:bg-sage-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark";
+const links = [
+  { href: '#current-season', label: 'Current Season' },
+  { href: '#all-sports', label: 'All Sports' },
+  { href: '#standings', label: 'Standings' },
+  { href: '#resources', label: 'Resources' },
+  { href: '#about', label: 'About' },
+];
+---
+
+<nav class="flex items-center gap-1 md:gap-2" aria-label="Main">
+  {links.map(({ href, label }) => (
+    <a href={href} class={navLinkClass}>{label}</a>
+  ))}
+</nav>

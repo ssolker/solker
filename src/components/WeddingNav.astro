@@ -1,0 +1,15 @@
+---
+const navLinkClass = "rounded px-3 py-2 text-sm font-medium text-taupe hover:bg-sage-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark";
+const links = [
+  { href: '#our-story', label: 'Our Story' },
+  { href: '#event-details', label: 'Event Details' },
+  { href: '#travel-stay', label: 'Travel & Stay' },
+  { href: '#registry', label: 'Registry' },
+];
+---
+
+<nav class="flex items-center gap-1 md:gap-2" aria-label="Wedding">
+  {links.map(({ href, label }) => (
+    <a href={href} class={navLinkClass}>{label}</a>
+  ))}
+</nav>

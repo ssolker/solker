@@ -1,0 +1,11 @@
+---
+import Footer from './Footer.astro';
+interface Props {
+  companyName: string;
+  contactHref?: string;
+  contactText?: string;
+  copyrightYear?: number;
+}
+const props = Astro.props;
+---
+<Footer {...props} />

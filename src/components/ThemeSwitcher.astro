@@ -1,0 +1,86 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div class={`theme-switcher flex items-center gap-1 ${className ?? ''}`} aria-label="Theme">
+  <div class="flex rounded-lg border border-taupe/30 bg-sage/50 p-0.5" role="group" aria-label="Light or dark mode">
+    <button type="button" data-theme-btn="light" class="theme-btn rounded-md px-2.5 py-1.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest" aria-pressed="false">Light</button>
+    <button type="button" data-theme-btn="dark" class="theme-btn rounded-md px-2.5 py-1.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest" aria-pressed="false">Dark</button>
+  </div>
+  <!-- Palette switcher (kept for reference; always use new palette)
+  <span class="ml-2 text-xs font-medium opacity-80">Palette</span>
+  <div class="flex rounded-lg border border-taupe/30 bg-sage/50 p-0.5" role="group" aria-label="Color palette">
+    <button type="button" data-palette-btn="new" class="palette-btn rounded-md px-3 py-1.5 text-sm font-medium ...">New</button>
+    <button type="button" data-palette-btn="original" class="palette-btn rounded-md px-3 py-1.5 text-sm font-medium ...">Original</button>
+  </div>
+  -->
+</div>
+
+<script>
+  // @ts-nocheck
+  const THEME_KEY = 'solker-theme';
+  const PALETTE_KEY = 'solker-palette';
+  const DEFAULT_PALETTE = 'new';
+
+  function getSystemTheme() {
+    if (typeof matchMedia === 'undefined') return 'light';
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme, palette) {
+    document.documentElement.setAttribute('data-theme', theme ?? getSystemTheme());
+    document.documentElement.setAttribute('data-palette', palette ?? DEFAULT_PALETTE);
+  }
+
+  function setActiveButtons(theme) {
+    const t = theme ?? getSystemTheme();
+    document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
+      const isActive = btn.getAttribute('data-theme-btn') === t;
+      btn.setAttribute('aria-pressed', String(isActive));
+      btn.classList.toggle('bg-orange', isActive);
+      btn.classList.toggle('text-white', isActive);
+      btn.classList.toggle('opacity-90', !isActive);
+    });
+  }
+
+  function init() {
+    const stored = localStorage.getItem(THEME_KEY);
+    const theme = stored === 'light' || stored === 'dark' ? stored : getSystemTheme();
+    applyTheme(theme, DEFAULT_PALETTE);
+    setActiveButtons(theme);
+
+    document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const t = btn.getAttribute('data-theme-btn') ?? getSystemTheme();
+        localStorage.setItem(THEME_KEY, t);
+        applyTheme(t, DEFAULT_PALETTE);
+        setActiveButtons(t);
+      });
+    });
+
+    if (typeof matchMedia !== 'undefined') {
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+        if (!localStorage.getItem(THEME_KEY)) {
+          const sys = this.matches ? 'dark' : 'light';
+          applyTheme(sys, DEFAULT_PALETTE);
+          setActiveButtons(sys);
+        }
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>
+
+<style>
+  .theme-switcher .theme-btn:not(.bg-orange) {
+    color: var(--theme-white);
+  }
+</style>

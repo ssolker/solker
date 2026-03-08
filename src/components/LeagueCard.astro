@@ -1,0 +1,38 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  badge: string;
+  imageSrc: { src: string } | string;
+  imageAlt?: string;
+  primaryButtonText?: string;
+  primaryButtonHref?: string;
+  secondaryButtonText?: string;
+  secondaryButtonHref?: string;
+}
+const { title, subtitle, badge, imageSrc, imageAlt = '', primaryButtonText, primaryButtonHref = '#', secondaryButtonText, secondaryButtonHref = '#' } = Astro.props;
+const imgSrc = typeof imageSrc === 'string' ? imageSrc : imageSrc.src;
+---
+
+<article class="overflow-hidden rounded-xl border border-taupe/30 bg-sage transition hover:border-taupe-light/50 hover:bg-sage-light">
+  <div class="aspect-square w-full bg-sage-dark flex items-center justify-center p-4">
+    <img src={imgSrc} alt={imageAlt} class="max-h-full w-auto max-w-full object-contain" width="120" height="120" />
+  </div>
+  <div class="p-5">
+    <p class="text-xs font-semibold uppercase tracking-wide text-orange">{badge}</p>
+    <h2 class="font-heading mt-1 text-xl font-semibold text-white">{title}</h2>
+    {subtitle && <p class="mt-1 text-sm text-taupe">{subtitle}</p>}
+    <div class="mt-4 flex flex-wrap gap-2">
+      {primaryButtonText && (
+        <a href={primaryButtonHref} class="rounded bg-orange px-3 py-2 text-sm font-medium text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">
+          {primaryButtonText}
+        </a>
+      )}
+      {secondaryButtonText && (
+        <a href={secondaryButtonHref} class="rounded border border-terracotta/70 bg-terracotta/20 px-3 py-2 text-sm font-medium text-white/95 hover:bg-terracotta/40 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">
+          {secondaryButtonText}
+        </a>
+      )}
+    </div>
+  </div>
+</article>

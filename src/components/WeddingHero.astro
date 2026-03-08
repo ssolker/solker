@@ -1,0 +1,65 @@
+---
+interface Props {
+  headline: string;
+  subhead: string;
+  imageSrc?: { src: string } | string;
+}
+const { headline, subhead, imageSrc } = Astro.props;
+const imgSrc = imageSrc ? (typeof imageSrc === 'string' ? imageSrc : imageSrc.src) : null;
+
+// 9 options for background (colors for now; replace with image URLs later)
+const BACKGROUND_OPTIONS = [
+  '#203A31', // forest
+  '#3E5F4B', // sage
+  '#7E4A35', // terracotta
+  '#5c5248', // taupe
+  '#2D5247', // forest-light
+  '#5A7D66', // sage-light
+  '#152820', // forest-dark
+  '#2E4738', // sage-dark
+  '#BC6439', // orange
+];
+---
+
+<section class="relative min-h-[80vh] flex flex-col items-center justify-center overflow-hidden px-4 py-24 text-center md:py-32" aria-label="Hero">
+  <div class="wedding-hero-panels absolute inset-0 grid grid-cols-3" aria-hidden="true">
+    <div class="wedding-hero-panel" data-panel="0"></div>
+    <div class="wedding-hero-panel" data-panel="1"></div>
+    <div class="wedding-hero-panel" data-panel="2"></div>
+  </div>
+  <div class="absolute inset-0 bg-gradient-hero-overlay" aria-hidden="true" />
+  <div class="relative z-10 mx-auto max-w-4xl">
+    <h1 class="font-heading text-4xl font-bold leading-tight text-white drop-shadow-md md:text-5xl lg:text-6xl">
+      {headline}
+    </h1>
+    <p class="mt-4 text-lg text-white/95 drop-shadow md:text-xl">
+      {subhead}
+    </p>
+  </div>
+</section>
+
+<script define:vars={{ backgroundOptions: BACKGROUND_OPTIONS }}>
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  const options = shuffle(backgroundOptions);
+  const chosen = options.slice(0, 3);
+  document.querySelectorAll('.wedding-hero-panel').forEach((el, i) => {
+    el.style.background = chosen[i];
+  });
+</script>
+
+<style>
+  .wedding-hero-panels {
+    min-height: 100%;
+  }
+  .wedding-hero-panel {
+    min-height: 100%;
+    background: var(--color-forest);
+  }
+</style>

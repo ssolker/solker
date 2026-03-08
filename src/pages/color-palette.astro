@@ -1,0 +1,144 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Full palette: base + darker + lighter (color theory–aligned intermediates)
+// Plus neutrals used across the site for complete color theory documentation
+const greens = [
+  { name: 'Forest Dark', hex: '#152820', role: 'Deepest background, hover states' },
+  { name: 'Forest', hex: '#203A31', role: 'Primary background' },
+  { name: 'Forest Light', hex: '#2D5247', role: 'Lighter background, borders' },
+  { name: 'Sage Dark', hex: '#2E4738', role: 'Card hover, depth' },
+  { name: 'Sage', hex: '#3E5F4B', role: 'Surfaces / cards' },
+  { name: 'Sage Light', hex: '#5A7D66', role: 'Highlight, subtle surfaces' },
+];
+
+const warmAccents = [
+  { name: 'Terracotta Dark', hex: '#5C3626', role: 'Secondary button hover' },
+  { name: 'Terracotta', hex: '#7E4A35', role: 'Secondary accent' },
+  { name: 'Terracotta Light', hex: '#9E6B52', role: 'Lighter accent' },
+  { name: 'Orange Dark', hex: '#8C4A28', role: 'CTA hover' },
+  { name: 'Orange', hex: '#BC6439', role: 'CTAs / primary accent' },
+  { name: 'Orange Light', hex: '#D4845A', role: 'CTA highlight' },
+];
+
+const neutrals = [
+  { name: 'Taupe Dark', hex: '#6D5D52', role: 'Muted text (strong)' },
+  { name: 'Taupe', hex: '#948070', role: 'Muted text & borders' },
+  { name: 'Taupe Light', hex: '#B39A8A', role: 'Subtle borders, disabled' },
+  { name: 'Black', hex: '#0D0D0D', role: 'Maximum contrast (e.g. focus rings)' },
+  { name: 'Black Muted', hex: '#1A1A1A', role: 'Dark overlay' },
+  { name: 'White Muted', hex: '#E8E4E0', role: 'Off-white (warm), secondary on light' },
+  { name: 'White', hex: '#FFFFFF', role: 'Primary text on dark, buttons' },
+];
+
+const allSwatches = [...greens, ...warmAccents, ...neutrals];
+---
+
+<Layout title="Color palette — Solker" description="Full site palette: greens, warm accents, neutrals, and color theory roles.">
+  <div class="min-h-screen bg-forest">
+    <div class="px-4 py-10 md:px-6 md:py-14">
+      <div class="mx-auto max-w-5xl">
+        <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">
+          Site color palette
+        </h1>
+        <p class="mt-2 text-taupe">
+          Base palette plus darker and lighter variants (color theory). Includes white and all colors used on the site.
+        </p>
+
+        <!-- Greens -->
+        <section class="mt-10" aria-label="Greens">
+          <h2 class="font-heading text-lg font-semibold text-white">Greens</h2>
+          <p class="mt-1 text-sm text-taupe">Forest and Sage families; primary backgrounds and surfaces.</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {greens.map(({ name, hex, role }) => (
+              <div class="overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark shadow">
+                <div class="h-20 w-full" style={`background-color: ${hex};`} aria-hidden="true" />
+                <div class="p-3 bg-forest-dark">
+                  <p class="font-medium text-white">{name}</p>
+                  <p class="mt-0.5 font-mono text-xs text-taupe">{hex}</p>
+                  <p class="mt-1 text-xs text-taupe-light">{role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Warm accents -->
+        <section class="mt-10" aria-label="Warm accents">
+          <h2 class="font-heading text-lg font-semibold text-white">Warm accents</h2>
+          <p class="mt-1 text-sm text-taupe">Terracotta and Orange; CTAs and secondary actions.</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {warmAccents.map(({ name, hex, role }) => (
+              <div class="overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark shadow">
+                <div class="h-20 w-full" style={`background-color: ${hex};`} aria-hidden="true" />
+                <div class="p-3 bg-forest-dark">
+                  <p class="font-medium text-white">{name}</p>
+                  <p class="mt-0.5 font-mono text-xs text-taupe">{hex}</p>
+                  <p class="mt-1 text-xs text-taupe-light">{role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Neutrals -->
+        <section class="mt-10" aria-label="Neutrals">
+          <h2 class="font-heading text-lg font-semibold text-white">Neutrals</h2>
+          <p class="mt-1 text-sm text-taupe">Taupe, black, white — text, borders, contrast.</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {neutrals.map(({ name, hex, role }) => (
+              <div class="overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark shadow">
+                <div class="h-20 w-full" style={`background-color: ${hex};`} aria-hidden="true" />
+                <div class="p-3 bg-forest-dark">
+                  <p class="font-medium text-white">{name}</p>
+                  <p class="mt-0.5 font-mono text-xs text-taupe">{hex}</p>
+                  <p class="mt-1 text-xs text-taupe-light">{role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Full strip -->
+        <section class="mt-10" aria-label="All colors strip">
+          <h2 class="font-heading text-lg font-semibold text-white">All colors (order)</h2>
+          <div class="mt-3 flex h-12 w-full flex-wrap overflow-hidden rounded-lg border border-taupe/30">
+            {allSwatches.map(({ name, hex }) => (
+              <div
+                class="min-w-[2rem] flex-1"
+                style={`background-color: ${hex};`}
+                title={name}
+              />
+            ))}
+          </div>
+        </section>
+
+        <!-- Website color theory: where each is used -->
+        <section class="mt-14 rounded-xl border border-taupe/30 bg-sage/80 p-6 md:p-8" aria-label="Website color theory">
+          <h2 class="font-heading text-lg font-semibold text-white">Color theory on this site</h2>
+          <p class="mt-1 text-sm text-taupe">
+            How each color (or variant) is used across the site for hierarchy, contrast, and consistency.
+          </p>
+          <ul class="mt-4 space-y-2 text-sm text-taupe-light">
+            <li><strong class="text-white">Forest</strong> — Page background (body), hero overlay base.</li>
+            <li><strong class="text-white">Forest dark</strong> — Available for footer, deep hover, or future dark sections.</li>
+            <li><strong class="text-white">Sage</strong> — Cards, header hover, quick-link cards, section surfaces.</li>
+            <li><strong class="text-white">Sage light/dark</strong> — Card image areas, icon wells; hover states.</li>
+            <li><strong class="text-white">Orange</strong> — Primary CTAs (hero, league cards, 404), nav “Log in”, link accents.</li>
+            <li><strong class="text-white">Orange dark/light</strong> — CTA hover (darker); highlights (lighter).</li>
+            <li><strong class="text-white">Terracotta</strong> — Secondary buttons (“Join as free agent”), borders.</li>
+            <li><strong class="text-white">Taupe</strong> — Secondary text, borders, footer links, captions.</li>
+            <li><strong class="text-white">Taupe light/dark</strong> — Subtle borders; stronger muted text.</li>
+            <li><strong class="text-white">White</strong> — Primary headings and body text on dark, button label text.</li>
+            <li><strong class="text-white">White muted</strong> — Reserved for light backgrounds or secondary text on light.</li>
+            <li><strong class="text-white">Black / black muted</strong> — Focus rings, overlays, or future light-mode text.</li>
+          </ul>
+        </section>
+
+        <p class="mt-10 text-xs text-taupe">
+          All tokens in <code class="rounded bg-forest-dark px-1">src/styles/global.css</code>. Header <code class="rounded bg-forest-dark px-1">z-50</code>; popups <code class="rounded bg-forest-dark px-1">z-[100]</code>+.
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>

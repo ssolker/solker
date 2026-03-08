@@ -1,42 +1,108 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import Section from '../../components/Section.astro';
+import LeagueNav from '../../components/LeagueNav.astro';
+import LeagueHero from '../../components/LeagueHero.astro';
+import LeagueCard from '../../components/LeagueCard.astro';
+import QuickLinkCard from '../../components/QuickLinkCard.astro';
+import Footer from '../../components/Footer.astro';
+import astroLogo from '../../assets/astro.svg';
 ---
 
-<Layout title="League — Solker" description="League rules, registration, and waivers.">
-  <main class="px-4 py-8 md:py-12">
-    <div class="mx-auto max-w-3xl">
-      <a
-        href="/"
-        class="mb-8 inline-block text-sm font-medium text-emerald-400 hover:text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900"
-      >
-        ← Back to home
-      </a>
-      <h1 class="font-heading mb-10 text-3xl font-bold text-white md:text-4xl">
-        League
-      </h1>
+<Layout title="League — Solker" description="Woodstock's premier social-first recreational league. Active leagues, rules, waivers, and resources.">
+  <Fragment slot="header-nav">
+    <LeagueNav />
+  </Fragment>
 
-      <Section title="Rules">
-        <p>
-          League rules and code of conduct will be posted here.
-        </p>
-      </Section>
-
-      <Section title="Registration">
-        <p>
-          Registration will open via an external form when the season is announced.
-          Do not store registration data in this repository; use a secure
-          external service (e.g. Google Forms, JotForm, or a league management
-          tool).
-        </p>
-      </Section>
-
-      <Section title="Waivers">
-        <p>
-          Waivers and eligibility info will be available here. Signing will be
-          done via an external link; no waiver data is stored in this repo.
-        </p>
-      </Section>
+  <main class="pt-0">
+    <div class="bg-orange/90 px-4 py-2 text-center text-sm font-medium text-white" role="status">
+      Under construction — we're getting things ready.
     </div>
+    <LeagueHero
+      headline="Cultivating accountability, connection & community."
+      subhead="Welcome to Woodstock's premier social-first recreational league."
+      ctaText="Join the Summer 6v6 Co-Ed Soccer Season"
+      ctaHref="#"
+      secondaryText="Explore other sports"
+      secondaryHref="#"
+    />
+
+    <section class="px-4 py-12 md:py-16" aria-labelledby="active-leagues-heading">
+      <div class="mx-auto max-w-5xl">
+        <h2 id="active-leagues-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
+          Our Active Leagues
+        </h2>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <LeagueCard
+            title="6v6 Co-Ed Soccer (Summer '26)"
+            subtitle="Tuesday Nights @ 6:30 PM"
+            badge="Registration Open!"
+            imageSrc={astroLogo}
+            primaryButtonText="Register team"
+            primaryButtonHref="#register"
+            secondaryButtonText="Join as free agent"
+            secondaryButtonHref="#join"
+          />
+          <LeagueCard
+            title="Volleyball"
+            badge="Coming soon"
+            imageSrc={astroLogo}
+            primaryButtonText="Get notified"
+            primaryButtonHref="#notify"
+          />
+          <LeagueCard
+            title="Pickleball"
+            badge="Coming soon"
+            imageSrc={astroLogo}
+            primaryButtonText="Get notified"
+            primaryButtonHref="#notify"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="px-4 py-12 md:py-16" aria-labelledby="quick-links-heading">
+      <div class="mx-auto max-w-5xl">
+        <h2 id="quick-links-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
+          Quick Links
+        </h2>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <QuickLinkCard
+            title="Rules & Ops Guide"
+            description="Read the 'Friendly City' 6v6 rules."
+            buttonText="View rules"
+            href="#rules"
+          >
+            <img slot="icon" src={astroLogo.src} alt="" class="h-8 w-auto" width="32" height="32" />
+          </QuickLinkCard>
+          <QuickLinkCard
+            title="Sign Waiver"
+            description="Mandatory for ALL players before first game."
+            buttonText="Sign now"
+            href="#waiver"
+          >
+            <img slot="icon" src={astroLogo.src} alt="" class="h-8 w-auto" width="32" height="32" />
+          </QuickLinkCard>
+          <QuickLinkCard
+            title="Captain's Corner"
+            description="Reporting, logistics & Captain Kit info."
+            buttonText="Visit portal"
+            href="#captains"
+          >
+            <img slot="icon" src={astroLogo.src} alt="" class="h-8 w-auto" width="32" height="32" />
+          </QuickLinkCard>
+        </div>
+      </div>
+    </section>
+
+    <!-- Soft step before footer so footer reads clearly darker -->
+    <section class="bg-forest-light/40 px-4 py-12 md:py-16" aria-labelledby="friendly-spirit-heading">
+      <div class="mx-auto max-w-5xl text-center">
+        <h2 id="friendly-spirit-heading" class="font-heading text-2xl font-bold text-white md:text-3xl">
+          Woodstock Adult Rec League
+        </h2>
+      </div>
+    </section>
+
+    <Footer companyName="Solker" contactHref="/contact" contactText="Contact" copyrightYear={2026} />
   </main>
 </Layout>
