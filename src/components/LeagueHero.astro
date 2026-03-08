@@ -1,0 +1,52 @@
+---
+interface Props {
+  headline: string;
+  subhead: string;
+  ctaText: string;
+  ctaHref?: string;
+  secondaryText?: string;
+  secondaryHref?: string;
+}
+const { headline, subhead, ctaText, ctaHref = '#', secondaryText, secondaryHref = '#' } = Astro.props;
+// Unsplash soccer field image (Abigail Keenan); credit in markup below
+const heroImageUrl = 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1920&q=80';
+---
+
+<section class="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-24 text-center md:py-32" aria-label="Hero">
+  <div class="absolute inset-0">
+    <img
+      src={heroImageUrl}
+      alt=""
+      class="h-full w-full object-cover"
+      fetchpriority="high"
+    />
+    <div class="absolute inset-0 bg-slate-900/60" aria-hidden="true" />
+  </div>
+  <div class="relative z-10 mx-auto max-w-4xl">
+    <h1 class="font-heading text-4xl font-bold leading-tight text-white drop-shadow-md md:text-5xl lg:text-6xl">
+      {headline}
+    </h1>
+    <p class="mt-4 text-lg text-white/95 drop-shadow md:text-xl">
+      {subhead}
+    </p>
+    <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+      <a
+        href={ctaHref}
+        class="inline-block rounded bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+      >
+        {ctaText}
+      </a>
+      {secondaryText && (
+        <a
+          href={secondaryHref}
+          class="text-sm font-medium text-white underline decoration-white/70 underline-offset-2 hover:decoration-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+        >
+          {secondaryText}
+        </a>
+      )}
+    </div>
+  </div>
+  <p class="absolute bottom-4 left-4 right-4 z-10 text-center text-xs text-white/80 md:left-6 md:right-auto">
+    Photo by <a href="https://unsplash.com/@akeenster?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" class="underline hover:text-white" target="_blank" rel="noopener noreferrer">Abigail Keenan</a> on <a href="https://unsplash.com/photos/group-of-people-playing-soccer-on-soccer-field-8-s5QuUBtyM?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" class="underline hover:text-white" target="_blank" rel="noopener noreferrer">Unsplash</a>
+  </p>
+</section>
