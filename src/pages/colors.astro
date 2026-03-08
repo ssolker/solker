@@ -1,0 +1,142 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Current site palette: Tailwind Slate + Emerald (used across the site)
+const slates = [
+  { name: 'Slate 950', hex: '#020617', role: 'Deepest dark (optional)' },
+  { name: 'Slate 900', hex: '#0f172a', role: 'Page background, header, footer, hero overlay, focus ring offset' },
+  { name: 'Slate 800', hex: '#1e293b', role: 'Cards, nav hover, secondary button bg' },
+  { name: 'Slate 700', hex: '#334155', role: 'Borders, icon wells, card image areas' },
+  { name: 'Slate 600', hex: '#475569', role: 'Card hover border, secondary button border' },
+  { name: 'Slate 500', hex: '#64748b', role: 'Muted UI elements' },
+  { name: 'Slate 400', hex: '#94a3b8', role: 'Secondary text, captions, footer links' },
+  { name: 'Slate 300', hex: '#cbd5e1', role: 'Nav links, section body' },
+  { name: 'Slate 200', hex: '#e2e8f0', role: 'Secondary button text' },
+  { name: 'Slate 100', hex: '#f1f5f9', role: 'Primary body text (on dark)' },
+];
+
+const emeraldAccents = [
+  { name: 'Emerald 600', hex: '#059669', role: 'CTA hover (e.g. 404)' },
+  { name: 'Emerald 500', hex: '#10b981', role: 'Primary CTAs, Log in, buttons' },
+  { name: 'Emerald 400', hex: '#34d399', role: 'CTA hover, focus ring, link accents, badges' },
+  { name: 'Emerald 300', hex: '#6ee7b7', role: 'Highlight (optional)' },
+];
+
+const neutrals = [
+  { name: 'White', hex: '#ffffff', role: 'Headings, hero text, button labels' },
+  { name: 'White 95%', hex: 'rgba(255,255,255,0.95)', role: 'Hero subhead' },
+  { name: 'White 80%', hex: 'rgba(255,255,255,0.8)', role: 'Caption, photo credit' },
+  { name: 'White 70%', hex: 'rgba(255,255,255,0.7)', role: 'Underline decoration' },
+];
+
+const allSwatches = [...slates, ...emeraldAccents, ...neutrals];
+---
+
+<Layout title="Color palette — Solker" description="Site palette: Slate, Emerald accents, and neutrals with usage roles.">
+  <div class="min-h-screen bg-slate-900">
+    <div class="px-4 py-10 md:px-6 md:py-14">
+      <div class="mx-auto max-w-5xl">
+        <h1 class="font-heading text-2xl font-bold text-slate-100 md:text-3xl">
+          Site color palette
+        </h1>
+        <p class="mt-2 text-slate-400">
+          Slate and Emerald palette used across the site. Includes all Tailwind shades in use and their roles.
+        </p>
+
+        <!-- Slates -->
+        <section class="mt-10" aria-label="Slates">
+          <h2 class="font-heading text-lg font-semibold text-slate-100">Slates</h2>
+          <p class="mt-1 text-sm text-slate-400">Primary backgrounds, borders, and text hierarchy.</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {slates.map(({ name, hex, role }) => (
+              <div class="overflow-hidden rounded-lg border border-slate-700 bg-slate-900 shadow">
+                <div class="h-20 w-full" style={`background-color: ${hex};`} aria-hidden="true" />
+                <div class="p-3 bg-slate-900">
+                  <p class="font-medium text-slate-100">{name}</p>
+                  <p class="mt-0.5 font-mono text-xs text-slate-400">{hex}</p>
+                  <p class="mt-1 text-xs text-slate-500">{role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Emerald accents -->
+        <section class="mt-10" aria-label="Emerald accents">
+          <h2 class="font-heading text-lg font-semibold text-slate-100">Emerald accents</h2>
+          <p class="mt-1 text-sm text-slate-400">CTAs, focus rings, link accents, badges.</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {emeraldAccents.map(({ name, hex, role }) => (
+              <div class="overflow-hidden rounded-lg border border-slate-700 bg-slate-900 shadow">
+                <div class="h-20 w-full" style={`background-color: ${hex};`} aria-hidden="true" />
+                <div class="p-3 bg-slate-900">
+                  <p class="font-medium text-slate-100">{name}</p>
+                  <p class="mt-0.5 font-mono text-xs text-slate-400">{hex}</p>
+                  <p class="mt-1 text-xs text-slate-500">{role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Neutrals -->
+        <section class="mt-10" aria-label="Neutrals">
+          <h2 class="font-heading text-lg font-semibold text-slate-100">Neutrals</h2>
+          <p class="mt-1 text-sm text-slate-400">White and opacity variants for text and overlays.</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {neutrals.map(({ name, hex, role }) => (
+              <div class="overflow-hidden rounded-lg border border-slate-700 bg-slate-900 shadow">
+                <div class="h-20 w-full" style={`background-color: ${hex};`} aria-hidden="true" />
+                <div class="p-3 bg-slate-900">
+                  <p class="font-medium text-slate-100">{name}</p>
+                  <p class="mt-0.5 font-mono text-xs text-slate-400">{hex}</p>
+                  <p class="mt-1 text-xs text-slate-500">{role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Full strip -->
+        <section class="mt-10" aria-label="All colors strip">
+          <h2 class="font-heading text-lg font-semibold text-slate-100">All colors (order)</h2>
+          <div class="mt-3 flex h-12 w-full flex-wrap overflow-hidden rounded-lg border border-slate-700">
+            {allSwatches.map(({ name, hex }) => (
+              <div
+                class="min-w-[2rem] flex-1"
+                style={`background-color: ${hex};`}
+                title={name}
+              />
+            ))}
+          </div>
+        </section>
+
+        <!-- Website color theory -->
+        <section class="mt-14 rounded-xl border border-slate-700 bg-slate-800/80 p-6 md:p-8" aria-label="Website color theory">
+          <h2 class="font-heading text-lg font-semibold text-slate-100">Color theory on this site</h2>
+          <p class="mt-1 text-sm text-slate-400">
+            How each color is used for hierarchy, contrast, and consistency.
+          </p>
+          <ul class="mt-4 space-y-2 text-sm text-slate-500">
+            <li><strong class="text-slate-200">Slate 900</strong> — Page background (body), header/footer, hero overlay, focus ring offset.</li>
+            <li><strong class="text-slate-200">Slate 800</strong> — Cards (VentureCard, QuickLinkCard, LeagueCard), nav hover, secondary button background.</li>
+            <li><strong class="text-slate-200">Slate 700</strong> — Borders, icon wells, card image areas.</li>
+            <li><strong class="text-slate-200">Slate 600</strong> — Card hover border, secondary button border.</li>
+            <li><strong class="text-slate-200">Slate 400</strong> — Secondary text, captions, footer links.</li>
+            <li><strong class="text-slate-200">Slate 300</strong> — Nav links, section body text.</li>
+            <li><strong class="text-slate-200">Slate 100</strong> — Primary body text on dark.</li>
+            <li><strong class="text-slate-200">Emerald 500</strong> — Primary CTAs (hero, league cards, 404), Log in / Register.</li>
+            <li><strong class="text-slate-200">Emerald 400</strong> — CTA hover, focus ring, link hover, badges (“Registration Open!”).</li>
+            <li><strong class="text-slate-200">Emerald 600</strong> — CTA hover on 404.</li>
+            <li><strong class="text-slate-200">White</strong> — Headings, hero text, button labels.</li>
+            <li><strong class="text-slate-200">White (opacity)</strong> — Hero subhead (95%), captions (80%), underline (70%).</li>
+          </ul>
+        </section>
+
+        <p class="mt-10 text-xs text-slate-500">
+          Tailwind default palette. Layout in <code class="rounded bg-slate-800 px-1">src/layouts/Layout.astro</code>; header <code class="rounded bg-slate-800 px-1">z-10</code>.
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>
