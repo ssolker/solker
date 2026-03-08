@@ -1,7 +1,7 @@
 # Build and deploy to GitHub Pages (runs in Actions; no branch build).
 # Repo Settings → Pages: set "Build and deployment" → "GitHub Actions".
 
-name: CI
+name: Build and deploy to Pages
 
 # Controls when the workflow will run
 on:
