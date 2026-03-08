@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import astroLogo from '../assets/astro.svg';
 interface Props {
   title?: string;
   description?: string;
@@ -13,6 +15,18 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
+		<script is:inline>
+			(function() {
+			 var theme = 'light', palette = 'new';
+			 try {
+			   var stored = localStorage.getItem('solker-theme');
+			   if (stored === 'light' || stored === 'dark') { theme = stored; }
+			   else if (typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches) { theme = 'dark'; }
+			 } catch (e) {}
+			 document.documentElement.setAttribute('data-theme', theme);
+			 document.documentElement.setAttribute('data-palette', palette);
+			})();
+		</script>
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<link rel="canonical" href={canonicalUrl} />
@@ -23,7 +37,22 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body class="min-h-screen bg-slate-900 text-slate-100 font-sans antialiased">
-		<slot />
+	<body class="min-h-screen bg-forest text-white font-sans antialiased">
+		<header class="fixed left-0 right-0 top-0 z-50 flex items-center justify-between border-b border-taupe/20 bg-forest-dark/95 px-4 py-3 backdrop-blur-sm md:px-6">
+			<a href="/" class="flex shrink-0 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark" aria-label="Home">
+				<img src={astroLogo.src} alt="Logo" class="h-10 w-auto md:h-12" width="115" height="48" />
+			</a>
+			<div class="flex min-w-0 flex-1 justify-center">
+				<slot name="header-nav" />
+			</div>			<div class="flex shrink-0 items-center gap-2">
+				<!-- Log in / Register (commented out)
+				<a href="#" class="rounded bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">Log in / Register</a>
+				-->
+				<ThemeSwitcher />
+			</div>
+		</header>
+		<div class="pt-16">
+			<slot />
+		</div>
 	</body>
 </html>

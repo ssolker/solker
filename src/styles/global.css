@@ -2,16 +2,154 @@
 
 @theme {
   --font-heading: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  /* All colors resolve from semantic theme variables (set per data-theme + data-palette) */
+  --color-forest: var(--theme-forest);
+  --color-sage: var(--theme-sage);
+  --color-terracotta: var(--theme-terracotta);
+  --color-orange: var(--theme-orange);
+  --color-taupe: var(--theme-taupe);
+  --color-forest-dark: var(--theme-forest-dark);
+  --color-sage-dark: var(--theme-sage-dark);
+  --color-terracotta-dark: var(--theme-terracotta-dark);
+  --color-orange-dark: var(--theme-orange-dark);
+  --color-taupe-dark: var(--theme-taupe-dark);
+  --color-forest-light: var(--theme-forest-light);
+  --color-sage-light: var(--theme-sage-light);
+  --color-terracotta-light: var(--theme-terracotta-light);
+  --color-orange-light: var(--theme-orange-light);
+  --color-taupe-light: var(--theme-taupe-light);
+  --color-white: var(--theme-white);
+  --color-white-muted: var(--theme-white-muted);
+  --color-black: var(--theme-black);
+  --color-black-muted: var(--theme-black-muted);
 }
 
+/* Gradients (use theme variables) */
 @layer base {
+  :root {
+    /* Hero: solid overlay over background so text is readable (no gradient). */
+    --gradient-hero-overlay: color-mix(in srgb, var(--theme-forest) 25%, transparent);
+    --gradient-cta: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-terracotta) 100%);
+    --gradient-section: linear-gradient(to bottom, var(--theme-sage) 0%, var(--theme-forest) 100%);
+    --z-header: 50;
+    --z-popup: 100;
+  }
+  /* Original palette: CTA gradient stays emerald-only (no slate) */
+  [data-palette="original"] {
+    --gradient-cta: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  /* Default: new palette, light theme (easier to see outdoors) */
+  :root,
+  [data-theme="light"][data-palette="new"] {
+    --theme-forest: #E8EDE9;
+    --theme-sage: #D4E0D8;
+    --theme-terracotta: #7E4A35;
+    --theme-orange: #BC6439;
+    --theme-taupe: #5c5248;
+    --theme-forest-dark: #C5D0C9;
+    --theme-sage-dark: #B8C9BD;
+    --theme-terracotta-dark: #5C3626;
+    --theme-orange-dark: #9a4f28;
+    --theme-forest-light: #F0F5F1;
+    --theme-sage-light: #E2EDE6;
+    --theme-terracotta-light: #9E6B52;
+    --theme-orange-light: #c97a4a;
+    --theme-taupe-dark: #4a423a;
+    --theme-taupe-light: #8a7d72;
+    --theme-white: #0D0D0D;
+    --theme-white-muted: #3d3832;
+    --theme-black: #0D0D0D;
+    --theme-black-muted: #1A1A1A;
+  }
+
+  /* New palette, dark theme (current site look) */
+  [data-theme="dark"][data-palette="new"] {
+    --theme-forest: #203A31;
+    --theme-sage: #3E5F4B;
+    --theme-terracotta: #7E4A35;
+    --theme-orange: #BC6439;
+    --theme-taupe: #948070;
+    --theme-forest-dark: #152820;
+    --theme-sage-dark: #2E4738;
+    --theme-terracotta-dark: #5C3626;
+    --theme-orange-dark: #8C4A28;
+    --theme-forest-light: #2D5247;
+    --theme-sage-light: #5A7D66;
+    --theme-terracotta-light: #9E6B52;
+    --theme-orange-light: #D4845A;
+    --theme-taupe-dark: #6D5D52;
+    --theme-taupe-light: #B39A8A;
+    --theme-white: #FFFFFF;
+    --theme-white-muted: #E8E4E0;
+    --theme-black: #0D0D0D;
+    --theme-black-muted: #1A1A1A;
+  }
+
+  /* Original palette: Slate + Emerald (from colors.astro), light theme */
+  [data-theme="light"][data-palette="original"] {
+    --theme-forest: #f1f5f9;   /* Slate 100 - page bg */
+    --theme-sage: #e2e8f0;     /* Slate 200 - cards */
+    --theme-terracotta: #475569; /* Slate 600 - secondary surfaces */
+    --theme-orange: #10b981;   /* Emerald 500 - CTAs */
+    --theme-taupe: #475569;    /* Slate 600 - muted text */
+    --theme-forest-dark: #e2e8f0; /* Slate 200 - header/footer */
+    --theme-sage-dark: #cbd5e1;   /* Slate 300 */
+    --theme-terracotta-dark: #334155; /* Slate 700 */
+    --theme-orange-dark: #059669; /* Emerald 600 */
+    --theme-forest-light: #f8fafc;
+    --theme-sage-light: #f1f5f9; /* Slate 100 */
+    --theme-terracotta-light: #64748b; /* Slate 500 */
+    --theme-orange-light: #34d399; /* Emerald 400 */
+    --theme-taupe-dark: #334155; /* Slate 700 */
+    --theme-taupe-light: #64748b; /* Slate 500 */
+    --theme-white: #0f172a;    /* Slate 900 - primary text */
+    --theme-white-muted: #1e293b; /* Slate 800 */
+    --theme-black: #0f172a;
+    --theme-black-muted: #1e293b;
+  }
+
+  /* Original palette: Slate + Emerald (from colors.astro), dark theme */
+  [data-theme="dark"][data-palette="original"] {
+    --theme-forest: #0f172a;   /* Slate 900 - page bg, header, footer */
+    --theme-sage: #1e293b;     /* Slate 800 - cards */
+    --theme-terracotta: #334155; /* Slate 700 - secondary button bg */
+    --theme-orange: #10b981;   /* Emerald 500 - CTAs */
+    --theme-taupe: #94a3b8;    /* Slate 400 - secondary text, captions */
+    --theme-forest-dark: #020617; /* Slate 950 - deepest dark */
+    --theme-sage-dark: #334155;   /* Slate 700 - borders, icon wells */
+    --theme-terracotta-dark: #334155; /* Slate 700 */
+    --theme-orange-dark: #059669; /* Emerald 600 - CTA hover */
+    --theme-forest-light: #1e293b; /* Slate 800 */
+    --theme-sage-light: #475569;  /* Slate 600 */
+    --theme-terracotta-light: #475569; /* Slate 600 */
+    --theme-orange-light: #34d399; /* Emerald 400 - focus ring, link accents */
+    --theme-taupe-dark: #64748b;   /* Slate 500 */
+    --theme-taupe-light: #cbd5e1; /* Slate 300 - nav links */
+    --theme-white: #f1f5f9;    /* Slate 100 - primary body text */
+    --theme-white-muted: #e2e8f0; /* Slate 200 */
+    --theme-black: #0D0D0D;
+    --theme-black-muted: #1A1A1A;
+  }
+
   body {
     font-family: ui-sans-serif, system-ui, sans-serif;
+    background-color: var(--theme-forest);
+    color: var(--theme-white);
   }
 }
 
 @layer components {
   .font-heading {
     font-family: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  }
+  .bg-gradient-hero-overlay {
+    background: var(--gradient-hero-overlay);
+  }
+  .bg-gradient-cta {
+    background: var(--gradient-cta);
+  }
+  .bg-gradient-section {
+    background: var(--gradient-section);
   }
 }

@@ -4,9 +4,9 @@ import Hero from '../components/Hero.astro';
 import VentureCard from '../components/VentureCard.astro';
 ---
 
-<Layout title="Solker" description="Solker — ventures and community.">
+<Layout title="Solker" description="Solker — Public Hub.">
   <main>
-    <Hero title="Solker" tagline="Ventures and community." />
+    <Hero title="Solker" tagline="Public Hub." />
     <section class="px-4 pb-16 md:pb-24" aria-label="Ventures">
       <div class="mx-auto max-w-5xl">
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -14,12 +14,19 @@ import VentureCard from '../components/VentureCard.astro';
             title="League"
             description="Rules, registration, and waivers for the league."
             href="/league"
+            badge="Under construction"
           />
           <VentureCard
-            title="Coming soon"
-            description="More ventures and projects."
-            href="#"
+            title="Wedding"
+            description="Shuaib & Hanna — October 10, 2026 at Bellamere Winery."
+            href="/wedding"
+            badge="Under construction"
           />
+          <VentureCard
+          title="Color Palette"
+          description="Page to preview the color palette."
+          href="/color-palette"
+        />
         </div>
       </div>
     </section>

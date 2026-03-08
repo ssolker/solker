@@ -14,22 +14,22 @@ const { title, subtitle, badge, imageSrc, imageAlt = '', primaryButtonText, prim
 const imgSrc = typeof imageSrc === 'string' ? imageSrc : imageSrc.src;
 ---
 
-<article class="overflow-hidden rounded-xl border border-slate-700 bg-slate-800/50 transition hover:border-slate-600">
-  <div class="aspect-square w-full bg-slate-700/50 p-4 flex items-center justify-center">
+<article class="overflow-hidden rounded-xl border border-taupe/30 bg-sage transition hover:border-taupe-light/50 hover:bg-sage-light">
+  <div class="aspect-square w-full bg-sage-dark flex items-center justify-center p-4">
     <img src={imgSrc} alt={imageAlt} class="max-h-full w-auto max-w-full object-contain" width="120" height="120" />
   </div>
   <div class="p-5">
-    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-400">{badge}</p>
+    <p class="text-xs font-semibold uppercase tracking-wide text-orange">{badge}</p>
     <h2 class="font-heading mt-1 text-xl font-semibold text-white">{title}</h2>
-    {subtitle && <p class="mt-1 text-sm text-slate-400">{subtitle}</p>}
+    {subtitle && <p class="mt-1 text-sm text-taupe">{subtitle}</p>}
     <div class="mt-4 flex flex-wrap gap-2">
       {primaryButtonText && (
-        <a href={primaryButtonHref} class="rounded bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900">
+        <a href={primaryButtonHref} class="rounded bg-orange px-3 py-2 text-sm font-medium text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">
           {primaryButtonText}
         </a>
       )}
       {secondaryButtonText && (
-        <a href={secondaryButtonHref} class="rounded border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900">
+        <a href={secondaryButtonHref} class="rounded border border-terracotta/70 bg-terracotta/20 px-3 py-2 text-sm font-medium text-white/95 hover:bg-terracotta/40 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">
           {secondaryButtonText}
         </a>
       )}
