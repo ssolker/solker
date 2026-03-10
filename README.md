@@ -10,6 +10,7 @@ Personal site and ventures hub for [solker.ca](https://solker.ca). Built with [A
 | **solker.ca/league** | League — rules, registration, waivers. |
 | **solker.ca/wedding** | Wedding — Shuaib & Hanna, event details, travel, registry. |
 | **solker.ca/color-palette** | Color palette (dev reference). |
+| **solker.ca/legal** | Privacy Policy and Terms of Service (single page, anchor links). |
 | **solker.ca/404** | 404 page (linked when a route is not found). |
 
 **Subdomain redirects** (configured at DNS/hosting; they point at the same static site):
@@ -21,6 +22,14 @@ Personal site and ventures hub for [solker.ca](https://solker.ca). Built with [A
 | **wedding.solker.ca** | solker.ca/wedding |
 
 When you add a new route (e.g. a new page under `src/pages/`), update this **Routing** section and the table of URLs so the README stays accurate.
+
+## Navigation
+
+- **Header:** Logo (home), optional page-specific nav (e.g. League nav, Wedding nav), theme switcher. No global “Legal” link in the header to keep it simple.
+- **Footer:** Shown on every page (home, league, wedding, legal, color-palette, 404). Contains company name, Contact link, **Privacy Policy** and **Terms of Service** (both go to `/legal` with anchors `#privacy` and `#terms`), and copyright.
+- **Legal page:** One page at `/legal` with two sections (Privacy Policy, Terms of Service). In-page links at the top jump to `#privacy` and `#terms`. Replace the placeholder content when you have final copy.
+
+To add a header link to Legal site-wide, add a single “Legal” or “Privacy & Terms” link in `Layout.astro` next to the theme switcher (or in the center nav slot when it’s empty).
 
 ## Project overview
 

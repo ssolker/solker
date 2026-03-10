@@ -2,10 +2,11 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import VentureCard from '../components/VentureCard.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout title="Solker" description="Solker — Public Hub.">
-  <main>
+  <main class="flex-1">
     <Hero title="Solker" tagline="Public Hub." />
     <section class="px-4 pb-16 md:pb-24" aria-label="Ventures">
       <div class="mx-auto max-w-5xl">
@@ -31,4 +32,5 @@ import VentureCard from '../components/VentureCard.astro';
       </div>
     </section>
   </main>
+  <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>

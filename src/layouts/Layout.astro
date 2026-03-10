@@ -37,8 +37,8 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body class="min-h-screen bg-forest text-white font-sans antialiased">
-		<header class="fixed left-0 right-0 top-0 z-50 flex items-center justify-between border-b border-taupe/20 bg-forest-dark/95 px-4 py-3 backdrop-blur-sm md:px-6">
+	<body class="flex min-h-screen flex-col bg-forest text-white font-sans antialiased">
+		<header class="fixed left-0 right-0 top-0 z-50 flex shrink-0 items-center justify-between border-b border-taupe/20 bg-forest-dark/95 px-4 py-3 backdrop-blur-sm md:px-6">
 			<a href="/" class="flex shrink-0 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark" aria-label="Home">
 				<img src={astroLogo.src} alt="Logo" class="h-10 w-auto md:h-12" width="115" height="48" />
 			</a>
@@ -51,7 +51,7 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
 				<ThemeSwitcher />
 			</div>
 		</header>
-		<div class="pt-16">
+		<div class="flex min-h-0 flex-1 flex-col pt-16">
 			<slot />
 		</div>
 	</body>
