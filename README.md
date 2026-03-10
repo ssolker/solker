@@ -2,6 +2,26 @@
 
 Personal site and ventures hub for [solker.ca](https://solker.ca). Built with [Astro](https://astro.build) and Tailwind CSS, deployed on GitHub Pages.
 
+## Routing
+
+| URL | Description |
+| --- | ----------- |
+| **solker.ca** | Main site (homepage). |
+| **solker.ca/league** | League — rules, registration, waivers. |
+| **solker.ca/wedding** | Wedding — Shuaib & Hanna, event details, travel, registry. |
+| **solker.ca/color-palette** | Color palette (dev reference). |
+| **solker.ca/404** | 404 page (linked when a route is not found). |
+
+**Subdomain redirects** (configured at DNS/hosting; they point at the same static site):
+
+| Subdomain | Redirects to |
+| --------- | ------------- |
+| **sports.solker.ca** | solker.ca/league |
+| **leagues.solker.ca** | solker.ca/league |
+| **wedding.solker.ca** | solker.ca/wedding |
+
+When you add a new route (e.g. a new page under `src/pages/`), update this **Routing** section and the table of URLs so the README stays accurate.
+
 ## Project overview
 
 - **Homepage:** Hero and a grid of venture cards (e.g. League).

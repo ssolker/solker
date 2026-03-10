@@ -1,0 +1,33 @@
+---
+name: update-readme-routes
+description: When adding a new route (page), update the README Routing section so the list of URLs stays accurate.
+globs: "**/src/pages/**/*.astro **/README.md"
+alwaysApply: false
+---
+# Update README When Adding Routes
+
+Whenever you add or remove a **route** (a page that gets its own URL), update the **Routing** section in [README.md](README.md) at the project root.
+
+## What counts as a new route
+
+- Adding a new file under `src/pages/` that produces a new URL (e.g. `src/pages/foo/index.astro` → `solker.ca/foo`, or `src/pages/bar.astro` → `solker.ca/bar`).
+- Removing or renaming a page so a URL no longer exists.
+
+## What to do
+
+1. **Open README.md** and find the **Routing** section.
+2. **Update the "URL" table** so it lists every public route:
+   - Add a row for the new URL and a short description.
+   - Remove or change the row if you removed or renamed a route.
+3. If you set up a **subdomain redirect** (e.g. `something.solker.ca` → a path), add or update a row in the **Subdomain redirects** table.
+4. Do not remove the reminder sentence: *"When you add a new route … update this **Routing** section …"*
+
+## Example
+
+After adding `src/pages/events/index.astro`:
+
+- Add to the URL table: `**solker.ca/events** | Events — upcoming events and calendar.`
+
+If you also configure `events.solker.ca` to redirect to the events page:
+
+- Add to the subdomain table: `**events.solker.ca** | solker.ca/events`
