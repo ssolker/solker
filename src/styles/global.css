@@ -140,6 +140,20 @@
 }
 
 @layer components {
+  /* Logo: light theme = black logo (Solker_b), dark theme = white logo (Solker_w) */
+  .logo-link .logo-light {
+    display: block;
+  }
+  .logo-link .logo-dark {
+    display: none;
+  }
+  [data-theme="dark"] .logo-link .logo-light {
+    display: none;
+  }
+  [data-theme="dark"] .logo-link .logo-dark {
+    display: block;
+  }
+
   .font-heading {
     font-family: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
   }
