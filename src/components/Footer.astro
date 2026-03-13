@@ -1,24 +1,25 @@
 ---
 interface Props {
-  companyName: string;
+  companyName?: string;
+  companyShortName?: string;
   contactHref?: string;
   contactText?: string;
   copyrightYear?: number;
 }
-const { companyName, contactHref = '/contact', contactText = 'Contact', copyrightYear = new Date().getFullYear() } = Astro.props;
+const { companyName = 'SOLKER RD COMPANY INC.', companyShortName = 'Solker', contactHref = '/contact', contactText = 'Contact', copyrightYear = new Date().getFullYear() } = Astro.props;
 ---
 
-<footer class="border-t border-taupe/20 bg-forest-dark px-4 py-8 md:px-6">
+<footer class="shrink-0 border-t border-taupe/20 bg-forest-dark px-4 py-8 md:px-6">
   <div class="mx-auto flex max-w-5xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
     <div>
-      <p class="font-heading font-semibold text-white">{companyName}</p>
+      <p class="font-heading font-semibold text-white">{ companyShortName }</p>
       <a href={contactHref} class="mt-1 block text-sm text-taupe hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">
         {contactText}
       </a>
     </div>
     <div class="flex flex-wrap items-center gap-4 text-sm text-taupe">
-      <a href="#" class="hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">Privacy Policy</a>
-      <a href="#" class="hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">Terms of Service</a>
+      <a href="/legal#privacy" class="hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">Privacy Policy</a>
+      <a href="/legal#terms" class="hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">Terms of Service</a>
       <span>© {copyrightYear} {companyName}</span>
     </div>
   </div>

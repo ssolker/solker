@@ -22,30 +22,30 @@ const { headline, subhead, ctaText, ctaHref = '#', secondaryText, secondaryHref 
     <div class="absolute inset-0 bg-gradient-hero-overlay" aria-hidden="true" />
   </div>
   <div class="relative z-10 mx-auto max-w-4xl">
-    <h1 class="font-heading text-4xl font-bold leading-tight text-white drop-shadow-md md:text-5xl lg:text-6xl">
+    <h1 class="font-heading text-4xl font-bold leading-tight text-white-constant drop-shadow-md md:text-5xl lg:text-6xl">
       {headline}
     </h1>
-    <p class="mt-4 text-lg text-white/95 drop-shadow md:text-xl">
+    <p class="mt-4 text-lg text-white-constant/95 drop-shadow md:text-xl">
       {subhead}
     </p>
     <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
       <a
         href={ctaHref}
-        class="inline-block rounded bg-gradient-cta px-6 py-3 text-base font-semibold text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
+        class="inline-block rounded bg-gradient-cta px-6 py-3 text-base font-semibold text-white-constant hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
       >
         {ctaText}
       </a>
       {secondaryText && (
         <a
           href={secondaryHref}
-          class="text-sm font-medium text-white underline decoration-white/70 underline-offset-2 hover:decoration-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
+          class="text-sm font-medium text-white-constant underline decoration-white-constant/70 underline-offset-2 hover:decoration-white-constant focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
         >
           {secondaryText}
         </a>
       )}
     </div>
   </div>
-  <p class="absolute bottom-4 left-4 right-4 z-10 text-center text-xs text-taupe-light md:left-6 md:right-auto">
+  <p class="absolute bottom-4 left-4 right-4 z-10 text-center text-xs text-white-constant/70 md:left-6 md:right-auto">
     Photo by <a href="https://unsplash.com/@izuddinhelmi?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" class="underline hover:text-white" target="_blank" rel="noopener noreferrer">Izuddin Helmi Adnan</a> on <a href="https://unsplash.com/photos/birds-eye-view-photography-of-green-soccer-field-with-lights-K5ChxJaheKI?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" class="underline hover:text-white" target="_blank" rel="noopener noreferrer">Unsplash</a>
   </p>
 </section>

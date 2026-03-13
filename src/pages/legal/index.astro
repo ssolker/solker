@@ -1,0 +1,120 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Layout
+  title="Privacy & Terms — Solker"
+  description="Privacy Policy and Terms of Service for Solker."
+>
+  <main class="flex-1 px-4 py-12 md:py-16">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="font-heading text-3xl font-bold text-white md:text-4xl">
+        Legal
+      </h1>
+      <p class="mt-2 text-taupe">
+        Privacy Policy and Terms of Service for solker.ca and related services.
+      </p>
+
+      <nav class="mt-8 flex flex-wrap gap-4" aria-label="On this page">
+        <a
+          href="#privacy"
+          class="text-sm font-medium text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
+        >
+          Privacy Policy
+        </a>
+        <a
+          href="#terms"
+          class="text-sm font-medium text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
+        >
+          Terms of Service
+        </a>
+      </nav>
+
+      <section id="privacy" class="mt-12 scroll-mt-24" aria-labelledby="privacy-heading">
+        <h2 id="privacy-heading" class="font-heading text-2xl font-bold text-white md:text-3xl">
+          Privacy Policy
+        </h2>
+        <p class="mt-2 text-sm text-taupe">Effective Date: March 9, 2026</p>
+        <div class="mt-6 space-y-6 text-taupe-light">
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">1. Information Collection</h3>
+            <p class="mt-2">
+              Solker RD Company Inc. collects personal information necessary for administration and eligibility verification. This includes identity data, contact information, and residency markers (such as postal codes).
+            </p>
+          </div>
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">2. Purpose of Use</h3>
+            <p class="mt-2">
+              Information is used strictly to manage operations, verify participant eligibility, ensure safety, and fulfill administrative requirements related to facility-use agreements.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">3. Data Disclosure</h3>
+            <p class="mt-2">
+              We do not sell personal data. We share limited information only with:
+            </p>
+            <ul class="mt-2 list-disc space-y-1 pl-6">
+              <li><strong class="text-white">Service Providers:</strong> Third parties that provide the infrastructure for data processing and storage.</li>
+              <li><strong class="text-white">Regulatory/Municipal Bodies:</strong> Data shared as required to comply with local affiliation or facility-access requirements.</li>
+              <li><strong class="text-white">Legal Compliance:</strong> As required by law or to protect the legal rights of the Company.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">4. Data Safeguards</h3>
+            <p class="mt-2">
+              We employ industry-standard administrative and technological safeguards to protect your data. Information is retained only as long as necessary to fulfill the purposes outlined above or to meet legal retention requirements.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">5. Contact and Access</h3>
+            <p class="mt-2">
+              In accordance with applicable privacy laws, you may request access to your personal information or withdraw consent for its use. Direct all inquiries via our <a href="/contact" class="text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">Contact</a> page.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="terms" class="mt-12 scroll-mt-24" aria-labelledby="terms-heading">
+        <h2 id="terms-heading" class="font-heading text-2xl font-bold text-white md:text-3xl">
+          Terms of Service
+        </h2>
+        <p class="mt-2 text-sm text-taupe">Effective Date: March 9, 2026</p>
+        <div class="mt-6 space-y-6 text-taupe-light">
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">1. Agreement to Terms</h3>
+            <p class="mt-2">
+              By accessing this website or registering for any program, you agree to be bound by these Terms. Solker RD Company Inc. reserves the right to modify these terms at any time.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">2. Participation and Conduct</h3>
+            <p class="mt-2">
+              The Company reserves the right to deny service, terminate participation, or remove any individual who provides inaccurate information or whose conduct is deemed detrimental to the safety, integrity, or operations of the organization.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">3. Limitation of Liability</h3>
+            <p class="mt-2">
+              To the maximum extent permitted by law, Solker RD Company Inc. and its officers shall not be liable for any injury, loss, or damage resulting from the use of this website or participation in league activities. Services are provided on an &quot;as is&quot; and &quot;as available&quot; basis.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">4. Proprietary Rights</h3>
+            <p class="mt-2">
+              All website content, branding, and operational materials are the exclusive property of Solker RD Company Inc., except where otherwise noted or credited. Unauthorized use, reproduction, or distribution of our original materials is prohibited.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-heading text-lg font-semibold text-white">5. Governing Law</h3>
+            <p class="mt-2">
+              These Terms are governed by the laws of the Province of Ontario, Canada. Any legal proceedings shall be conducted exclusively in the courts of Ontario.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
+</Layout>

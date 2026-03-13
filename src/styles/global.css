@@ -20,6 +20,7 @@
   --color-taupe-light: var(--theme-taupe-light);
   --color-white: var(--theme-white);
   --color-white-muted: var(--theme-white-muted);
+  --color-white-constant: #ffffff;
   --color-black: var(--theme-black);
   --color-black-muted: var(--theme-black-muted);
 }
@@ -28,7 +29,7 @@
 @layer base {
   :root {
     /* Hero: solid overlay over background so text is readable (no gradient). */
-    --gradient-hero-overlay: color-mix(in srgb, var(--theme-forest) 25%, transparent);
+    --gradient-hero-overlay: color-mix(in srgb, var(--theme-black) 30%, transparent);
     --gradient-cta: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-terracotta) 100%);
     --gradient-section: linear-gradient(to bottom, var(--theme-sage) 0%, var(--theme-forest) 100%);
     --z-header: 50;
@@ -140,6 +141,20 @@
 }
 
 @layer components {
+  /* Logo: light theme = black logo (Solker_b), dark theme = white logo (Solker_w) */
+  .logo-link .logo-light {
+    display: block;
+  }
+  .logo-link .logo-dark {
+    display: none;
+  }
+  [data-theme="dark"] .logo-link .logo-light {
+    display: none;
+  }
+  [data-theme="dark"] .logo-link .logo-dark {
+    display: block;
+  }
+
   .font-heading {
     font-family: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
   }

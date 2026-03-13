@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
 
 // Full palette: base + darker + lighter (color theory–aligned intermediates)
 // Plus neutrals used across the site for complete color theory documentation
@@ -35,8 +36,8 @@ const allSwatches = [...greens, ...warmAccents, ...neutrals];
 ---
 
 <Layout title="Color palette — Solker" description="Full site palette: greens, warm accents, neutrals, and color theory roles.">
-  <div class="min-h-screen bg-forest">
-    <div class="px-4 py-10 md:px-6 md:py-14">
+  <div class="flex min-h-0 flex-1 flex-col bg-forest">
+    <div class="flex-1 px-4 py-10 md:px-6 md:py-14">
       <div class="mx-auto max-w-5xl">
         <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">
           Site color palette
@@ -140,5 +141,6 @@ const allSwatches = [...greens, ...warmAccents, ...neutrals];
         </p>
       </div>
     </div>
+    <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
   </div>
 </Layout>
