@@ -1,5 +1,6 @@
 ---
-const navLinkClass = "rounded px-3 py-2 text-sm font-medium text-taupe hover:bg-sage-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark";
+const navLinkClass =
+  "block rounded px-3 py-2 text-sm font-medium text-taupe hover:bg-sage-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark md:inline-block";
 const links = [
   { href: '#current-season', label: 'Current Season' },
   { href: '#all-sports', label: 'All Sports' },
@@ -7,10 +8,91 @@ const links = [
   { href: '#resources', label: 'Resources' },
   { href: '#about', label: 'About' },
 ];
+const menuId = 'league-nav-menu';
+const buttonId = 'league-nav-menu-button';
 ---
 
-<nav class="flex items-center gap-1 md:gap-2" aria-label="Main">
-  {links.map(({ href, label }) => (
-    <a href={href} class={navLinkClass}>{label}</a>
-  ))}
-</nav>
+<div class="relative flex items-center">
+  <!-- Desktop: horizontal links -->
+  <nav class="hidden items-center gap-1 md:flex md:gap-2" aria-label="Main">
+    {links.map(({ href, label }) => (
+      <a href={href} class={navLinkClass}>{label}</a>
+    ))}
+  </nav>
+
+  <!-- Mobile: menu button -->
+  <button
+    id={buttonId}
+    type="button"
+    class="league-nav-toggle flex h-10 w-10 items-center justify-center rounded text-taupe hover:bg-sage-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark md:hidden"
+    aria-expanded="false"
+    aria-controls={menuId}
+    aria-label="Open menu"
+  >
+    <svg class="league-nav-icon-menu h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+    <svg class="league-nav-icon-close hidden h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+</div>
+
+<!-- Mobile: full-width dropdown panel (fixed so it spans viewport) -->
+<div
+  id={menuId}
+  class="fixed left-0 right-0 top-16 z-40 max-h-0 overflow-hidden border-b border-taupe/20 bg-forest-dark/98 shadow-lg backdrop-blur-sm transition-[max-height] duration-200 ease-out md:hidden"
+  role="dialog"
+  aria-label="Main menu"
+  hidden
+>
+  <nav class="flex flex-col px-4 py-3" aria-label="Main">
+    {links.map(({ href, label }) => (
+      <a href={href} class={navLinkClass} data-nav-close>{label}</a>
+    ))}
+  </nav>
+</div>
+
+<style>
+  .league-nav-toggle.open .league-nav-icon-menu { display: none; }
+  .league-nav-toggle.open .league-nav-icon-close { display: block; }
+</style>
+
+<script>
+  (function () {
+    const button = document.getElementById('league-nav-menu-button');
+    const menu = document.getElementById('league-nav-menu');
+    if (!button || !menu) return;
+
+    const open = () => {
+      menu.hidden = false;
+      menu.classList.remove('max-h-0');
+      menu.classList.add('max-h-[80vh]');
+      button.classList.add('open');
+      button.setAttribute('aria-expanded', 'true');
+      button.setAttribute('aria-label', 'Close menu');
+    };
+
+    const close = () => {
+      menu.hidden = true;
+      menu.classList.add('max-h-0');
+      menu.classList.remove('max-h-[80vh]');
+      button.classList.remove('open');
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-label', 'Open menu');
+    };
+
+    button.addEventListener('click', () => (button.getAttribute('aria-expanded') === 'true' ? close() : open()));
+
+    menu.querySelectorAll('[data-nav-close]').forEach((link) => {
+      link.addEventListener('click', close);
+    });
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as Node | null;
+      if (target && button.getAttribute('aria-expanded') === 'true' && !menu.contains(target) && !button.contains(target)) {
+        close();
+      }
+    });
+  })();
+</script>
