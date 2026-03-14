@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import LeagueNav from '../../components/LeagueNav.astro';
+import Footer from '../../components/Footer.astro';
+
+// Set this in your deployment env as PUBLIC_WAIVER_FORM_URL, or replace the URL below
+// after deploying the Apps Script Web App (Deploy > New deployment > Web app).
+const waiverFormUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.google.com/macros/s/AKfycbxQ6F0QnbJB6y7gAPbMn3GMfjw1zBWv1niMjJx0T0vd0g_UU-1BalgNcu2LSoCf9TxIHg/exec';
+---
+
+<Layout
+  title="Sign Waiver — League — Solker"
+  description="Sign the mandatory waiver for league players. Woodstock recreational league."
+>
+  <Fragment slot="header-nav">
+    <LeagueNav />
+  </Fragment>
+
+  <main class="flex-1 px-4 py-8 md:py-12">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">
+        Sign the Waiver
+      </h1>
+      <p class="mt-2 text-taupe">
+        Mandatory for all players before their first game. Fill out the form below and draw your signature.
+      </p>
+      <div class="mt-6 min-h-[600px] w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark">
+        <iframe
+          title="Waiver sign form"
+          src={waiverFormUrl}
+          width="100%"
+          height="700"
+          style="border: none; min-height: 700px;"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  </main>
+
+  <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
+</Layout>
