@@ -2,10 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import Footer from '../components/Footer.astro';
 
-// Form submissions go to your Formspree account. Create a form at https://formspree.io
-// and set the form action below (or use PUBLIC_CONTACT_FORM_ACTION in .env).
-// Formspree sends to your email; the address never appears in this repo.
-const formAction = import.meta.env.PUBLIC_CONTACT_FORM_ACTION ?? 'https://formspree.io/f/YOUR_FORM_ID';
+// Contact form is served by the same Apps Script Web App as waiver/registration (PUBLIC_WAIVER_FORM_URL).
+const webAppBaseUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.google.com/macros/s/AKfycbxQ6F0QnbJB6y7gAPbMn3GMfjw1zBWv1niMjJx0T0vd0g_UU-1BalgNcu2LSoCf9TxIHg/exec';
+const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?'}page=contact`;
 ---
 
 <Layout
@@ -21,48 +20,16 @@ const formAction = import.meta.env.PUBLIC_CONTACT_FORM_ACTION ?? 'https://formsp
         For general inquiries, privacy requests (access, correction, withdrawal of consent), or legal matters, use the form below.
       </p>
 
-      <form
-        action={formAction}
-        method="POST"
-        class="mt-8 flex flex-col gap-4"
-      >
-        <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <label class="flex flex-col gap-1">
-          <span class="text-sm font-medium text-white">Your email</span>
-          <input
-            type="email"
-            name="email"
-            required
-            class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-            placeholder="you@example.com"
-          />
-        </label>
-        <label class="flex flex-col gap-1">
-          <span class="text-sm font-medium text-white">Subject</span>
-          <input
-            type="text"
-            name="subject"
-            class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-            placeholder="e.g. Privacy request"
-          />
-        </label>
-        <label class="flex flex-col gap-1">
-          <span class="text-sm font-medium text-white">Message</span>
-          <textarea
-            name="message"
-            required
-            rows={5}
-            class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-            placeholder="Your message…"
-          />
-        </label>
-        <button
-          type="submit"
-          class="mt-2 w-fit rounded-lg bg-orange px-4 py-2 text-sm font-medium text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
-        >
-          Send
-        </button>
-      </form>
+      <div class="mt-8 min-h-[400px] w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark">
+        <iframe
+          title="Contact form"
+          src={contactFormUrl}
+          width="100%"
+          height="450"
+          style="border: none; min-height: 450px;"
+          loading="lazy"
+        />
+      </div>
 
       <p class="mt-6 text-sm text-taupe">
         Submissions are used only to respond to your inquiry. See our <a href="/legal#privacy" class="text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">Privacy Policy</a>.

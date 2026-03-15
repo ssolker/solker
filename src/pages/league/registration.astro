@@ -2,6 +2,9 @@
 import Layout from '../../layouts/Layout.astro';
 import LeagueNav from '../../components/LeagueNav.astro';
 import Footer from '../../components/Footer.astro';
+
+const webAppBaseUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.google.com/macros/s/AKfycbxQ6F0QnbJB6y7gAPbMn3GMfjw1zBWv1niMjJx0T0vd0g_UU-1BalgNcu2LSoCf9TxIHg/exec';
+const registrationFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?'}page=registration`;
 ---
 
 <Layout
@@ -20,9 +23,16 @@ import Footer from '../../components/Footer.astro';
       <p class="mt-2 text-taupe">
         Register your team or join as a free agent for the 6v6 Co-Ed Soccer league.
       </p>
-      <p class="mt-4 rounded-lg border border-taupe/30 bg-sage-dark px-4 py-6 text-taupe">
-        Registration is coming soon. Check back for links and forms.
-      </p>
+      <div class="mt-6 min-h-[600px] w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark">
+        <iframe
+          title="League registration form"
+          src={registrationFormUrl}
+          width="100%"
+          height="700"
+          style="border: none; min-height: 700px;"
+          loading="lazy"
+        />
+      </div>
       <a
         href="/league/soccer"
         class="mt-6 inline-block text-sm font-medium text-orange hover:text-orange-light"
