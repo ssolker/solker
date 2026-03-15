@@ -2,10 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import Footer from '../components/Footer.astro';
 
-// Form submissions go to your Formspree account. Create a form at https://formspree.io
-// and set the form action below (or use PUBLIC_CONTACT_FORM_ACTION in .env).
-// Formspree sends to your email; the address never appears in this repo.
-const formAction = import.meta.env.PUBLIC_CONTACT_FORM_ACTION ?? 'https://formspree.io/f/YOUR_FORM_ID';
+// Contact form is served by the same Apps Script Web App as waiver/registration (PUBLIC_WAIVER_FORM_URL).
+const webAppBaseUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.google.com/macros/s/AKfycbxQ6F0QnbJB6y7gAPbMn3GMfjw1zBWv1niMjJx0T0vd0g_UU-1BalgNcu2LSoCf9TxIHg/exec';
+const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?'}page=contact`;
 ---
 
 <Layout
@@ -13,7 +12,7 @@ const formAction = import.meta.env.PUBLIC_CONTACT_FORM_ACTION ?? 'https://formsp
   description="Contact Solker for general inquiries, privacy requests, or legal matters."
 >
   <main class="flex-1 px-4 py-12 md:py-16">
-    <div class="mx-auto max-w-xl">
+    <div class="mx-auto max-w-4xl">
       <h1 class="font-heading text-3xl font-bold text-white md:text-4xl">
         Contact
       </h1>
@@ -21,54 +20,65 @@ const formAction = import.meta.env.PUBLIC_CONTACT_FORM_ACTION ?? 'https://formsp
         For general inquiries, privacy requests (access, correction, withdrawal of consent), or legal matters, use the form below.
       </p>
 
-      <form
-        action={formAction}
-        method="POST"
-        class="mt-8 flex flex-col gap-4"
-      >
-        <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <label class="flex flex-col gap-1">
-          <span class="text-sm font-medium text-white">Your email</span>
-          <input
-            type="email"
-            name="email"
-            required
-            class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-            placeholder="you@example.com"
-          />
-        </label>
-        <label class="flex flex-col gap-1">
-          <span class="text-sm font-medium text-white">Subject</span>
-          <input
-            type="text"
-            name="subject"
-            class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-            placeholder="e.g. Privacy request"
-          />
-        </label>
-        <label class="flex flex-col gap-1">
-          <span class="text-sm font-medium text-white">Message</span>
-          <textarea
-            name="message"
-            required
-            rows={5}
-            class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-            placeholder="Your message…"
-          />
-        </label>
-        <button
-          type="submit"
-          class="mt-2 w-fit rounded-lg bg-orange px-4 py-2 text-sm font-medium text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
-        >
-          Send
-        </button>
-      </form>
+      <!-- Full-height iframe: viewport minus navbar + title + subtitle -->
+      <div class="relative mt-8 w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark" style="min-height: 400px; height: calc(100vh - 220px);">
+        <div id="contact-loading-overlay" class="form-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-forest-dark text-white" aria-live="polite">
+          <div class="form-spinner h-10 w-10 rounded-full border-2 border-sage-dark" />
+          <p class="mt-4 font-medium text-white">Loading form…</p>
+        </div>
+        <iframe
+          id="form-iframe"
+          title="Contact form"
+          src={contactFormUrl}
+          width="100%"
+          height="100%"
+          style="border: none; display: block; height: 100%;"
+          loading="lazy"
+        />
+      </div>
 
       <p class="mt-6 text-sm text-taupe">
         Submissions are used only to respond to your inquiry. See our <a href="/legal#privacy" class="text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">Privacy Policy</a>.
       </p>
     </div>
   </main>
+
+  <style>
+    .form-spinner {
+      border-top-color: var(--theme-orange);
+      animation: form-spin 0.8s linear infinite;
+    }
+    @keyframes form-spin {
+      to { transform: rotate(360deg); }
+    }
+    .form-loading-overlay[aria-hidden="true"] {
+      display: none;
+    }
+  </style>
+
+  <script>
+    (function() {
+      var overlay = document.getElementById('contact-loading-overlay');
+      var iframe = document.getElementById('form-iframe');
+      if (!overlay || !iframe) return;
+      var iframeLoaded = false;
+      var minTimeDone = false;
+      function maybeHide() {
+        if (iframeLoaded && minTimeDone && overlay) {
+          overlay.setAttribute('aria-hidden', 'true');
+          overlay.style.display = 'none';
+        }
+      }
+      iframe.addEventListener('load', function() {
+        iframeLoaded = true;
+        maybeHide();
+      });
+      window.setTimeout(function() {
+        minTimeDone = true;
+        maybeHide();
+      }, 2000);
+    })();
+  </script>
 
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>
