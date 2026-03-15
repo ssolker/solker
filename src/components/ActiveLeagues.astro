@@ -1,0 +1,41 @@
+---
+import LeagueCard from './LeagueCard.astro';
+import { leagues, filterLeagues } from '../data/leagues';
+
+interface Props {
+  /** Filter leagues by title (e.g. "soccer" to show only soccer leagues). Omit to show all. */
+  filter?: string;
+  heading?: string;
+}
+
+const { filter, heading = 'Current Leagues' } = Astro.props;
+const filtered = filterLeagues(leagues, filter);
+---
+
+<section class="px-4 py-12 md:py-16" aria-labelledby="active-leagues-heading">
+  <div class="mx-auto max-w-5xl">
+    <h2 id="active-leagues-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
+      {heading}
+    </h2>
+    {filtered.length > 0 ? (
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
+        {filtered.map((league) => (
+          <LeagueCard
+            title={league.title}
+            subtitle={league.subtitle}
+            badge={league.badge}
+            imageSrc={league.imageSrc}
+            imageAlt={league.imageAlt}
+            imageCredit={league.imageCredit}
+            primaryButtonText={league.primaryButtonText}
+            primaryButtonHref={league.primaryButtonHref}
+            secondaryButtonText={league.secondaryButtonText}
+            secondaryButtonHref={league.secondaryButtonHref}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="text-center text-taupe">No leagues match this filter.</p>
+    )}
+  </div>
+</section>
