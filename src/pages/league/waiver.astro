@@ -17,25 +17,68 @@ const waiverFormUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.
   </Fragment>
 
   <main class="flex-1 px-4 py-8 md:py-12">
-    <div class="mx-auto max-w-3xl">
+    <div class="mx-auto max-w-4xl">
       <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">
-        Sign the Waiver
+        Waiver
       </h1>
       <p class="mt-2 text-taupe">
-        Mandatory for all players before their first game. Fill out the form below and draw your signature.
+        Mandatory for all players before they can play. Fill out the form below.
       </p>
-      <div class="mt-6 min-h-[600px] w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark">
+      <!-- Full-height iframe: height = viewport minus navbar + page title + subtitle (footer not included) -->
+      <div class="waiver-iframe-wrapper relative mt-6 w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark" style="min-height: 400px; height: calc(100vh - 220px);">
+        <div id="waiver-loading-overlay" class="waiver-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-forest-dark text-white" aria-live="polite">
+          <div class="waiver-spinner h-10 w-10 rounded-full border-2 border-sage-dark" />
+          <p class="mt-4 font-medium text-white">Loading form…</p>
+        </div>
         <iframe
+          id="form-iframe"
           title="Waiver sign form"
           src={waiverFormUrl}
           width="100%"
-          height="700"
-          style="border: none; min-height: 700px;"
+          height="100%"
+          style="border: none; display: block; min-height: 400px; height: 100%;"
           loading="lazy"
         />
       </div>
     </div>
   </main>
+
+  <style>
+    .waiver-spinner {
+      border-top-color: var(--theme-orange);
+      animation: waiver-spin 0.8s linear infinite;
+    }
+    @keyframes waiver-spin {
+      to { transform: rotate(360deg); }
+    }
+    .waiver-loading-overlay[aria-hidden="true"] {
+      display: none;
+    }
+  </style>
+
+  <script>
+    (function() {
+      var overlay = document.getElementById('waiver-loading-overlay');
+      var iframe = document.getElementById('form-iframe');
+      if (!overlay || !iframe) return;
+      var iframeLoaded = false;
+      var minTimeDone = false;
+      function maybeHide() {
+        if (iframeLoaded && minTimeDone && overlay) {
+          overlay.setAttribute('aria-hidden', 'true');
+          overlay.style.display = 'none';
+        }
+      }
+      iframe.addEventListener('load', function() {
+        iframeLoaded = true;
+        maybeHide();
+      });
+      window.setTimeout(function() {
+        minTimeDone = true;
+        maybeHide();
+      }, 2000);
+    })();
+  </script>
 
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>
