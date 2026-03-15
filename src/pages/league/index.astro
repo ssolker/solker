@@ -2,16 +2,8 @@
 import Layout from '../../layouts/Layout.astro';
 import LeagueNav from '../../components/LeagueNav.astro';
 import LeagueHero from '../../components/LeagueHero.astro';
-import LeagueCard from '../../components/LeagueCard.astro';
-import QuickLinkCard from '../../components/QuickLinkCard.astro';
+import VentureCard from '../../components/VentureCard.astro';
 import Footer from '../../components/Footer.astro';
-import astroLogo from '../../assets/astro.svg';
-import soccerIllustrationSpring from '../../assets/soccer/soccer_spring.svg';
-import soccerIllustrationSummer from '../../assets/soccer/soccer_summer.svg';
-const soccerSpringImageCredit =
-  'Illustration by <a href="https://unsplash.com/@fadhilsanad?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Fast Ink</a> on <a href="https://unsplash.com/illustrations/a-person-standing-on-top-of-a-soccer-ball-JYoednJRax0?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>';
-const soccerSummerImageCredit =
-  'Illustration by <a href="https://unsplash.com/@simonliillustrates?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Simon Li</a> on <a href="https://unsplash.com/illustrations/two-soccer-players-in-action-on-the-field-r48cN5wp-B0?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>'
 ---
 
 <Layout title="League — Solker" description="Woodstock's recreational league. Active leagues, rules, waivers, and resources.">
@@ -26,82 +18,23 @@ const soccerSummerImageCredit =
     <LeagueHero
       headline="Woodstock's Recreational Sports League"
       subhead="Spirit of the Game."
-      ctaText="Join a League"
-      ctaHref="#active-leagues-heading"
+      ctaText="View Leagues"
+      ctaHref="#current-leagues-heading"
     />
 
-    <section class="px-4 py-12 md:py-16" aria-labelledby="active-leagues-heading">
+    <section class="px-4 py-12 md:py-16" aria-labelledby="current-leagues-heading">
       <div class="mx-auto max-w-5xl">
-        <h2 id="active-leagues-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
+        <h2 id="current-leagues-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
           Current Leagues
         </h2>
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
-          <LeagueCard
-            title="6v6 Co-Ed Soccer (Spring '26)"
-            subtitle="Thursday Nights (May 7th - June 25th)"
-            badge="Coming soon!"
-            imageSrc={soccerIllustrationSpring}
-            imageAlt="Person standing on a soccer ball"
-            imageCredit={soccerSpringImageCredit}
-            primaryButtonText="Register team"
-            primaryButtonHref="#register"
-            secondaryButtonText="Join as free agent"
-            secondaryButtonHref="#join"
-          />
-          <LeagueCard
-            title="6v6 Co-Ed Soccer (Summer '26)"
-            subtitle="Thursday Nights (July - August)"
-            badge="Coming soon"
-            imageSrc={soccerIllustrationSummer}
-            imageAlt="Person standing on a soccer ball"
-            imageCredit={soccerSummerImageCredit}
-            primaryButtonText="Coming soon!"
-            primaryButtonHref="#active-leagues-heading"
-          />
-        </div>
-      </div>
-    </section>
-
-    <section class="px-4 py-12 md:py-16" aria-labelledby="quick-links-heading">
-      <div class="mx-auto max-w-5xl">
-        <h2 id="quick-links-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
-          Quick Links
-        </h2>
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <QuickLinkCard
-            title="Rules & Ops Guide"
-            description="Read the 'Friendly City' 6v6 rules."
-            buttonText="View rules"
-            href="#rules"
-          >
-            <img slot="icon" src={astroLogo.src} alt="" class="h-8 w-auto" width="32" height="32" />
-          </QuickLinkCard>
-          <QuickLinkCard
-            title="Sign Waiver"
-            description="Mandatory for ALL players before first game."
-            buttonText="Sign now"
-            href="/league/waiver"
-          >
-            <img slot="icon" src={astroLogo.src} alt="" class="h-8 w-auto" width="32" height="32" />
-          </QuickLinkCard>
-          <QuickLinkCard
-            title="Captain's Corner"
-            description="Reporting, logistics & Captain Kit info."
-            buttonText="Visit portal"
-            href="#captains"
-          >
-            <img slot="icon" src={astroLogo.src} alt="" class="h-8 w-auto" width="32" height="32" />
-          </QuickLinkCard>
+          <VentureCard
+            title="6v6 Co-Ed Soccer"
+            description="Adult co-ed soccer. Rules, registration, waivers, standings."
+            href="/league/soccer"
+            badge="Under construction"
+          />
         </div>
-      </div>
-    </section>
-
-    <!-- Soft step before footer so footer reads clearly darker -->
-    <section class="bg-forest-light/40 px-4 py-12 md:py-16" aria-labelledby="friendly-spirit-heading">
-      <div class="mx-auto max-w-5xl text-center">
-        <h2 id="friendly-spirit-heading" class="font-heading text-2xl font-bold text-white md:text-3xl">
-          Woodstock Adult Rec League
-        </h2>
       </div>
     </section>
   </main>
