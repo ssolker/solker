@@ -1,0 +1,22 @@
+---
+interface Props {
+  title: string;
+  open?: boolean;
+}
+const { title, open = false } = Astro.props;
+---
+
+<details
+  class="group rounded-xl border border-taupe/30 bg-sage-dark overflow-hidden"
+  {...(open && { open: true })}
+>
+  <summary class="flex cursor-pointer items-center justify-between px-5 py-4 font-heading text-lg font-semibold text-white hover:bg-sage/50 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-inset [&::-webkit-details-marker]:hidden">
+    {title}
+    <svg class="h-5 w-5 shrink-0 text-taupe transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </summary>
+  <div class="border-t border-taupe/30 px-5 py-4 text-taupe">
+    <slot />
+  </div>
+</details>
