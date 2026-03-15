@@ -24,7 +24,8 @@ const waiverFormUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.
       <p class="mt-2 text-taupe">
         Mandatory for all players before they can play. Fill out the form below.
       </p>
-      <!-- Full-height iframe: height = viewport minus navbar + page title + subtitle (footer not included) -->
+      <!-- Backup: iframe commented out. New form at /league/waiver-api. -->
+      <!--
       <div class="waiver-iframe-wrapper relative mt-6 w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark" style="min-height: 400px; height: calc(100vh - 220px);">
         <div id="waiver-loading-overlay" class="waiver-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-forest-dark text-white" aria-live="polite">
           <div class="waiver-spinner h-10 w-10 rounded-full border-2 border-sage-dark" />
@@ -40,6 +41,10 @@ const waiverFormUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.
           loading="lazy"
         />
       </div>
+      -->
+      <p class="mt-6">
+        <a href="/league/waiver-api" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Go to waiver form</a>
+      </p>
     </div>
   </main>
 
@@ -56,6 +61,7 @@ const waiverFormUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.
     }
   </style>
 
+  <!-- Backup: overlay script commented out (iframe above is commented).
   <script>
     (function() {
       var overlay = document.getElementById('waiver-loading-overlay');
@@ -79,6 +85,7 @@ const waiverFormUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.
       }, 2000);
     })();
   </script>
+  -->
 
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>
