@@ -28,15 +28,15 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
         <p class="text-sm text-taupe">Fields marked with <span class="text-red-500 font-medium">*</span> are required (except notes and emergency contact).</p>
         <div>
           <label for="fullName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Full Name</label>
-          <input type="text" id="fullName" name="fullName" required placeholder="Your full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <input type="text" id="fullName" name="fullName" required maxlength="150" placeholder="Your full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
           <label for="email" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Email</label>
-          <input type="email" id="email" name="email" required placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <input type="email" id="email" name="email" required maxlength="254" placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
           <label for="phone" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Phone</label>
-          <input type="tel" id="phone" name="phone" required placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <input type="tel" id="phone" name="phone" required maxlength="25" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
           <label for="leagueSeason" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> League / Season</label>
@@ -60,7 +60,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </label>
             <div id="existingTeamWrap" class="ml-6 mt-1" style="display: none;">
               <label for="existingTeamName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Team name / Captain</label>
-              <input type="text" id="existingTeamName" name="existingTeamName" placeholder="Team name or captain name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+              <input type="text" id="existingTeamName" name="existingTeamName" maxlength="100" placeholder="Team name or captain name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
             </div>
             <label class="flex cursor-pointer items-start gap-2">
               <input type="radio" id="regTypeNewTeam" name="regType" value="newTeam" class="mt-1 h-4 w-4 accent-orange" />
@@ -69,7 +69,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             <div id="newTeamWrap" class="ml-6 mt-1 space-y-3" style="display: none;">
               <div>
                 <label for="newTeamName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Team name</label>
-                <input type="text" id="newTeamName" name="newTeamName" placeholder="Your new team name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+                <input type="text" id="newTeamName" name="newTeamName" maxlength="100" placeholder="Your new team name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
               </div>
               <div class="rounded-lg border border-amber-600/80 bg-amber-900/40 px-4 py-3 text-amber-100" role="alert">
                 <p class="font-semibold">WAITLIST NOTICE</p>
@@ -84,15 +84,15 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
         </div>
         <div>
           <label for="emergencyName" class="mb-1 block font-medium text-white">Emergency Contact Name</label>
-          <input type="text" id="emergencyName" name="emergencyName" placeholder="Full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <input type="text" id="emergencyName" name="emergencyName" maxlength="100" placeholder="Full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
           <label for="emergencyPhone" class="mb-1 block font-medium text-white">Emergency Contact Phone</label>
-          <input type="tel" id="emergencyPhone" name="emergencyPhone" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <input type="tel" id="emergencyPhone" name="emergencyPhone" maxlength="25" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
           <label for="notes" class="mb-1 block font-medium text-white">Notes</label>
-          <textarea id="notes" name="notes" placeholder="Any additional information..." rows="3" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
+          <textarea id="notes" name="notes" maxlength="1000" placeholder="Any additional information... (max 1000 characters)" rows="3" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
         </div>
 
         <div id="recaptcha-wrap" class="flex justify-center"></div>
