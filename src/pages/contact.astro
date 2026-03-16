@@ -20,7 +20,8 @@ const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?
         For general inquiries, privacy requests (access, correction, withdrawal of consent), or legal matters, use the form below.
       </p>
 
-      <!-- Full-height iframe: viewport minus navbar + title + subtitle -->
+      <!-- Backup: iframe commented out. New form at /contact-api. -->
+      <!--
       <div class="relative mt-8 w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark" style="min-height: 400px; height: calc(100vh - 220px);">
         <div id="contact-loading-overlay" class="form-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-forest-dark text-white" aria-live="polite">
           <div class="form-spinner h-10 w-10 rounded-full border-2 border-sage-dark" />
@@ -36,6 +37,10 @@ const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?
           loading="lazy"
         />
       </div>
+      -->
+      <p class="mt-8">
+        <a href="/contact-api" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Go to contact form</a>
+      </p>
 
       <p class="mt-6 text-sm text-taupe">
         Submissions are used only to respond to your inquiry. See our <a href="/legal#privacy" class="text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">Privacy Policy</a>.
@@ -56,6 +61,7 @@ const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?
     }
   </style>
 
+  <!-- Backup: overlay script commented out (iframe above is commented).
   <script>
     (function() {
       var overlay = document.getElementById('contact-loading-overlay');
@@ -79,6 +85,7 @@ const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?
       }, 2000);
     })();
   </script>
+  -->
 
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>
