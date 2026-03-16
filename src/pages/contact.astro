@@ -25,15 +25,15 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
         <p class="text-sm text-taupe">All fields marked with <span class="text-red-500 font-medium">*</span> are required.</p>
         <div>
           <label for="email" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Your email</label>
-          <input type="email" id="email" name="email" required placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <input type="email" id="email" name="email" required maxlength="254" placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
           <label for="subject" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Subject</label>
-          <input type="text" id="subject" name="subject" required placeholder="e.g. Privacy request" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <input type="text" id="subject" name="subject" required maxlength="150" placeholder="e.g. Privacy request" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
           <label for="message" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Message</label>
-          <textarea id="message" name="message" required placeholder="Your message…" rows="5" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
+          <textarea id="message" name="message" required maxlength="3000" placeholder="Your message… (max 3000 characters)" rows="5" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
         </div>
 
         <div id="recaptcha-wrap" class="flex justify-center"></div>

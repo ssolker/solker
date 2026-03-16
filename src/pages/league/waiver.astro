@@ -77,12 +77,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
           <div>
             <label for="fullName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Full Name</label>
-            <input type="text" id="fullName" name="fullName" required placeholder="Your full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+            <input type="text" id="fullName" name="fullName" required maxlength="150" placeholder="Your full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
           </div>
 
           <div>
             <label for="email" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Email Address</label>
-            <input type="email" id="email" name="email" required placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+            <input type="email" id="email" name="email" required maxlength="254" placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
           </div>
 
           <div>
