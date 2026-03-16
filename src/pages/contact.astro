@@ -2,9 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import Footer from '../components/Footer.astro';
 
-// Contact form is served by the same Apps Script Web App as waiver/registration (PUBLIC_WAIVER_FORM_URL).
-const webAppBaseUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.google.com/macros/s/AKfycbxQ6F0QnbJB6y7gAPbMn3GMfjw1zBWv1niMjJx0T0vd0g_UU-1BalgNcu2LSoCf9TxIHg/exec';
-const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?'}page=contact`;
+const apiUrl = import.meta.env.PUBLIC_FORMS_API_URL || '';
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 ---
 
 <Layout
@@ -12,7 +11,7 @@ const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?
   description="Contact Solker for general inquiries, privacy requests, or legal matters."
 >
   <main class="flex-1 px-4 py-12 md:py-16">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-2xl">
       <h1 class="font-heading text-3xl font-bold text-white md:text-4xl">
         Contact
       </h1>
@@ -20,27 +19,40 @@ const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?
         For general inquiries, privacy requests (access, correction, withdrawal of consent), or legal matters, use the form below.
       </p>
 
-      <!-- Backup: iframe commented out. New form at /contact-api. -->
-      <!--
-      <div class="relative mt-8 w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark" style="min-height: 400px; height: calc(100vh - 220px);">
-        <div id="contact-loading-overlay" class="form-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-forest-dark text-white" aria-live="polite">
-          <div class="form-spinner h-10 w-10 rounded-full border-2 border-sage-dark" />
-          <p class="mt-4 font-medium text-white">Loading form…</p>
+      <form id="contact-form" class="mt-8 space-y-4" novalidate>
+        <input type="text" name="_gotcha" id="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute left-[-9999px]" />
+
+        <p class="text-sm text-taupe">All fields marked with <span class="text-red-500 font-medium">*</span> are required.</p>
+        <div>
+          <label for="email" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Your email</label>
+          <input type="email" id="email" name="email" required placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
-        <iframe
-          id="form-iframe"
-          title="Contact form"
-          src={contactFormUrl}
-          width="100%"
-          height="100%"
-          style="border: none; display: block; height: 100%;"
-          loading="lazy"
-        />
+        <div>
+          <label for="subject" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Subject</label>
+          <input type="text" id="subject" name="subject" required placeholder="e.g. Privacy request" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+        </div>
+        <div>
+          <label for="message" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Message</label>
+          <textarea id="message" name="message" required placeholder="Your message…" rows="5" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
+        </div>
+
+        <div id="recaptcha-wrap" class="flex justify-center"></div>
+
+        <button type="submit" id="submitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+          Send
+        </button>
+
+        <!-- MOCK SUBMIT: Functionality for testing start -->
+        <!-- <button type="button" id="mockSubmitBtn" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+          Mock submit (10s)
+        </button> -->
+        <!-- MOCK SUBMIT: Functionality for testing end -->
+      </form>
+
+      <div id="statusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
+        <span id="statusSpinner" class="submit-spinner h-10 w-10 rounded-full border-2 border-sage-dark border-t-orange" aria-hidden="true" style="display: none;"></span>
+        <span id="statusText"></span>
       </div>
-      -->
-      <p class="mt-8">
-        <a href="/contact-api" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Go to contact form</a>
-      </p>
 
       <p class="mt-6 text-sm text-taupe">
         Submissions are used only to respond to your inquiry. See our <a href="/legal#privacy" class="text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">Privacy Policy</a>.
@@ -49,43 +61,127 @@ const contactFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?
   </main>
 
   <style>
-    .form-spinner {
+    .submit-spinner {
       border-top-color: var(--theme-orange);
-      animation: form-spin 0.8s linear infinite;
+      animation: submit-spin 0.8s linear infinite;
     }
-    @keyframes form-spin {
+    @keyframes submit-spin {
       to { transform: rotate(360deg); }
-    }
-    .form-loading-overlay[aria-hidden="true"] {
-      display: none;
     }
   </style>
 
-  <!-- Backup: overlay script commented out (iframe above is commented).
-  <script>
+  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadContact&render=explicit" async defer />
+  <script define:vars={{ apiUrl, recaptchaSiteKey }}>
     (function() {
-      var overlay = document.getElementById('contact-loading-overlay');
-      var iframe = document.getElementById('form-iframe');
-      if (!overlay || !iframe) return;
-      var iframeLoaded = false;
-      var minTimeDone = false;
-      function maybeHide() {
-        if (iframeLoaded && minTimeDone && overlay) {
-          overlay.setAttribute('aria-hidden', 'true');
-          overlay.style.display = 'none';
-        }
+      window.onRecaptchaLoadContact = function() {
+        if (typeof grecaptcha === 'undefined' || !recaptchaSiteKey) return;
+        var wrap = document.getElementById('recaptcha-wrap');
+        if (wrap) window.contactRecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
+      };
+
+      var form = document.getElementById('contact-form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var gotcha = document.getElementById('gotcha');
+          if (gotcha && gotcha.value) return;
+          var email = document.getElementById('email').value.trim();
+          var message = document.getElementById('message').value.trim();
+          var statusSpinner = document.getElementById('statusSpinner');
+          var statusText = document.getElementById('statusText');
+          var submitBtn = document.getElementById('submitBtn');
+
+          var subject = document.getElementById('subject').value.trim();
+          if (!email || !subject || !message) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Please fill in your email, subject, and message.';
+            return;
+          }
+          var token = '';
+          if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && window.contactRecaptchaId !== undefined) {
+            token = grecaptcha.getResponse(window.contactRecaptchaId);
+            if (!token) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) statusText.textContent = 'Please complete the verification below.';
+              return;
+            }
+          }
+          if (!apiUrl) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL.';
+            return;
+          }
+
+          submitBtn.disabled = true;
+          if (statusSpinner) statusSpinner.style.display = 'block';
+          if (statusText) { statusText.textContent = 'Sending…'; statusText.classList.remove('text-red-500', 'text-green-600'); }
+
+          var payload = {
+            action: 'contact',
+            data: {
+              email: email,
+              subject: document.getElementById('subject').value.trim(),
+              message: message
+            },
+            recaptchaToken: token
+          };
+
+          fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            redirect: 'follow'
+          })
+            .then(function(res) { return res.json(); })
+            .then(function(json) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (json.success) {
+                if (statusText) { statusText.textContent = json.message || 'Message sent.'; statusText.classList.add('text-green-600'); }
+                submitBtn.style.display = 'none';
+                var recWrap = document.getElementById('recaptcha-wrap');
+                if (recWrap) recWrap.innerHTML = '';
+              } else {
+                if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
+                submitBtn.disabled = false;
+              }
+            })
+            .catch(function(err) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+              submitBtn.disabled = false;
+            });
+        });
       }
-      iframe.addEventListener('load', function() {
-        iframeLoaded = true;
-        maybeHide();
-      });
-      window.setTimeout(function() {
-        minTimeDone = true;
-        maybeHide();
-      }, 2000);
+
+      /* --- MOCK SUBMIT (comment out this block to disable) --- */
+      (function() {
+        var mockBtn = document.getElementById('mockSubmitBtn');
+        if (!mockBtn) return;
+        var MOCK_DELAY_MS = 10000;
+        mockBtn.addEventListener('click', function() {
+          var submitBtn = document.getElementById('submitBtn');
+          var statusSpinner = document.getElementById('statusSpinner');
+          var statusText = document.getElementById('statusText');
+          if (!statusText) return;
+          if (submitBtn) submitBtn.disabled = true;
+          mockBtn.disabled = true;
+          if (statusSpinner) statusSpinner.style.display = 'block';
+          statusText.textContent = 'Sending…';
+          statusText.classList.remove('text-red-500', 'text-green-600');
+          window.setTimeout(function() {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            statusText.textContent = 'Message sent. We will get back to you soon.';
+            statusText.classList.add('text-green-600');
+            if (submitBtn) submitBtn.style.display = 'none';
+            var recWrap = document.getElementById('recaptcha-wrap');
+            if (recWrap) recWrap.innerHTML = '';
+            mockBtn.disabled = false;
+          }, MOCK_DELAY_MS);
+        });
+      })();
+      /* --- end MOCK SUBMIT --- */
     })();
   </script>
-  -->
 
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>
