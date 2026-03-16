@@ -22,30 +22,31 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
       <form id="contact-form" class="mt-8 space-y-4" novalidate>
         <input type="text" name="_gotcha" id="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute left-[-9999px]" />
 
+        <p class="text-sm text-taupe">All fields marked with <span class="text-red-500 font-medium">*</span> are required.</p>
         <div>
-          <label for="email" class="mb-1 block font-medium text-white">Your email</label>
+          <label for="email" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Your email</label>
           <input type="email" id="email" name="email" required placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
-          <label for="subject" class="mb-1 block font-medium text-white">Subject</label>
-          <input type="text" id="subject" name="subject" placeholder="e.g. Privacy request" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <label for="subject" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Subject</label>
+          <input type="text" id="subject" name="subject" required placeholder="e.g. Privacy request" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
-          <label for="message" class="mb-1 block font-medium text-white">Message</label>
+          <label for="message" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Message</label>
           <textarea id="message" name="message" required placeholder="Your message…" rows="5" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
         </div>
 
         <div id="recaptcha-wrap" class="flex justify-center"></div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button type="submit" id="submitBtn" class="rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
-            Send
-          </button>
-          <!-- MOCK SUBMIT: comment out the next button to remove -->
-          <button type="button" id="mockSubmitBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
-            Mock submit (10s)
-          </button>
-        </div>
+        <button type="submit" id="submitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+          Send
+        </button>
+
+        <!-- MOCK SUBMIT: Functionality for testing start -->
+        <!-- <button type="button" id="mockSubmitBtn" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+          Mock submit (10s)
+        </button> -->
+        <!-- MOCK SUBMIT: Functionality for testing end -->
       </form>
 
       <div id="statusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
@@ -90,9 +91,10 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
           var statusText = document.getElementById('statusText');
           var submitBtn = document.getElementById('submitBtn');
 
-          if (!email || !message) {
+          var subject = document.getElementById('subject').value.trim();
+          if (!email || !subject || !message) {
             if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Please fill in your email and message.';
+            if (statusText) statusText.textContent = 'Please fill in your email, subject, and message.';
             return;
           }
           var token = '';

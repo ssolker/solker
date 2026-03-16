@@ -21,33 +21,66 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
         Registration
       </h1>
       <p class="mt-2 text-taupe">
-        Register your team or join as a free agent for the 6v6 Co-Ed Soccer league.
+        Register a new team, join a team, or register as a free agent for the league.
       </p>
 
       <form id="registration-form" class="mt-6 space-y-4" novalidate>
+        <p class="text-sm text-taupe">Fields marked with <span class="text-red-500 font-medium">*</span> are required (except notes and emergency contact).</p>
         <div>
-          <label for="fullName" class="mb-1 block font-medium text-white">Full Name</label>
+          <label for="fullName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Full Name</label>
           <input type="text" id="fullName" name="fullName" required placeholder="Your full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
-          <label for="email" class="mb-1 block font-medium text-white">Email</label>
+          <label for="email" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Email</label>
           <input type="email" id="email" name="email" required placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
-          <label for="phone" class="mb-1 block font-medium text-white">Phone</label>
-          <input type="tel" id="phone" name="phone" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <label for="phone" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Phone</label>
+          <input type="tel" id="phone" name="phone" required placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
         <div>
-          <label for="leagueSeason" class="mb-1 block font-medium text-white">League / Season</label>
-          <select id="leagueSeason" name="leagueSeason" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange">
+          <label for="leagueSeason" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> League / Season</label>
+          <select id="leagueSeason" name="leagueSeason" required class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange">
             <option value="">Select...</option>
-            <option value="6v6 Co-Ed Soccer - Season 1">6v6 Co-Ed Soccer - Season 1</option>
-            <option value="6v6 Co-Ed Soccer - Season 2">6v6 Co-Ed Soccer - Season 2</option>
+            <option value="Soccer - Season 1">Soccer - Season 1 (May - Jun)</option>
+            <option value="Soccer - Season 2">Soccer - Season 2 (Jul - Aug)</option>
+            <option value="Soccer - Both Seasons">Soccer - Both Seasons (May - Aug)</option>
           </select>
         </div>
         <div>
-          <label for="teamOrFreeAgent" class="mb-1 block font-medium text-white">Team Name or Free Agent</label>
-          <input type="text" id="teamOrFreeAgent" name="teamOrFreeAgent" placeholder="Team name or 'Free Agent'" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          <span class="mb-2 block font-medium text-white"><span class="text-red-500">*</span> Registration Choices</span>
+          <div class="flex flex-col gap-3">
+            <label class="flex cursor-pointer items-start gap-2">
+              <input type="radio" id="regTypeFreeAgent" name="regType" value="freeAgent" class="mt-1 h-4 w-4 accent-orange" checked />
+              <span class="text-white">I am a Free Agent</span>
+            </label>
+            <label class="flex cursor-pointer items-start gap-2">
+              <input type="radio" id="regTypeExistingTeam" name="regType" value="existingTeam" class="mt-1 h-4 w-4 accent-orange" />
+              <span class="text-white">I am joining an existing team</span>
+            </label>
+            <div id="existingTeamWrap" class="ml-6 mt-1" style="display: none;">
+              <label for="existingTeamName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Team name / Captain</label>
+              <input type="text" id="existingTeamName" name="existingTeamName" placeholder="Team name or captain name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+            </div>
+            <label class="flex cursor-pointer items-start gap-2">
+              <input type="radio" id="regTypeNewTeam" name="regType" value="newTeam" class="mt-1 h-4 w-4 accent-orange" />
+              <span class="text-white">I am starting a NEW team (Captain)</span>
+            </label>
+            <div id="newTeamWrap" class="ml-6 mt-1 space-y-3" style="display: none;">
+              <div>
+                <label for="newTeamName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Team name</label>
+                <input type="text" id="newTeamName" name="newTeamName" placeholder="Your new team name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+              </div>
+              <div class="rounded-lg border border-amber-600/80 bg-amber-900/40 px-4 py-3 text-amber-100" role="alert">
+                <p class="font-semibold">WAITLIST NOTICE</p>
+                <p class="mt-1 text-sm">New team registrations are placed on a waitlist. After review new teams will be added. You will be contacted to discuss your submission and be provided more details.</p>
+              </div>
+              <label class="flex cursor-pointer items-start gap-2">
+                <input type="checkbox" id="newTeamCaptainAgreement" name="newTeamCaptainAgreement" class="mt-0.5 h-4 w-4 accent-orange" />
+                <span class="text-white"><span class="text-red-500">*</span> I am registering a new team as a team captain</span>
+              </label>
+            </div>
+          </div>
         </div>
         <div>
           <label for="emergencyName" class="mb-1 block font-medium text-white">Emergency Contact Name</label>
@@ -64,23 +97,28 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
         <div id="recaptcha-wrap" class="flex justify-center"></div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button type="submit" id="submitBtn" class="rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
-            Submit Registration
-          </button>
-          <!-- MOCK SUBMIT: comment out the next button to remove -->
-          <button type="button" id="mockSubmitBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
-            Mock submit (10s)
-          </button>
-        </div>
+        <button type="submit" id="submitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+          Submit Registration
+        </button>
+
+        <!-- MOCK SUBMIT: Functionality for testing start -->
+        <!-- <button type="button" id="mockSubmitBtn" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+          Mock submit (10s)
+        </button> -->
+        <!-- MOCK SUBMIT: Functionality for testing end -->
       </form>
 
       <div id="statusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
         <span id="statusSpinner" class="submit-spinner h-10 w-10 rounded-full border-2 border-sage-dark border-t-orange" aria-hidden="true" style="display: none;"></span>
         <span id="statusText"></span>
-        <div id="successActions" class="mt-2 flex flex-col items-center gap-2" style="display: none;">
-          <a href="/league/waiver" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Continue to Waiver</a>
-          <button type="button" id="resetRegistrationBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Reset form</button>
+        <div id="successActions" class="mt-2 flex flex-col gap-3" style="display: none;">
+          <p class="rounded-lg bg-amber-900/80 px-4 py-3 text-center font-semibold text-amber-100" role="alert">
+            Waiver must be signed before playing.
+          </p>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <button type="button" id="resetRegistrationBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Reset form</button>
+            <a href="/league/waiver" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Continue to Waiver</a>
+          </div>
         </div>
       </div>
 
@@ -107,6 +145,30 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
         if (wrap) window.registrationRecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
       };
 
+      function updateRegistrationChoiceVisibility() {
+        var existingWrap = document.getElementById('existingTeamWrap');
+        var newWrap = document.getElementById('newTeamWrap');
+        var existingTeam = document.getElementById('regTypeExistingTeam');
+        var newTeam = document.getElementById('regTypeNewTeam');
+        var existingNameEl = document.getElementById('existingTeamName');
+        var newNameEl = document.getElementById('newTeamName');
+        var agreementEl = document.getElementById('newTeamCaptainAgreement');
+        var isExisting = existingTeam && existingTeam.checked;
+        var isNew = newTeam && newTeam.checked;
+        if (existingWrap) existingWrap.style.display = isExisting ? 'block' : 'none';
+        if (newWrap) newWrap.style.display = isNew ? 'block' : 'none';
+        if (existingNameEl) existingNameEl.required = isExisting;
+        if (newNameEl) newNameEl.required = isNew;
+        if (agreementEl) agreementEl.required = isNew;
+        if (!isNew && agreementEl) agreementEl.checked = false;
+        if (!isExisting && existingNameEl) existingNameEl.value = '';
+        if (!isNew && newNameEl) newNameEl.value = '';
+      }
+      document.querySelectorAll('input[name="regType"]').forEach(function(radio) {
+        radio.addEventListener('change', updateRegistrationChoiceVisibility);
+      });
+      updateRegistrationChoiceVisibility();
+
       var form = document.getElementById('registration-form');
       if (form) {
         form.addEventListener('submit', function(e) {
@@ -118,9 +180,21 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
           var successActions = document.getElementById('successActions');
           var submitBtn = document.getElementById('submitBtn');
 
+          var phone = document.getElementById('phone').value.trim();
+          var leagueSeason = document.getElementById('leagueSeason').value;
           if (!fullName || !email) {
             if (statusSpinner) statusSpinner.style.display = 'none';
             if (statusText) statusText.textContent = 'Please fill in your name and email.';
+            return;
+          }
+          if (!phone) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Please fill in your phone number.';
+            return;
+          }
+          if (!leagueSeason) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Please select a league / season.';
             return;
           }
           var token = '';
@@ -138,6 +212,34 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             return;
           }
 
+          var regTypeExistingTeam = document.getElementById('regTypeExistingTeam');
+          var regTypeNewTeam = document.getElementById('regTypeNewTeam');
+          var existingTeamNameEl = document.getElementById('existingTeamName');
+          var newTeamNameEl = document.getElementById('newTeamName');
+          var newTeamCaptainAgreementEl = document.getElementById('newTeamCaptainAgreement');
+          var registrationChoice = regTypeExistingTeam && regTypeExistingTeam.checked ? 'existingTeam' : (regTypeNewTeam && regTypeNewTeam.checked ? 'newTeam' : 'freeAgent');
+          var teamOrFreeAgentValue = 'Free Agent';
+          if (registrationChoice === 'existingTeam') {
+            if (!existingTeamNameEl || !existingTeamNameEl.value.trim()) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) statusText.textContent = 'Please enter the team name or captain name.';
+              return;
+            }
+            teamOrFreeAgentValue = existingTeamNameEl.value.trim();
+          } else if (registrationChoice === 'newTeam') {
+            if (!newTeamNameEl || !newTeamNameEl.value.trim()) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) statusText.textContent = 'Please enter your new team name.';
+              return;
+            }
+            if (!newTeamCaptainAgreementEl || !newTeamCaptainAgreementEl.checked) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) statusText.textContent = 'Please confirm that you are registering a new team as team captain.';
+              return;
+            }
+            teamOrFreeAgentValue = newTeamNameEl.value.trim();
+          }
+
           submitBtn.disabled = true;
           if (statusSpinner) statusSpinner.style.display = 'block';
           if (statusText) { statusText.textContent = 'Submitting…'; statusText.classList.remove('text-red-500', 'text-green-600'); }
@@ -150,7 +252,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               email: email,
               phone: document.getElementById('phone').value.trim(),
               leagueSeason: document.getElementById('leagueSeason').value,
-              teamOrFreeAgent: document.getElementById('teamOrFreeAgent').value.trim(),
+              registrationChoice: registrationChoice,
+              teamOrFreeAgent: teamOrFreeAgentValue,
+              newTeamCaptainAgreement: registrationChoice === 'newTeam' && newTeamCaptainAgreementEl && newTeamCaptainAgreementEl.checked,
               emergencyName: document.getElementById('emergencyName').value.trim(),
               emergencyPhone: document.getElementById('emergencyPhone').value.trim(),
               notes: document.getElementById('notes').value.trim()
