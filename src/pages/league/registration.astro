@@ -3,8 +3,8 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueNav from '../../components/LeagueNav.astro';
 import Footer from '../../components/Footer.astro';
 
-const webAppBaseUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.google.com/macros/s/AKfycbxQ6F0QnbJB6y7gAPbMn3GMfjw1zBWv1niMjJx0T0vd0g_UU-1BalgNcu2LSoCf9TxIHg/exec';
-const registrationFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&' : '?'}page=registration`;
+const apiUrl = import.meta.env.PUBLIC_FORMS_API_URL || '';
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 ---
 
 <Layout
@@ -16,81 +16,211 @@ const registrationFormUrl = `${webAppBaseUrl}${webAppBaseUrl.includes('?') ? '&'
   </Fragment>
 
   <main class="flex-1 px-4 py-8 md:py-12">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-2xl">
       <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">
         Registration
       </h1>
       <p class="mt-2 text-taupe">
         Register your team or join as a free agent for the 6v6 Co-Ed Soccer league.
       </p>
-      <!-- Backup: iframe commented out. New form at /league/registration-api. -->
-      <!--
-      <div class="relative mt-6 w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark" style="min-height: 400px; height: calc(100vh - 220px);">
-        <div id="registration-loading-overlay" class="form-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-forest-dark text-white" aria-live="polite">
-          <div class="form-spinner h-10 w-10 rounded-full border-2 border-sage-dark" />
-          <p class="mt-4 font-medium text-white">Loading form…</p>
+
+      <form id="registration-form" class="mt-6 space-y-4" novalidate>
+        <div>
+          <label for="fullName" class="mb-1 block font-medium text-white">Full Name</label>
+          <input type="text" id="fullName" name="fullName" required placeholder="Your full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
         </div>
-        <iframe
-          id="form-iframe"
-          title="League registration form"
-          src={registrationFormUrl}
-          width="100%"
-          height="100%"
-          style="border: none; display: block; height: 100%;"
-          loading="lazy"
-        />
+        <div>
+          <label for="email" class="mb-1 block font-medium text-white">Email</label>
+          <input type="email" id="email" name="email" required placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+        </div>
+        <div>
+          <label for="phone" class="mb-1 block font-medium text-white">Phone</label>
+          <input type="tel" id="phone" name="phone" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+        </div>
+        <div>
+          <label for="leagueSeason" class="mb-1 block font-medium text-white">League / Season</label>
+          <select id="leagueSeason" name="leagueSeason" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange">
+            <option value="">Select...</option>
+            <option value="6v6 Co-Ed Soccer - Season 1">6v6 Co-Ed Soccer - Season 1</option>
+            <option value="6v6 Co-Ed Soccer - Season 2">6v6 Co-Ed Soccer - Season 2</option>
+          </select>
+        </div>
+        <div>
+          <label for="teamOrFreeAgent" class="mb-1 block font-medium text-white">Team Name or Free Agent</label>
+          <input type="text" id="teamOrFreeAgent" name="teamOrFreeAgent" placeholder="Team name or 'Free Agent'" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+        </div>
+        <div>
+          <label for="emergencyName" class="mb-1 block font-medium text-white">Emergency Contact Name</label>
+          <input type="text" id="emergencyName" name="emergencyName" placeholder="Full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+        </div>
+        <div>
+          <label for="emergencyPhone" class="mb-1 block font-medium text-white">Emergency Contact Phone</label>
+          <input type="tel" id="emergencyPhone" name="emergencyPhone" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+        </div>
+        <div>
+          <label for="notes" class="mb-1 block font-medium text-white">Notes</label>
+          <textarea id="notes" name="notes" placeholder="Any additional information..." rows="3" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
+        </div>
+
+        <div id="recaptcha-wrap" class="flex justify-center"></div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="submit" id="submitBtn" class="rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+            Submit Registration
+          </button>
+          <!-- MOCK SUBMIT: comment out the next button to remove -->
+          <button type="button" id="mockSubmitBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+            Mock submit (10s)
+          </button>
+        </div>
+      </form>
+
+      <div id="statusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
+        <span id="statusSpinner" class="submit-spinner h-10 w-10 rounded-full border-2 border-sage-dark border-t-orange" aria-hidden="true" style="display: none;"></span>
+        <span id="statusText"></span>
+        <div id="successActions" class="mt-2 flex flex-col items-center gap-2" style="display: none;">
+          <a href="/league/waiver" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Continue to Waiver</a>
+          <button type="button" id="resetRegistrationBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Reset form</button>
+        </div>
       </div>
-      -->
-      <p class="mt-6">
-        <a href="/league/registration-api" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Go to registration form</a>
-      </p>
-      <a
-        href="/league/soccer"
-        class="mt-6 inline-block text-sm font-medium text-orange hover:text-orange-light"
-      >
-        Back to Soccer league
-      </a>
+
+      <a href="/league/soccer" class="mt-6 inline-block text-sm font-medium text-orange hover:text-orange-light">Back to Soccer league</a>
     </div>
   </main>
 
   <style>
-    .form-spinner {
+    .submit-spinner {
       border-top-color: var(--theme-orange);
-      animation: form-spin 0.8s linear infinite;
+      animation: submit-spin 0.8s linear infinite;
     }
-    @keyframes form-spin {
+    @keyframes submit-spin {
       to { transform: rotate(360deg); }
-    }
-    .form-loading-overlay[aria-hidden="true"] {
-      display: none;
     }
   </style>
 
-  <!-- Backup: overlay script commented out (iframe above is commented).
-  <script>
+  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadReg&render=explicit" async defer />
+  <script define:vars={{ apiUrl, recaptchaSiteKey }}>
     (function() {
-      var overlay = document.getElementById('registration-loading-overlay');
-      var iframe = document.getElementById('form-iframe');
-      if (!overlay || !iframe) return;
-      var iframeLoaded = false;
-      var minTimeDone = false;
-      function maybeHide() {
-        if (iframeLoaded && minTimeDone && overlay) {
-          overlay.setAttribute('aria-hidden', 'true');
-          overlay.style.display = 'none';
-        }
+      window.onRecaptchaLoadReg = function() {
+        if (typeof grecaptcha === 'undefined' || !recaptchaSiteKey) return;
+        var wrap = document.getElementById('recaptcha-wrap');
+        if (wrap) window.registrationRecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
+      };
+
+      var form = document.getElementById('registration-form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var fullName = document.getElementById('fullName').value.trim();
+          var email = document.getElementById('email').value.trim();
+          var statusSpinner = document.getElementById('statusSpinner');
+          var statusText = document.getElementById('statusText');
+          var successActions = document.getElementById('successActions');
+          var submitBtn = document.getElementById('submitBtn');
+
+          if (!fullName || !email) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Please fill in your name and email.';
+            return;
+          }
+          var token = '';
+          if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && window.registrationRecaptchaId !== undefined) {
+            token = grecaptcha.getResponse(window.registrationRecaptchaId);
+            if (!token) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) statusText.textContent = 'Please complete the verification below.';
+              return;
+            }
+          }
+          if (!apiUrl) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL.';
+            return;
+          }
+
+          submitBtn.disabled = true;
+          if (statusSpinner) statusSpinner.style.display = 'block';
+          if (statusText) { statusText.textContent = 'Submitting…'; statusText.classList.remove('text-red-500', 'text-green-600'); }
+          if (successActions) successActions.style.display = 'none';
+
+          var payload = {
+            action: 'registration',
+            data: {
+              fullName: fullName,
+              email: email,
+              phone: document.getElementById('phone').value.trim(),
+              leagueSeason: document.getElementById('leagueSeason').value,
+              teamOrFreeAgent: document.getElementById('teamOrFreeAgent').value.trim(),
+              emergencyName: document.getElementById('emergencyName').value.trim(),
+              emergencyPhone: document.getElementById('emergencyPhone').value.trim(),
+              notes: document.getElementById('notes').value.trim()
+            },
+            recaptchaToken: token
+          };
+
+          fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            redirect: 'follow'
+          })
+            .then(function(res) { return res.json(); })
+            .then(function(json) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (json.success) {
+                if (statusText) { statusText.textContent = json.message || 'Submitted.'; statusText.classList.add('text-green-600'); }
+                submitBtn.style.display = 'none';
+                var recWrap = document.getElementById('recaptcha-wrap');
+                if (recWrap) recWrap.innerHTML = '';
+                if (successActions) successActions.style.display = 'flex';
+              } else {
+                if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
+                submitBtn.disabled = false;
+              }
+            })
+            .catch(function(err) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+              submitBtn.disabled = false;
+            });
+        });
       }
-      iframe.addEventListener('load', function() {
-        iframeLoaded = true;
-        maybeHide();
-      });
-      window.setTimeout(function() {
-        minTimeDone = true;
-        maybeHide();
-      }, 2000);
+
+      var resetRegistrationBtn = document.getElementById('resetRegistrationBtn');
+      if (resetRegistrationBtn) resetRegistrationBtn.addEventListener('click', function() { location.reload(); });
+
+      /* --- MOCK SUBMIT (comment out this block to disable) --- */
+      (function() {
+        var mockBtn = document.getElementById('mockSubmitBtn');
+        if (!mockBtn) return;
+        var MOCK_DELAY_MS = 10000;
+        mockBtn.addEventListener('click', function() {
+          var submitBtn = document.getElementById('submitBtn');
+          var statusSpinner = document.getElementById('statusSpinner');
+          var statusText = document.getElementById('statusText');
+          var successActions = document.getElementById('successActions');
+          if (!statusText) return;
+          if (submitBtn) submitBtn.disabled = true;
+          mockBtn.disabled = true;
+          if (statusSpinner) statusSpinner.style.display = 'block';
+          statusText.textContent = 'Submitting…';
+          statusText.classList.remove('text-red-500', 'text-green-600');
+          if (successActions) successActions.style.display = 'none';
+          window.setTimeout(function() {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            statusText.textContent = 'Registration submitted successfully.';
+            statusText.classList.add('text-green-600');
+            if (submitBtn) submitBtn.style.display = 'none';
+            var recWrap = document.getElementById('recaptcha-wrap');
+            if (recWrap) recWrap.innerHTML = '';
+            if (successActions) successActions.style.display = 'flex';
+            mockBtn.disabled = false;
+          }, MOCK_DELAY_MS);
+        });
+      })();
+      /* --- end MOCK SUBMIT --- */
     })();
   </script>
-  -->
 
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>

@@ -3,9 +3,8 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueNav from '../../components/LeagueNav.astro';
 import Footer from '../../components/Footer.astro';
 
-// Set this in your deployment env as PUBLIC_WAIVER_FORM_URL, or replace the URL below
-// after deploying the Apps Script Web App (Deploy > New deployment > Web app).
-const waiverFormUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.google.com/macros/s/AKfycbxQ6F0QnbJB6y7gAPbMn3GMfjw1zBWv1niMjJx0T0vd0g_UU-1BalgNcu2LSoCf9TxIHg/exec';
+const apiUrl = import.meta.env.PUBLIC_FORMS_API_URL || '';
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 ---
 
 <Layout
@@ -17,75 +16,301 @@ const waiverFormUrl = import.meta.env.PUBLIC_WAIVER_FORM_URL || 'https://script.
   </Fragment>
 
   <main class="flex-1 px-4 py-8 md:py-12">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-3xl">
       <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">
         Waiver
       </h1>
       <p class="mt-2 text-taupe">
         Mandatory for all players before they can play. Fill out the form below.
       </p>
-      <!-- Backup: iframe commented out. New form at /league/waiver-api. -->
-      <!--
-      <div class="waiver-iframe-wrapper relative mt-6 w-full overflow-hidden rounded-lg border border-taupe/30 bg-forest-dark" style="min-height: 400px; height: calc(100vh - 220px);">
-        <div id="waiver-loading-overlay" class="waiver-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-forest-dark text-white" aria-live="polite">
-          <div class="waiver-spinner h-10 w-10 rounded-full border-2 border-sage-dark" />
-          <p class="mt-4 font-medium text-white">Loading form…</p>
+
+      <div class="waiver-form waiver-print-area mt-6">
+        <p class="waiver-banner rounded-lg bg-red-700 px-4 py-3 text-center font-bold text-white" role="alert">
+          Please read the document carefully.
+        </p>
+
+        <div class="waiver-doc mt-4 rounded-lg border border-taupe/30 bg-forest-dark p-4 text-sm leading-relaxed text-white">
+          <p class="text-xs font-semibold uppercase tracking-wide text-taupe">Solker RD Company Inc</p>
+          <p class="waiver-main-title mt-1 text-base font-bold text-white">RELEASE OF LIABILITY, WAIVER OF CLAIMS AND ASSUMPTION OF RISKS</p>
+          <p class="waiver-warning mt-2 border-b border-taupe/30 pb-3 font-bold text-orange">
+            BY SIGNING THIS DOCUMENT, YOU WAIVE CERTAIN LEGAL RIGHTS, INCLUDING THE RIGHT TO SUE. PLEASE READ CAREFULLY.
+          </p>
+
+          <section class="waiver-section mt-3">
+            <p class="font-bold text-white">1. AWARENESS AND ASSUMPTION OF RISK</p>
+            <p class="mt-1">
+              I am aware that participating in the sports leagues, events, and activities organized by Solker RD Company Inc. (known as &ldquo;Solker&rdquo;) involves inherent risks, including but not limited to: physical injury, collisions, equipment failure, facility hazards, weather conditions, and the transmission of communicable diseases. I acknowledge that these risks may result in personal injury, death, property damage, or loss of income. I freely accept and fully assume all such risks, including those arising from the <strong>NEGLIGENCE</strong>, breach of contract, or breach of any statutory or other duty of care (including any duty of care owed under the Occupiers&apos; Liability Act of Ontario) of Solker, its directors, officers, employees, volunteers, and facility owners (collectively <strong>&ldquo;The Organization&rdquo;</strong>).
+            </p>
+          </section>
+
+          <section class="waiver-section mt-3">
+            <p class="font-bold text-white">2. RELEASE OF LIABILITY AND INDEMNITY</p>
+            <p class="mt-1">In consideration of being permitted to participate, I agree:</p>
+            <ul class="ml-5 mt-1 list-disc space-y-1">
+              <li><strong>TO WAIVE ANY AND ALL CLAIMS</strong> that I have or may have in the future against the Organization.</li>
+              <li><strong>TO RELEASE THE ORGANIZATION</strong> from any and all liability for any loss, damage, or injury&mdash;including death&mdash;that I or my next of kin may suffer due to any cause whatsoever, including <strong>NEGLIGENCE</strong>, breach of contract, or breach of any statutory duty of care.</li>
+              <li><strong>TO INDEMNIFY AND HOLD HARMLESS</strong> the Organization from any and all liability for damage to property of, or personal injury to, any third party resulting from my participation.</li>
+              <li><strong>BINDING EFFECT:</strong> This agreement is binding upon my heirs, next of kin, executors, and representatives.</li>
+            </ul>
+          </section>
+
+          <section class="waiver-section mt-3">
+            <p class="font-bold text-white">3. LEAGUE RULES AND CONSENT</p>
+            <ul class="ml-5 mt-1 list-disc space-y-1">
+              <li><strong>CONDUCT &amp; EQUIPMENT:</strong> I agree to abide by all league rules. I understand that failure to comply with these rules, failing to meet the expectations of the league, or engaging in any physical or mental abuse will result in immediate expulsion without a refund. Furthermore, I am solely responsible for providing and wearing my own protective equipment.</li>
+              <li><strong>MEDICAL &amp; MEDIA:</strong> In the event of an emergency, I consent to medical treatment at my own expense. I also grant the Organization permission to use my image or likeness for promotional purposes without compensation, understanding that I may withdraw this media consent in writing at any time.</li>
+            </ul>
+          </section>
+
+          <section class="waiver-section mt-3">
+            <p class="font-bold text-white">4. ACKNOWLEDGEMENT</p>
+            <p class="mt-1">I warrant that I am physically fit to participate and 18 years of age or older. I have read and understand this agreement. I am aware that by signing below, I am waiving substantial legal rights which I or my heirs may have against the Organization.</p>
+          </section>
         </div>
-        <iframe
-          id="form-iframe"
-          title="Waiver sign form"
-          src={waiverFormUrl}
-          width="100%"
-          height="100%"
-          style="border: none; display: block; min-height: 400px; height: 100%;"
-          loading="lazy"
-        />
+
+        <p class="waiver-no-print mt-4 text-sm text-taupe">All fields marked with <span class="text-red-500 font-medium">*</span> are required (agreement, full name, email, and signature) before submission.</p>
+        <form id="waiver-form" class="mt-4 space-y-4" novalidate>
+          <div class="flex items-start gap-2">
+            <input type="checkbox" id="agreement" name="agreement" required class="mt-1 h-[18px] w-[18px] accent-orange" />
+            <label for="agreement" class="cursor-pointer text-white"><span class="text-red-500">*</span> I have read and understand this agreement, am 18 years of age or older, and agree to the terms above.</label>
+          </div>
+
+          <div>
+            <label for="fullName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Full Name</label>
+            <input type="text" id="fullName" name="fullName" required placeholder="Your full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          </div>
+
+          <div>
+            <label for="email" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Email Address</label>
+            <input type="email" id="email" name="email" required placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+          </div>
+
+          <div>
+            <label class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Draw Signature</label>
+            <div class="signature-wrapper mx-auto max-w-md overflow-hidden rounded-lg border border-taupe/30 bg-[#F0F5F1]">
+              <canvas id="signatureCanvas" class="signature-canvas block w-full touch-none" width="400" height="160"></canvas>
+            </div>
+            <div class="signature-actions mt-2 flex items-center justify-between gap-4">
+              <button type="button" id="clearBtn" class="btn-clear rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-sm font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Clear Signature</button>
+              <button type="button" id="printBtn" class="btn-print rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-sm font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Print Page</button>
+            </div>
+          </div>
+
+          <p class="waiver-dated text-sm text-white/70" id="waiverDate">Dated: <span id="waiverDateValue"></span></p>
+
+          <div class="flex items-start gap-2">
+            <input type="checkbox" id="emailCopy" name="emailCopy" class="mt-1 h-[18px] w-[18px] accent-orange" />
+            <label for="emailCopy" class="cursor-pointer text-white">Send me a copy of the waiver by email</label>
+          </div>
+
+          <div id="recaptcha-wrap" class="flex justify-center"></div>
+
+          <button type="submit" id="submitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+            Submit Waiver
+          </button>
+
+          <!-- MOCK SUBMIT: Functionality for testing start -->
+          <!-- <button type="button" id="mockSubmitBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+            Mock submit (10s)
+          </button> -->
+          <!-- MOCK SUBMIT: Functionality for testing end -->
+        </form>
+
+        <div id="statusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
+          <span id="statusSpinner" class="submit-spinner h-10 w-10 rounded-full border-2 border-sage-dark border-t-orange" aria-hidden="true" style="display: none;"></span>
+          <span id="statusText"></span>
+          <div id="successActions" class="flex flex-wrap items-center justify-center gap-2 mt-2" style="display: none;">
+            <button type="button" id="resetWaiverBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Reset form</button>
+          </div>
+        </div>
       </div>
-      -->
-      <p class="mt-6">
-        <a href="/league/waiver-api" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Go to waiver form</a>
-      </p>
+
+      <a href="/league/soccer" class="mt-6 inline-block text-sm font-medium text-orange hover:text-orange-light">Back to Soccer league</a>
     </div>
   </main>
 
   <style>
-    .waiver-spinner {
+    .signature-wrapper { width: 100%; }
+    .signature-canvas { width: 100%; height: 160px; max-width: 400px; }
+    .submit-spinner {
       border-top-color: var(--theme-orange);
-      animation: waiver-spin 0.8s linear infinite;
+      animation: submit-spin 0.8s linear infinite;
     }
-    @keyframes waiver-spin {
+    @keyframes submit-spin {
       to { transform: rotate(360deg); }
     }
-    .waiver-loading-overlay[aria-hidden="true"] {
-      display: none;
+    @media print {
+      :global(body *) { visibility: hidden; }
+      :global(.waiver-print-area), :global(.waiver-print-area *) { visibility: visible; }
+      :global(.waiver-print-area) { position: absolute; left: 0; top: 0; width: 100%; max-width: none; }
+      :global(.waiver-print-area) .waiver-banner, :global(.waiver-print-area) .btn-clear, :global(.waiver-print-area) .btn-print, :global(.waiver-print-area) #submitBtn, :global(.waiver-print-area) #mockSubmitBtn, :global(.waiver-print-area) #recaptcha-wrap, :global(.waiver-print-area) .signature-actions, :global(.waiver-print-area) [id="clearBtn"], :global(.waiver-print-area) [id="printBtn"], :global(.waiver-print-area) #emailCopy, :global(.waiver-print-area) label[for="emailCopy"], :global(.waiver-print-area) .waiver-no-print, :global(.waiver-print-area) #statusMessage { display: none !important; }
+      :global(.waiver-print-area) .waiver-doc, :global(.waiver-print-area) .signature-wrapper { border: 1px solid #ccc; }
     }
   </style>
 
-  <!-- Backup: overlay script commented out (iframe above is commented).
-  <script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js" />
+  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer />
+  <script define:vars={{ apiUrl, recaptchaSiteKey }}>
     (function() {
-      var overlay = document.getElementById('waiver-loading-overlay');
-      var iframe = document.getElementById('form-iframe');
-      if (!overlay || !iframe) return;
-      var iframeLoaded = false;
-      var minTimeDone = false;
-      function maybeHide() {
-        if (iframeLoaded && minTimeDone && overlay) {
-          overlay.setAttribute('aria-hidden', 'true');
-          overlay.style.display = 'none';
-        }
+      var waiverDateEl = document.getElementById('waiverDateValue');
+      if (waiverDateEl) {
+        var d = new Date();
+        waiverDateEl.textContent = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
       }
-      iframe.addEventListener('load', function() {
-        iframeLoaded = true;
-        maybeHide();
+
+      var signaturePad = null;
+
+      function initSignaturePad() {
+        var canvas = document.getElementById('signatureCanvas');
+        if (!canvas || typeof SignaturePad === 'undefined') return;
+        var w = canvas.offsetWidth || 400;
+        var h = canvas.offsetHeight || 160;
+        canvas.width = w;
+        canvas.height = h;
+        signaturePad = new SignaturePad(canvas, { penColor: 'rgb(13, 13, 13)' });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSignaturePad);
+      } else {
+        initSignaturePad();
+      }
+
+      document.addEventListener('click', function clearBtnHandler(ev) {
+        if (ev.target && ev.target.id === 'clearBtn' && signaturePad) signaturePad.clear();
       });
-      window.setTimeout(function() {
-        minTimeDone = true;
-        maybeHide();
-      }, 2000);
+      document.addEventListener('click', function printBtnHandler(ev) {
+        if (ev.target && ev.target.id === 'printBtn') window.print();
+      });
+
+      var recaptchaWidgetId = null;
+      window.onRecaptchaLoad = function() {
+        if (typeof grecaptcha === 'undefined' || !recaptchaSiteKey) return;
+        var wrap = document.getElementById('recaptcha-wrap');
+        if (wrap) recaptchaWidgetId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
+      };
+
+      var form = document.getElementById('waiver-form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var agreement = document.getElementById('agreement');
+          var fullName = document.getElementById('fullName').value.trim();
+          var email = document.getElementById('email').value.trim();
+          var statusSpinner = document.getElementById('statusSpinner');
+          var statusText = document.getElementById('statusText');
+          var submitBtn = document.getElementById('submitBtn');
+
+          if (!agreement || !agreement.checked) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Please confirm that you have read and agree to the waiver.';
+            return;
+          }
+          if (!fullName || !email) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Please fill in your name and email.';
+            return;
+          }
+          if (!signaturePad || signaturePad.isEmpty()) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Please provide a signature.';
+            return;
+          }
+          var token = '';
+          if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && recaptchaWidgetId !== null) {
+            token = grecaptcha.getResponse(recaptchaWidgetId);
+            if (!token) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) statusText.textContent = 'Please complete the verification below.';
+              return;
+            }
+          }
+
+          if (!apiUrl) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL.';
+            return;
+          }
+
+          submitBtn.disabled = true;
+          if (statusSpinner) statusSpinner.style.display = 'block';
+          if (statusText) { statusText.textContent = 'Verifying and submitting…'; statusText.classList.remove('text-red-500', 'text-green-600'); }
+
+          var dateSigned = document.getElementById('waiverDateValue') ? document.getElementById('waiverDateValue').textContent : new Date().toLocaleDateString();
+          var emailCopyEl = document.getElementById('emailCopy');
+          var payload = {
+            action: 'waiver',
+            data: {
+              name: fullName,
+              email: email,
+              signatureData: signaturePad.toDataURL('image/png'),
+              dateSigned: dateSigned,
+              emailCopy: !!(emailCopyEl && emailCopyEl.checked)
+            },
+            recaptchaToken: token
+          };
+
+          fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            redirect: 'follow'
+          })
+            .then(function(res) { return res.json(); })
+            .then(function(json) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (json.success) {
+                if (statusText) { statusText.textContent = json.message || 'Success!'; statusText.classList.add('text-green-600'); }
+                submitBtn.style.display = 'none';
+                var recWrap = document.getElementById('recaptcha-wrap');
+                if (recWrap) recWrap.innerHTML = '';
+                var successActions = document.getElementById('successActions');
+                if (successActions) successActions.style.display = 'flex';
+              } else {
+                if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
+                submitBtn.disabled = false;
+              }
+            })
+            .catch(function(err) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+              submitBtn.disabled = false;
+            });
+        });
+      }
+
+      /* --- MOCK SUBMIT (comment out this block to disable) --- */
+      (function() {
+        var mockBtn = document.getElementById('mockSubmitBtn');
+        if (!mockBtn) return;
+        var MOCK_DELAY_MS = 10000;
+        mockBtn.addEventListener('click', function() {
+          var submitBtn = document.getElementById('submitBtn');
+          var statusSpinner = document.getElementById('statusSpinner');
+          var statusText = document.getElementById('statusText');
+          if (!statusText) return;
+          if (submitBtn) submitBtn.disabled = true;
+          mockBtn.disabled = true;
+          if (statusSpinner) statusSpinner.style.display = 'block';
+          statusText.textContent = 'Verifying and submitting…';
+          statusText.classList.remove('text-red-500', 'text-green-600');
+          window.setTimeout(function() {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            statusText.textContent = 'Success! Your waiver has been submitted.';
+            statusText.classList.add('text-green-600');
+            if (submitBtn) submitBtn.style.display = 'none';
+            var successActions = document.getElementById('successActions');
+            if (successActions) successActions.style.display = 'flex';
+            mockBtn.disabled = false;
+          }, MOCK_DELAY_MS);
+        });
+      })();
+      /* --- end MOCK SUBMIT --- */
+
+      var resetWaiverBtn = document.getElementById('resetWaiverBtn');
+      if (resetWaiverBtn) resetWaiverBtn.addEventListener('click', function() { location.reload(); });
     })();
   </script>
-  -->
 
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>
