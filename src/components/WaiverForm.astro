@@ -187,6 +187,12 @@ const isFlow = context === 'flow';
           if (statusText) statusText.textContent = 'Please fill in your name and email.';
           return;
         }
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (statusText) statusText.textContent = 'Please enter a valid email address.';
+          return;
+        }
         if (!signaturePad || signaturePad.isEmpty()) {
           if (statusSpinner) statusSpinner.style.display = 'none';
           if (statusText) statusText.textContent = 'Please provide a signature.';

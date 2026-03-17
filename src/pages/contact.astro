@@ -97,6 +97,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             if (statusText) statusText.textContent = 'Please fill in your email, subject, and message.';
             return;
           }
+          var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Please enter a valid email address.';
+            return;
+          }
           var token = '';
           if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && window.contactRecaptchaId !== undefined) {
             token = grecaptcha.getResponse(window.contactRecaptchaId);

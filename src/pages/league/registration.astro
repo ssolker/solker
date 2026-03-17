@@ -99,7 +99,10 @@ const eTransferEmail = 'e-transfer@solker.ca';
           <!-- <button type="button" id="mockProceedToWaiverBtn" class="mt-2 w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
             Mock Proceed to Waiver
           </button> -->
-        <p id="paymentStatusText" class="min-h-[1.5em] text-center text-sm font-medium text-red-500" aria-live="polite"></p>
+        <div id="paymentStatusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
+          <span id="paymentStatusSpinner" class="submit-spinner h-10 w-10 rounded-full border-2 border-sage-dark border-t-orange" aria-hidden="true" style="display: none;"></span>
+          <p id="paymentStatusText" class="min-h-[1.5em] text-center text-sm font-medium text-red-500"></p>
+        </div>
       </div>
 
       <!-- Step 3: Waiver form -->
@@ -115,6 +118,13 @@ const eTransferEmail = 'e-transfer@solker.ca';
     .step-dot.bg-orange { background-color: var(--theme-orange, #ea580c); }
     .step-dot.bg-transparent { background-color: transparent; }
     .step-panel.hidden { display: none !important; }
+    .submit-spinner {
+      border-top-color: var(--theme-orange, #ea580c);
+      animation: submit-spin 0.8s linear infinite;
+    }
+    @keyframes submit-spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 
   <script define:vars={{ apiUrl, eTransferEmail, recaptchaSiteKey }}>
@@ -160,6 +170,8 @@ const eTransferEmail = 'e-transfer@solker.ca';
           if (paymentPrefill.leagueSeason && paymentPrefill.leagueSeason.indexOf('Both') !== -1) amt = 100;
           if (amountEl) amountEl.textContent = '$' + amt + '.00';
           initStep2Recaptcha();
+          var step2Panel = document.getElementById('step2Panel');
+          if (step2Panel) step2Panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         if (step === 3) {
           var waiverFullNameEl = document.getElementById('waiverFullName');
@@ -228,43 +240,60 @@ const eTransferEmail = 'e-transfer@solker.ca';
 
         document.getElementById('proceedToWaiverBtn').addEventListener('click', function() {
           var btn = this;
+          var statusSpinner = document.getElementById('paymentStatusSpinner');
           var statusText = document.getElementById('paymentStatusText');
           var nameVal = (document.getElementById('paymentName') && document.getElementById('paymentName').value) ? document.getElementById('paymentName').value.trim() : '';
           var emailVal = (document.getElementById('paymentUserEmail') && document.getElementById('paymentUserEmail').value) ? document.getElementById('paymentUserEmail').value.trim() : '';
           if (!nameVal) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
             if (statusText) { statusText.textContent = 'Please enter your registration name.'; statusText.classList.add('text-red-500'); }
             return;
           }
           if (!emailVal) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
             if (statusText) { statusText.textContent = 'Please enter your email address.'; statusText.classList.add('text-red-500'); }
+            return;
+          }
+          var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(emailVal)) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) { statusText.textContent = 'Please enter a valid email address.'; statusText.classList.add('text-red-500'); }
             return;
           }
           var token = '';
           if (typeof grecaptcha !== 'undefined' && step2RecaptchaId !== null) token = grecaptcha.getResponse(step2RecaptchaId);
           if (!token) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
             if (statusText) statusText.textContent = 'Please complete the verification above.';
             return;
           }
           if (!apiUrl) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
             if (statusText) statusText.textContent = 'Form is not configured.';
             return;
           }
           var regId = window.__registrationFlowId;
           if (!regId) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
             if (statusText) statusText.textContent = 'Session lost. Please refresh and start again.';
             return;
           }
+          var paymentMethodEl = document.querySelector('input[name="paymentMethod"]:checked');
+          var paymentMethod = paymentMethodEl ? paymentMethodEl.value : 'etransfer';
+
           btn.disabled = true;
+          if (statusSpinner) statusSpinner.style.display = 'block';
           if (statusText) { statusText.textContent = ''; statusText.classList.remove('text-red-500', 'text-green-600'); }
 
           fetch(apiUrl, {
             method: 'POST',
-            body: JSON.stringify({ action: 'paymentAcknowledged', data: { registrationId: regId }, recaptchaToken: token }),
+            body: JSON.stringify({ action: 'paymentAcknowledged', data: { registrationId: regId, paymentMethod: paymentMethod }, recaptchaToken: token }),
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             redirect: 'follow'
           })
             .then(function(res) { return res.json(); })
             .then(function(json) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
               if (json.success) {
                 if (statusText) { statusText.textContent = ''; statusText.classList.add('text-green-600'); }
                 setStep(3);
@@ -274,6 +303,7 @@ const eTransferEmail = 'e-transfer@solker.ca';
               }
             })
             .catch(function(err) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
               if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
               btn.disabled = false;
             });

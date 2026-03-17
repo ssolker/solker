@@ -141,6 +141,17 @@ const isFlow = context === 'flow';
     });
     updateRegistrationChoiceVisibility();
 
+    function restrictPhoneInput(el) {
+      if (!el) return;
+      el.addEventListener('input', function() {
+        var v = this.value;
+        var allowed = v.replace(/[^\d\s\-()+]/g, '');
+        if (v !== allowed) this.value = allowed;
+      });
+    }
+    restrictPhoneInput(document.getElementById('phone'));
+    restrictPhoneInput(document.getElementById('emergencyPhone'));
+
     var form = document.getElementById('registration-form');
     if (form) {
       form.addEventListener('submit', function(e) {
@@ -157,6 +168,12 @@ const isFlow = context === 'flow';
         if (!fullName || !email) {
           if (statusSpinner) statusSpinner.style.display = 'none';
           if (statusText) statusText.textContent = 'Please fill in your name and email.';
+          return;
+        }
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (statusText) statusText.textContent = 'Please enter a valid email address.';
           return;
         }
         if (!phone) {
