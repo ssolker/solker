@@ -39,6 +39,8 @@ export const leagues: League[] = [
     imageSrc: soccerIllustrationSummer,
     imageAlt: 'Two soccer players in action',
     imageCredit: soccerSummerImageCredit,
+    primaryButtonText: 'Register',
+    primaryButtonHref: '/league/registration',
     secondaryButtonText: 'Learn More',
     secondaryButtonHref: '/league/soccer#rules',
   },
