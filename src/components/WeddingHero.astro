@@ -3,11 +3,13 @@ interface Props {
   headline: string;
   subhead: string;
   imageSrc?: { src: string } | string;
+  /** Pixels to move the text block up from center (e.g. 400 = 400px higher). */
+  textBlockOffsetY?: number;
 }
-const { headline, subhead, imageSrc } = Astro.props;
+const { headline, subhead, imageSrc, textBlockOffsetY } = Astro.props;
 const imgSrc = imageSrc ? (typeof imageSrc === 'string' ? imageSrc : imageSrc.src) : null;
 
-// 9 options for background (colors for now; replace with image URLs later)
+// Fallback colors when no image or not enough valid images
 const BACKGROUND_OPTIONS = [
   '#203A31', // forest
   '#3E5F4B', // sage
@@ -19,16 +21,79 @@ const BACKGROUND_OPTIONS = [
   '#2E4738', // sage-dark
   '#BC6439', // orange
 ];
+
+// Load all wedding images from assets (build-time). Path relative to this file.
+const globs = [
+  import.meta.glob<{ default: string }>('../assets/wedding/*.jpg', { eager: true }),
+  import.meta.glob<{ default: string }>('../assets/wedding/*.jpeg', { eager: true }),
+  import.meta.glob<{ default: string }>('../assets/wedding/*.png', { eager: true }),
+  import.meta.glob<{ default: string }>('../assets/wedding/*.webp', { eager: true }),
+];
+
+function getUrl(m: unknown): string {
+  if (typeof m === 'string') return m;
+  const d = (m as { default?: string | { src?: string } }).default;
+  return typeof d === 'string' ? d : (d?.src ?? '');
+}
+
+type Entry = { path: string; url: string };
+const allEntries: Entry[] = globs.flatMap((g) =>
+  Object.entries(g).map(([path, mod]) => ({ path, url: getUrl(mod) })).filter((e) => e.url)
+);
+
+function filename(path: string): string {
+  return path.split('/').pop()?.toLowerCase() ?? '';
+}
+
+const middleEntries = allEntries.filter((e) => filename(e.path).includes('middle'));
+const sideLeftEntries = allEntries.filter(
+  (e) => filename(e.path).includes('side-left') || filename(e.path).includes('side_left')
+);
+const sideRightEntries = allEntries.filter(
+  (e) => filename(e.path).includes('side-right') || filename(e.path).includes('side_right')
+);
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const leftUrl = sideLeftEntries.length > 0 ? shuffle(sideLeftEntries)[0].url : '';
+const middleUrl = middleEntries.length > 0 ? shuffle(middleEntries)[0].url : '';
+const rightUrl = sideRightEntries.length > 0 ? shuffle(sideRightEntries)[0].url : '';
+
+const useColorFallbackLeft = !leftUrl;
+const useColorFallbackMiddle = !middleUrl;
+const useColorFallbackRight = !rightUrl;
 ---
 
 <section class="relative min-h-[80vh] flex flex-col items-center justify-center overflow-hidden px-4 py-24 text-center md:py-32" aria-label="Hero">
-  <div class="wedding-hero-panels absolute inset-0 grid grid-cols-3" aria-hidden="true">
-    <div class="wedding-hero-panel" data-panel="0"></div>
-    <div class="wedding-hero-panel" data-panel="1"></div>
-    <div class="wedding-hero-panel" data-panel="2"></div>
+  <div class="wedding-hero-panels absolute inset-0 grid grid-cols-1 xl:grid-cols-3" aria-hidden="true">
+    <div
+      class="wedding-hero-panel wedding-hero-left hidden xl:block"
+      data-panel="0"
+      style={leftUrl ? `background-image: url(${leftUrl}); background-size: cover; background-position: center;` : undefined}
+    />
+    <div
+      class="wedding-hero-panel wedding-hero-middle"
+      data-panel="1"
+      style={middleUrl ? `background-image: url(${middleUrl}); background-size: cover; background-position: center;` : undefined}
+    />
+    <div
+      class="wedding-hero-panel wedding-hero-right hidden xl:block"
+      data-panel="2"
+      style={rightUrl ? `background-image: url(${rightUrl}); background-size: cover; background-position: center;` : undefined}
+    />
   </div>
   <div class="absolute inset-0 bg-gradient-hero-overlay" aria-hidden="true" />
-  <div class="relative z-10 mx-auto max-w-4xl">
+  <div
+    class="relative z-10 mx-auto max-w-4xl"
+    style={textBlockOffsetY != null ? `transform: translateY(-${textBlockOffsetY}px)` : undefined}
+  >
     <h1 class="font-heading text-4xl font-bold leading-tight text-white drop-shadow-md md:text-5xl lg:text-6xl">
       {headline}
     </h1>
@@ -38,7 +103,7 @@ const BACKGROUND_OPTIONS = [
   </div>
 </section>
 
-<script define:vars={{ backgroundOptions: BACKGROUND_OPTIONS }}>
+<script define:vars={{ backgroundOptions: BACKGROUND_OPTIONS, useColorFallbackLeft: useColorFallbackLeft, useColorFallbackMiddle: useColorFallbackMiddle, useColorFallbackRight: useColorFallbackRight }}>
   function shuffle(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -47,11 +112,13 @@ const BACKGROUND_OPTIONS = [
     }
     return a;
   }
-  const options = shuffle(backgroundOptions);
-  const chosen = options.slice(0, 3);
-  document.querySelectorAll('.wedding-hero-panel').forEach((el, i) => {
-    el.style.background = chosen[i];
-  });
+  const colors = shuffle(backgroundOptions);
+  const left = document.querySelector('.wedding-hero-left');
+  const middle = document.querySelector('.wedding-hero-middle');
+  const right = document.querySelector('.wedding-hero-right');
+  if (useColorFallbackLeft && left instanceof HTMLElement) left.style.background = colors[0];
+  if (useColorFallbackMiddle && middle instanceof HTMLElement) middle.style.background = colors[1];
+  if (useColorFallbackRight && right instanceof HTMLElement) right.style.background = colors[2];
 </script>
 
 <style>
@@ -61,5 +128,7 @@ const BACKGROUND_OPTIONS = [
   .wedding-hero-panel {
     min-height: 100%;
     background: var(--color-forest);
+    background-size: cover;
+    background-position: center;
   }
 </style>
