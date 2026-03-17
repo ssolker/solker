@@ -2,9 +2,12 @@
 import Layout from '../../layouts/Layout.astro';
 import LeagueNav from '../../components/LeagueNav.astro';
 import Footer from '../../components/Footer.astro';
+import RegistrationForm from '../../components/RegistrationForm.astro';
+import WaiverForm from '../../components/WaiverForm.astro';
 
 const apiUrl = import.meta.env.PUBLIC_FORMS_API_URL || '';
 const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
+const eTransferEmail = 'e-transfer@solker.ca';
 ---
 
 <Layout
@@ -24,307 +27,266 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
         Register a new team, join a team, or register as a free agent for the league.
       </p>
 
-      <form id="registration-form" class="mt-6 space-y-4" novalidate>
-        <p class="text-sm text-taupe">Fields marked with <span class="text-red-500 font-medium">*</span> are required (except notes and emergency contact).</p>
-        <div>
-          <label for="fullName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Full Name</label>
-          <input type="text" id="fullName" name="fullName" required maxlength="150" placeholder="Your full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
-        </div>
-        <div>
-          <label for="email" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Email</label>
-          <input type="email" id="email" name="email" required maxlength="254" placeholder="you@example.com" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
-        </div>
-        <div>
-          <label for="phone" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Phone</label>
-          <input type="tel" id="phone" name="phone" required maxlength="25" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
-        </div>
-        <div>
-          <label for="leagueSeason" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> League / Season</label>
-          <select id="leagueSeason" name="leagueSeason" required class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange">
-            <option value="">Select...</option>
-            <option value="Soccer - Season 1">Soccer - Season 1 (May - Jun)</option>
-            <option value="Soccer - Season 2">Soccer - Season 2 (Jul - Aug)</option>
-            <option value="Soccer - Both Seasons">Soccer - Both Seasons (May - Aug)</option>
-          </select>
-        </div>
-        <div>
-          <span class="mb-2 block font-medium text-white"><span class="text-red-500">*</span> Registration Choices</span>
-          <div class="flex flex-col gap-3">
-            <label class="flex cursor-pointer items-start gap-2">
-              <input type="radio" id="regTypeFreeAgent" name="regType" value="freeAgent" class="mt-1 h-4 w-4 accent-orange" checked />
-              <span class="text-white">I am a Free Agent</span>
-            </label>
-            <label class="flex cursor-pointer items-start gap-2">
-              <input type="radio" id="regTypeExistingTeam" name="regType" value="existingTeam" class="mt-1 h-4 w-4 accent-orange" />
-              <span class="text-white">I am joining an existing team</span>
-            </label>
-            <div id="existingTeamWrap" class="ml-6 mt-1" style="display: none;">
-              <label for="existingTeamName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Team name / Captain</label>
-              <input type="text" id="existingTeamName" name="existingTeamName" maxlength="100" placeholder="Team name or captain name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
-            </div>
-            <label class="flex cursor-pointer items-start gap-2">
-              <input type="radio" id="regTypeNewTeam" name="regType" value="newTeam" class="mt-1 h-4 w-4 accent-orange" />
-              <span class="text-white">I am starting a NEW team (Captain)</span>
-            </label>
-            <div id="newTeamWrap" class="ml-6 mt-1 space-y-3" style="display: none;">
-              <div>
-                <label for="newTeamName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Team name</label>
-                <input type="text" id="newTeamName" name="newTeamName" maxlength="100" placeholder="Your new team name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
-              </div>
-              <div class="rounded-lg border border-amber-600/80 bg-amber-900/40 px-4 py-3 text-amber-100" role="alert">
-                <p class="font-semibold">WAITLIST NOTICE</p>
-                <p class="mt-1 text-sm">New team registrations are placed on a waitlist. After review new teams will be added. You will be contacted to discuss your submission and be provided more details.</p>
-              </div>
-              <label class="flex cursor-pointer items-start gap-2">
-                <input type="checkbox" id="newTeamCaptainAgreement" name="newTeamCaptainAgreement" class="mt-0.5 h-4 w-4 accent-orange" />
-                <span class="text-white"><span class="text-red-500">*</span> I am registering a new team as a team captain</span>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div>
-          <label for="emergencyName" class="mb-1 block font-medium text-white">Emergency Contact Name</label>
-          <input type="text" id="emergencyName" name="emergencyName" maxlength="100" placeholder="Full name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
-        </div>
-        <div>
-          <label for="emergencyPhone" class="mb-1 block font-medium text-white">Emergency Contact Phone</label>
-          <input type="tel" id="emergencyPhone" name="emergencyPhone" maxlength="25" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
-        </div>
-        <div>
-          <label for="notes" class="mb-1 block font-medium text-white">Notes</label>
-          <textarea id="notes" name="notes" maxlength="1000" placeholder="Any additional information... (max 1000 characters)" rows="3" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
-        </div>
+      <!-- Step indicator: 3 dots -->
+      <div class="mt-6 flex items-center justify-center gap-2" aria-label="Registration steps">
+        <span id="stepDot1" class="step-dot h-3 w-3 rounded-full border-2 border-orange bg-orange" aria-current="step" title="Step 1: Registration"></span>
+        <span id="stepDot2" class="step-dot h-3 w-3 rounded-full border-2 border-taupe/50 bg-transparent" title="Step 2: Payment"></span>
+        <span id="stepDot3" class="step-dot h-3 w-3 rounded-full border-2 border-taupe/50 bg-transparent" title="Step 3: Waiver"></span>
+      </div>
+      <p class="mt-1 text-center text-sm text-taupe">
+        <span id="stepLabel">Step 1: Registration</span>
+      </p>
 
-        <div id="recaptcha-wrap" class="flex justify-center"></div>
-
-        <button type="submit" id="submitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
-          Submit Registration
-        </button>
-
-        <!-- MOCK SUBMIT: Functionality for testing start -->
-        <!-- <button type="button" id="mockSubmitBtn" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
-          Mock submit (10s)
-        </button> -->
-        <!-- MOCK SUBMIT: Functionality for testing end -->
-      </form>
-
-      <div id="statusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
-        <span id="statusSpinner" class="submit-spinner h-10 w-10 rounded-full border-2 border-sage-dark border-t-orange" aria-hidden="true" style="display: none;"></span>
-        <span id="statusText"></span>
-        <div id="successActions" class="mt-2 flex flex-col gap-3" style="display: none;">
-          <p class="rounded-lg bg-amber-900/80 px-4 py-3 text-center font-semibold text-amber-100" role="alert">
-            Waiver must be signed before playing.
-          </p>
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <button type="button" id="resetRegistrationBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Reset form</button>
-            <a href="/league/waiver" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Continue to Waiver</a>
-          </div>
-        </div>
+      <!-- Step 1: Registration form -->
+      <div id="step1Panel" class="step-panel mt-6" data-step="1">
+        <RegistrationForm apiUrl={apiUrl} recaptchaSiteKey={recaptchaSiteKey} context="flow" />
       </div>
 
-      <a href="/league/soccer" class="mt-6 inline-block text-sm font-medium text-orange hover:text-orange-light">Back to Soccer league</a>
+      <!-- Step 2: Payment -->
+      <div id="step2Panel" class="step-panel mt-6 hidden space-y-4" data-step="2">
+        <p class="text-taupe font-semibold">To complete your registration, please send your payment. Your registration is not complete until payment is received and waiver is signed.</p>
+
+        <div class="payment-step rounded-lg border border-taupe/30 bg-forest-dark p-4">
+          <h2 class="text-base font-bold text-white mb-3">e-Transfer Instructions</h2>
+          <p class="text-sm font-semibold text-taupe mb-2">Send e-Transfer to this email address:</p>
+          <div class="flex items-center gap-2">
+            <input type="text" id="paymentEmail" readonly value={eTransferEmail} class="flex-1 border-0 bg-transparent px-0 py-2 text-white font-semibold focus:ring-0 focus:outline-none" />
+            <button type="button" id="copyEmailBtn" class="copy-btn rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white font-semibold hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange" title="Copy email">Copy</button>
+          </div>
+          <p class="text-sm font-semibold text-taupe mt-3 mb-1">Amount</p>
+          <p id="paymentAmount" class="text-lg font-bold text-white">$50.00</p>
+          <p class="text-sm font-semibold text-taupe mt-3 mb-1">Message to include in e-Transfer</p>
+          <div class="flex items-center gap-2">
+            <input type="text" id="paymentMessage" class="flex-1 rounded-lg border border-taupe/30 bg-forest-dark/80 px-4 py-2 text-white font-semibold" placeholder="Registration for [Full Name] - [Phone Number]" />
+            <button type="button" id="copyMessageBtn" class="copy-btn rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white font-semibold hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange" title="Copy message">Copy</button>
+          </div>
+        </div>
+
+        <div class="border-b border-taupe/30 pb-4">
+            <h2 class="text-base font-bold text-white mb-3">Participant Details</h2>
+            <p class="text-sm font-semibold text-taupe mb-1"><span class="text-red-500 font-medium">*</span> Registration name</p>
+            <div class="flex items-center gap-2 mb-3">
+              <input type="text" id="paymentName" required class="flex-1 rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white font-semibold" placeholder="Your name" />
+              <!-- <button type="button" id="copyNameBtn" class="copy-btn rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white font-semibold hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange" title="Copy name">Copy</button> -->
+            </div>
+            <p class="text-sm font-semibold text-taupe mb-1"><span class="text-red-500 font-medium">*</span> Your email address</p>
+            <div class="flex items-center gap-2">
+              <input type="email" id="paymentUserEmail" required class="flex-1 rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white font-semibold" placeholder="you@example.com" />
+              <!-- <button type="button" id="copyUserEmailBtn" class="copy-btn rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white font-semibold hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange" title="Copy your email">Copy</button> -->
+            </div>
+          </div>
+
+          <div class="border-b border-taupe/30 pb-4">
+            <h2 class="text-base font-bold text-white mb-3"><span class="text-red-500 font-medium">*</span> Payment method</h2>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="paymentMethod" id="paymentMethodEtransfer" value="etransfer" class="h-4 w-4 accent-orange" checked />
+                <span class="text-white font-semibold">E-Transfer</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="paymentMethod" id="paymentMethodCash" value="cash" class="h-4 w-4 accent-orange" />
+                <span class="text-white font-semibold">Cash (only if e-Transfer cannot be done)</span>
+              </label>
+            </div>
+            <p class="mt-2 text-sm text-taupe font-semibold">If e-Transfer cannot be made, cash is an option but must be paid before you play.</p>
+          </div>
+
+          <div id="step2RecaptchaWrap" class="flex justify-center py-2"></div>
+
+          <button type="button" id="proceedToWaiverBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+            Submit and Proceed to Waiver
+          </button>
+          <!-- <button type="button" id="mockProceedToWaiverBtn" class="mt-2 w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+            Mock Proceed to Waiver
+          </button> -->
+        <p id="paymentStatusText" class="min-h-[1.5em] text-center text-sm font-medium text-red-500" aria-live="polite"></p>
+      </div>
+
+      <!-- Step 3: Waiver form -->
+      <div id="step3Panel" class="step-panel mt-6 hidden" data-step="3">
+        <WaiverForm apiUrl={apiUrl} recaptchaSiteKey={recaptchaSiteKey} context="flow" />
+      </div>
+
+      <a id="backToSoccerLink" href="/league/soccer" class="mt-6 inline-block text-sm font-medium text-orange hover:text-orange-light">Back to Soccer league</a>
     </div>
   </main>
 
   <style>
-    .submit-spinner {
-      border-top-color: var(--theme-orange);
-      animation: submit-spin 0.8s linear infinite;
-    }
-    @keyframes submit-spin {
-      to { transform: rotate(360deg); }
-    }
+    .step-dot.bg-orange { background-color: var(--theme-orange, #ea580c); }
+    .step-dot.bg-transparent { background-color: transparent; }
+    .step-panel.hidden { display: none !important; }
   </style>
 
-  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadReg&render=explicit" async defer />
-  <script define:vars={{ apiUrl, recaptchaSiteKey }}>
+  <script define:vars={{ apiUrl, eTransferEmail, recaptchaSiteKey }}>
     (function() {
-      window.onRecaptchaLoadReg = function() {
-        if (typeof grecaptcha === 'undefined' || !recaptchaSiteKey) return;
-        var wrap = document.getElementById('recaptcha-wrap');
-        if (wrap) window.registrationRecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
+      var currentStep = 1;
+      var paymentPrefill = { fullName: '', phone: '', leagueSeason: '', email: '' };
+      var step2RecaptchaId = null;
+
+      function generateUuid() {
+        return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      }
+
+      function setStep(step) {
+        currentStep = step;
+        document.getElementById('step1Panel').classList.toggle('hidden', step !== 1);
+        document.getElementById('step2Panel').classList.toggle('hidden', step !== 2);
+        document.getElementById('step3Panel').classList.toggle('hidden', step !== 3);
+
+        var dot1 = document.getElementById('stepDot1');
+        var dot2 = document.getElementById('stepDot2');
+        var dot3 = document.getElementById('stepDot3');
+        var label = document.getElementById('stepLabel');
+        if (dot1) { dot1.classList.toggle('bg-orange', step === 1); dot1.classList.toggle('bg-transparent', step !== 1); dot1.classList.toggle('border-taupe/50', step !== 1); dot1.setAttribute('aria-current', step === 1 ? 'step' : 'false'); }
+        if (dot2) { dot2.classList.toggle('bg-orange', step === 2); dot2.classList.toggle('bg-transparent', step !== 2); dot2.classList.toggle('border-taupe/50', step !== 2); dot2.setAttribute('aria-current', step === 2 ? 'step' : 'false'); }
+        if (dot3) { dot3.classList.toggle('bg-orange', step === 3); dot3.classList.toggle('bg-transparent', step !== 3); dot3.classList.toggle('border-taupe/50', step !== 3); dot3.setAttribute('aria-current', step === 3 ? 'step' : 'false'); }
+        if (label) label.textContent = step === 1 ? 'Step 1: Registration' : (step === 2 ? 'Step 2: Payment' : 'Step 3: Waiver');
+
+        var backToSoccerLink = document.getElementById('backToSoccerLink');
+        if (backToSoccerLink) backToSoccerLink.style.display = step === 2 ? 'none' : '';
+
+        if (step === 2) {
+          var nameEl = document.getElementById('paymentName');
+          var userEmailEl = document.getElementById('paymentUserEmail');
+          var amountEl = document.getElementById('paymentAmount');
+          var messageEl = document.getElementById('paymentMessage');
+          if (nameEl) nameEl.value = paymentPrefill.fullName || '';
+          if (userEmailEl) userEmailEl.value = paymentPrefill.email || '';
+          if (messageEl) messageEl.value = 'Registration for ' + (paymentPrefill.fullName || '') + ' - ' + (paymentPrefill.phone || '');
+          var amt = 50;
+          if (paymentPrefill.leagueSeason && paymentPrefill.leagueSeason.indexOf('Both') !== -1) amt = 100;
+          if (amountEl) amountEl.textContent = '$' + amt + '.00';
+          initStep2Recaptcha();
+        }
+        if (step === 3) {
+          var waiverFullNameEl = document.getElementById('waiverFullName');
+          var waiverEmailEl = document.getElementById('waiverEmail');
+          if (waiverFullNameEl) waiverFullNameEl.value = paymentPrefill.fullName || '';
+          if (waiverEmailEl) waiverEmailEl.value = paymentPrefill.email || '';
+        }
+      }
+
+      function initStep2Recaptcha() {
+        var wrap = document.getElementById('step2RecaptchaWrap');
+        if (!wrap || !recaptchaSiteKey) return;
+        if (wrap.innerHTML.trim()) return;
+        if (typeof grecaptcha === 'undefined') return;
+        step2RecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
+      }
+
+      window.__onRegistrationSuccess = function() {
+        var form = document.getElementById('registration-form');
+        if (form) {
+          var fn = form.querySelector('#fullName');
+          var ph = form.querySelector('#phone');
+          var ls = form.querySelector('#leagueSeason');
+          var em = form.querySelector('#email');
+          paymentPrefill.fullName = fn ? fn.value.trim() : '';
+          paymentPrefill.phone = ph ? ph.value.trim() : '';
+          paymentPrefill.leagueSeason = ls ? ls.value : '';
+          paymentPrefill.email = em ? em.value.trim() : '';
+        }
+        setStep(2);
       };
 
-      function updateRegistrationChoiceVisibility() {
-        var existingWrap = document.getElementById('existingTeamWrap');
-        var newWrap = document.getElementById('newTeamWrap');
-        var existingTeam = document.getElementById('regTypeExistingTeam');
-        var newTeam = document.getElementById('regTypeNewTeam');
-        var existingNameEl = document.getElementById('existingTeamName');
-        var newNameEl = document.getElementById('newTeamName');
-        var agreementEl = document.getElementById('newTeamCaptainAgreement');
-        var isExisting = existingTeam && existingTeam.checked;
-        var isNew = newTeam && newTeam.checked;
-        if (existingWrap) existingWrap.style.display = isExisting ? 'block' : 'none';
-        if (newWrap) newWrap.style.display = isNew ? 'block' : 'none';
-        if (existingNameEl) existingNameEl.required = isExisting;
-        if (newNameEl) newNameEl.required = isNew;
-        if (agreementEl) agreementEl.required = isNew;
-        if (!isNew && agreementEl) agreementEl.checked = false;
-        if (!isExisting && existingNameEl) existingNameEl.value = '';
-        if (!isNew && newNameEl) newNameEl.value = '';
-      }
-      document.querySelectorAll('input[name="regType"]').forEach(function(radio) {
-        radio.addEventListener('change', updateRegistrationChoiceVisibility);
-      });
-      updateRegistrationChoiceVisibility();
+      window.__onWaiverSuccessInFlow = function() {
+        paymentPrefill = { fullName: '', phone: '', leagueSeason: '', email: '' };
+        window.__registrationFlowId = generateUuid();
+        setStep(1);
+        location.reload();
+      };
 
-      var form = document.getElementById('registration-form');
-      if (form) {
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-          var fullName = document.getElementById('fullName').value.trim();
-          var email = document.getElementById('email').value.trim();
-          var statusSpinner = document.getElementById('statusSpinner');
-          var statusText = document.getElementById('statusText');
-          var successActions = document.getElementById('successActions');
-          var submitBtn = document.getElementById('submitBtn');
+      document.addEventListener('DOMContentLoaded', function() {
+        window.__registrationFlowId = generateUuid();
 
-          var phone = document.getElementById('phone').value.trim();
-          var leagueSeason = document.getElementById('leagueSeason').value;
-          if (!fullName || !email) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Please fill in your name and email.';
+        function copyToClipboard(text, btn) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() {
+              if (btn) { var t = btn.textContent; btn.textContent = 'Copied!'; setTimeout(function() { btn.textContent = t; }, 1500); }
+            });
+          }
+        }
+
+        var copyEmailBtn = document.getElementById('copyEmailBtn');
+        if (copyEmailBtn) copyEmailBtn.addEventListener('click', function() { copyToClipboard(eTransferEmail, this); });
+        var copyNameBtn = document.getElementById('copyNameBtn');
+        if (copyNameBtn) copyNameBtn.addEventListener('click', function() { copyToClipboard(document.getElementById('paymentName').value, this); });
+        var copyUserEmailBtn = document.getElementById('copyUserEmailBtn');
+        if (copyUserEmailBtn) copyUserEmailBtn.addEventListener('click', function() { copyToClipboard(document.getElementById('paymentUserEmail').value, this); });
+        var copyMessageBtn = document.getElementById('copyMessageBtn');
+        if (copyMessageBtn) copyMessageBtn.addEventListener('click', function() { copyToClipboard(document.getElementById('paymentMessage').value, this); });
+
+        document.getElementById('paymentName').addEventListener('input', function() {
+          var msg = document.getElementById('paymentMessage');
+          var ph = paymentPrefill.phone || '';
+          if (msg) msg.value = 'Registration for ' + this.value + ' - ' + ph;
+        });
+        document.getElementById('paymentMessage').addEventListener('input', function() {});
+
+        document.getElementById('proceedToWaiverBtn').addEventListener('click', function() {
+          var btn = this;
+          var statusText = document.getElementById('paymentStatusText');
+          var nameVal = (document.getElementById('paymentName') && document.getElementById('paymentName').value) ? document.getElementById('paymentName').value.trim() : '';
+          var emailVal = (document.getElementById('paymentUserEmail') && document.getElementById('paymentUserEmail').value) ? document.getElementById('paymentUserEmail').value.trim() : '';
+          if (!nameVal) {
+            if (statusText) { statusText.textContent = 'Please enter your registration name.'; statusText.classList.add('text-red-500'); }
             return;
           }
-          if (!phone) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Please fill in your phone number.';
-            return;
-          }
-          if (!leagueSeason) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Please select a league / season.';
+          if (!emailVal) {
+            if (statusText) { statusText.textContent = 'Please enter your email address.'; statusText.classList.add('text-red-500'); }
             return;
           }
           var token = '';
-          if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && window.registrationRecaptchaId !== undefined) {
-            token = grecaptcha.getResponse(window.registrationRecaptchaId);
-            if (!token) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (statusText) statusText.textContent = 'Please complete the verification below.';
-              return;
-            }
-          }
-          if (!apiUrl) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL.';
+          if (typeof grecaptcha !== 'undefined' && step2RecaptchaId !== null) token = grecaptcha.getResponse(step2RecaptchaId);
+          if (!token) {
+            if (statusText) statusText.textContent = 'Please complete the verification above.';
             return;
           }
-
-          var regTypeExistingTeam = document.getElementById('regTypeExistingTeam');
-          var regTypeNewTeam = document.getElementById('regTypeNewTeam');
-          var existingTeamNameEl = document.getElementById('existingTeamName');
-          var newTeamNameEl = document.getElementById('newTeamName');
-          var newTeamCaptainAgreementEl = document.getElementById('newTeamCaptainAgreement');
-          var registrationChoice = regTypeExistingTeam && regTypeExistingTeam.checked ? 'existingTeam' : (regTypeNewTeam && regTypeNewTeam.checked ? 'newTeam' : 'freeAgent');
-          var teamOrFreeAgentValue = 'Free Agent';
-          if (registrationChoice === 'existingTeam') {
-            if (!existingTeamNameEl || !existingTeamNameEl.value.trim()) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (statusText) statusText.textContent = 'Please enter the team name or captain name.';
-              return;
-            }
-            teamOrFreeAgentValue = existingTeamNameEl.value.trim();
-          } else if (registrationChoice === 'newTeam') {
-            if (!newTeamNameEl || !newTeamNameEl.value.trim()) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (statusText) statusText.textContent = 'Please enter your new team name.';
-              return;
-            }
-            if (!newTeamCaptainAgreementEl || !newTeamCaptainAgreementEl.checked) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (statusText) statusText.textContent = 'Please confirm that you are registering a new team as team captain.';
-              return;
-            }
-            teamOrFreeAgentValue = newTeamNameEl.value.trim();
+          if (!apiUrl) {
+            if (statusText) statusText.textContent = 'Form is not configured.';
+            return;
           }
-
-          submitBtn.disabled = true;
-          if (statusSpinner) statusSpinner.style.display = 'block';
-          if (statusText) { statusText.textContent = 'Submitting…'; statusText.classList.remove('text-red-500', 'text-green-600'); }
-          if (successActions) successActions.style.display = 'none';
-
-          var payload = {
-            action: 'registration',
-            data: {
-              fullName: fullName,
-              email: email,
-              phone: document.getElementById('phone').value.trim(),
-              leagueSeason: document.getElementById('leagueSeason').value,
-              registrationChoice: registrationChoice,
-              teamOrFreeAgent: teamOrFreeAgentValue,
-              newTeamCaptainAgreement: registrationChoice === 'newTeam' && newTeamCaptainAgreementEl && newTeamCaptainAgreementEl.checked,
-              emergencyName: document.getElementById('emergencyName').value.trim(),
-              emergencyPhone: document.getElementById('emergencyPhone').value.trim(),
-              notes: document.getElementById('notes').value.trim()
-            },
-            recaptchaToken: token
-          };
+          var regId = window.__registrationFlowId;
+          if (!regId) {
+            if (statusText) statusText.textContent = 'Session lost. Please refresh and start again.';
+            return;
+          }
+          btn.disabled = true;
+          if (statusText) { statusText.textContent = ''; statusText.classList.remove('text-red-500', 'text-green-600'); }
 
           fetch(apiUrl, {
             method: 'POST',
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ action: 'paymentAcknowledged', data: { registrationId: regId }, recaptchaToken: token }),
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             redirect: 'follow'
           })
             .then(function(res) { return res.json(); })
             .then(function(json) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
               if (json.success) {
-                if (statusText) { statusText.textContent = json.message || 'Submitted.'; statusText.classList.add('text-green-600'); }
-                submitBtn.style.display = 'none';
-                var recWrap = document.getElementById('recaptcha-wrap');
-                if (recWrap) recWrap.innerHTML = '';
-                if (successActions) successActions.style.display = 'flex';
+                if (statusText) { statusText.textContent = ''; statusText.classList.add('text-green-600'); }
+                setStep(3);
               } else {
                 if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
-                submitBtn.disabled = false;
+                btn.disabled = false;
               }
             })
             .catch(function(err) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
               if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
-              submitBtn.disabled = false;
+              btn.disabled = false;
             });
         });
-      }
 
-      var resetRegistrationBtn = document.getElementById('resetRegistrationBtn');
-      if (resetRegistrationBtn) resetRegistrationBtn.addEventListener('click', function() { location.reload(); });
-
-      /* --- MOCK SUBMIT (comment out this block to disable) --- */
-      (function() {
-        var mockBtn = document.getElementById('mockSubmitBtn');
-        if (!mockBtn) return;
-        var MOCK_DELAY_MS = 10000;
-        mockBtn.addEventListener('click', function() {
-          var submitBtn = document.getElementById('submitBtn');
-          var statusSpinner = document.getElementById('statusSpinner');
-          var statusText = document.getElementById('statusText');
-          var successActions = document.getElementById('successActions');
-          if (!statusText) return;
-          if (submitBtn) submitBtn.disabled = true;
-          mockBtn.disabled = true;
-          if (statusSpinner) statusSpinner.style.display = 'block';
-          statusText.textContent = 'Submitting…';
-          statusText.classList.remove('text-red-500', 'text-green-600');
-          if (successActions) successActions.style.display = 'none';
-          window.setTimeout(function() {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            statusText.textContent = 'Registration submitted successfully.';
-            statusText.classList.add('text-green-600');
-            if (submitBtn) submitBtn.style.display = 'none';
-            var recWrap = document.getElementById('recaptcha-wrap');
-            if (recWrap) recWrap.innerHTML = '';
-            if (successActions) successActions.style.display = 'flex';
-            mockBtn.disabled = false;
-          }, MOCK_DELAY_MS);
-        });
-      })();
-      /* --- end MOCK SUBMIT --- */
+        var mockProceedBtn = document.getElementById('mockProceedToWaiverBtn');
+        if (mockProceedBtn) {
+          mockProceedBtn.addEventListener('click', function() {
+            setStep(3);
+          });
+        }
+      });
     })();
   </script>
-
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>
