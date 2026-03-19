@@ -40,10 +40,21 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
 	</head>
 	<body class="flex min-h-screen flex-col bg-forest text-white font-sans antialiased">
 		<header class="fixed left-0 right-0 top-0 z-50 flex shrink-0 items-center justify-between border-b border-taupe/20 bg-forest-dark/95 px-4 py-3 backdrop-blur-sm md:px-6">
-			<a href="/" class="logo-link flex shrink-0 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark" aria-label="Home">
+			<a href="/" class="logo-link flex shrink-0 focus:outline-none" aria-label="Home" data-logo-clicks="0">
 				<img src={logoLight.src} alt="Solker" class="logo logo-light h-10 w-auto md:h-12" width="115" height="48" />
 				<img src={logoDark.src} alt="Solker" class="logo logo-dark h-10 w-auto md:h-12" width="115" height="48" />
 			</a>
+			<script>
+				document.querySelector('.logo-link')?.addEventListener('click', (e) => {
+					const link = e.currentTarget as HTMLAnchorElement | null;
+					if (!link) return;
+					const count = parseInt(link.getAttribute('data-logo-clicks') ?? '0', 10) + 1;
+					link.setAttribute('data-logo-clicks', String(count));
+					if (count < 12) {
+						e.preventDefault();
+					}
+				});
+			</script>
 			<div class="flex min-w-0 flex-1 justify-center">
 				<slot name="header-nav" />
 			</div>			<div class="flex shrink-0 items-center gap-2">

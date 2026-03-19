@@ -18,6 +18,27 @@ const isFlow = context === 'flow';
     <input type="tel" id="phone" name="phone" required maxlength="25" placeholder="(555) 000-0000" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
   </div>
   <div>
+    <div class="flex items-start justify-between gap-3">
+      <label for="postalCode" class="block font-medium text-white"><span class="text-red-500">*</span> Postal Code</label>
+      <button
+        type="button"
+        id="postalCodeHelpBtn"
+        class="flex h-6 w-6 select-none items-center justify-center rounded-full border border-taupe/30 bg-forest-dark text-xs font-bold text-taupe hover:border-orange focus:outline-none focus:ring-2 focus:ring-orange"
+        aria-haspopup="true"
+        aria-controls="postalCodeHelpTooltip"
+        aria-expanded="false"
+        title="Required for affiliation status."
+      >
+        ?
+      </button>
+    </div>
+    <input type="text" id="postalCode" name="postalCode" required maxlength="7" placeholder="(XXX-XXX)" inputmode="text" autocomplete="postal-code" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+    <p class="mt-1 text-xs text-taupe">Required for affiliation status.</p>
+    <div id="postalCodeHelpTooltip" class="hidden mt-1 text-xs text-taupe" role="note">
+      Required for affiliation status.
+    </div>
+  </div>
+  <div>
     <label for="leagueSeason" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> League / Season</label>
     <select id="leagueSeason" name="leagueSeason" required class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange">
       <option value="">Select...</option>
@@ -152,6 +173,54 @@ const isFlow = context === 'flow';
     restrictPhoneInput(document.getElementById('phone'));
     restrictPhoneInput(document.getElementById('emergencyPhone'));
 
+    function formatPostalCodeInput(value) {
+      var v = (value || '').toString().toUpperCase();
+      v = v.replace(/[^A-Z0-9]/g, '');
+      v = v.slice(0, 6);
+      if (v.length <= 3) return v;
+      return v.slice(0, 3) + '-' + v.slice(3);
+    }
+
+    function restrictPostalInput(el) {
+      if (!el) return;
+      el.addEventListener('input', function() {
+        var formatted = formatPostalCodeInput(this.value);
+        if (this.value !== formatted) this.value = formatted;
+      });
+    }
+    restrictPostalInput(document.getElementById('postalCode'));
+
+    (function setupPostalCodeHelp() {
+      var btn = document.getElementById('postalCodeHelpBtn');
+      var tooltip = document.getElementById('postalCodeHelpTooltip');
+      if (!btn || !tooltip) return;
+
+      function show() {
+        tooltip.classList.remove('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+      function hide() {
+        tooltip.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+
+      btn.addEventListener('click', function(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (tooltip.classList.contains('hidden')) show();
+        else hide();
+      });
+
+      btn.addEventListener('mouseenter', show);
+      btn.addEventListener('mouseleave', hide);
+      tooltip.addEventListener('mouseenter', show);
+      tooltip.addEventListener('mouseleave', hide);
+
+      document.addEventListener('click', function() {
+        hide();
+      });
+    })();
+
     var form = document.getElementById('registration-form');
     if (form) {
       form.addEventListener('submit', function(e) {
@@ -164,6 +233,7 @@ const isFlow = context === 'flow';
         var submitBtn = document.getElementById('registrationSubmitBtn');
 
         var phone = (form.querySelector('#phone') && form.querySelector('#phone').value) ? form.querySelector('#phone').value.trim() : '';
+        var postalCode = (form.querySelector('#postalCode') && form.querySelector('#postalCode').value) ? form.querySelector('#postalCode').value.trim().toUpperCase() : '';
         var leagueSeason = form.querySelector('#leagueSeason') ? form.querySelector('#leagueSeason').value : '';
         if (!fullName || !email) {
           if (statusSpinner) statusSpinner.style.display = 'none';
@@ -179,6 +249,17 @@ const isFlow = context === 'flow';
         if (!phone) {
           if (statusSpinner) statusSpinner.style.display = 'none';
           if (statusText) statusText.textContent = 'Please fill in your phone number.';
+          return;
+        }
+        if (!postalCode) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (statusText) statusText.textContent = 'Please fill in your postal code.';
+          return;
+        }
+        var postalRegex = /^[A-Z0-9]{3}-[A-Z0-9]{3}$/;
+        if (!postalRegex.test(postalCode)) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (statusText) statusText.textContent = 'Please enter your postal code in the format XXX-XXX.';
           return;
         }
         if (!leagueSeason) {
@@ -238,6 +319,7 @@ const isFlow = context === 'flow';
           fullName: fullName,
           email: email,
           phone: phone,
+          postalCode: postalCode,
           leagueSeason: leagueSeason,
           registrationChoice: registrationChoice,
           teamOrFreeAgent: teamOrFreeAgentValue,
