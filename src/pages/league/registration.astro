@@ -4,10 +4,17 @@ import LeagueNav from '../../components/LeagueNav.astro';
 import Footer from '../../components/Footer.astro';
 import RegistrationForm from '../../components/RegistrationForm.astro';
 import WaiverForm from '../../components/WaiverForm.astro';
+import { getRegistrationSeasons } from '../../data/leagueCatalog';
 
 const apiUrl = import.meta.env.PUBLIC_FORMS_API_URL || '';
 const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 const eTransferEmail = 'e-transfer@solker.ca';
+const registrationSeasons = getRegistrationSeasons().map((season) => ({
+  submissionValue: season.submissionValue,
+  price: season.price,
+  registrationClosesAt: season.registrationClosesAt
+}));
+const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].price : 50;
 ---
 
 <Layout
@@ -54,7 +61,7 @@ const eTransferEmail = 'e-transfer@solker.ca';
             <button type="button" id="copyEmailBtn" class="copy-btn rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white font-semibold hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange" title="Copy email">Copy</button>
           </div>
           <p class="text-sm font-semibold text-taupe mt-3 mb-1">Amount</p>
-          <p id="paymentAmount" class="text-lg font-bold text-white">$50.00</p>
+          <p id="paymentAmount" class="text-lg font-bold text-white">${defaultSeasonPrice.toFixed(2)}</p>
           <p class="text-sm font-semibold text-taupe mt-3 mb-1">Message to include in e-Transfer</p>
           <div class="flex items-center gap-2">
             <input type="text" id="paymentMessage" class="flex-1 rounded-lg border border-taupe/30 bg-forest-dark/80 px-4 py-2 text-white font-semibold" placeholder="Registration for [Full Name] - [Phone Number]" />
@@ -127,10 +134,10 @@ const eTransferEmail = 'e-transfer@solker.ca';
     }
   </style>
 
-  <script define:vars={{ apiUrl, eTransferEmail, recaptchaSiteKey }}>
+  <script define:vars={{ apiUrl, eTransferEmail, recaptchaSiteKey, registrationSeasons }}>
     (function() {
       var currentStep = 1;
-      var paymentPrefill = { fullName: '', phone: '', leagueSeason: '', email: '' };
+      var paymentPrefill = { fullName: '', phone: '', leagueSeasons: /** @type {string[]} */ ([]), email: '' };
       var step2RecaptchaId = null;
 
       function generateUuid() {
@@ -138,6 +145,39 @@ const eTransferEmail = 'e-transfer@solker.ca';
           var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
           return v.toString(16);
         });
+      }
+
+      function getSeasonMeta(submissionValue) {
+        for (var i = 0; i < registrationSeasons.length; i++) {
+          if (registrationSeasons[i].submissionValue === submissionValue) return registrationSeasons[i];
+        }
+        return null;
+      }
+
+      function isSeasonOpen(submissionValue) {
+        var season = getSeasonMeta(submissionValue);
+        if (!season || !season.registrationClosesAt) return true;
+        var closeAt = new Date(season.registrationClosesAt);
+        if (Number.isNaN(closeAt.getTime())) return true;
+        return Date.now() <= closeAt.getTime();
+      }
+
+      function areAllSeasonsOpen(selections) {
+        if (!selections || !selections.length) return true;
+        for (var ai = 0; ai < selections.length; ai++) {
+          if (!isSeasonOpen(selections[ai])) return false;
+        }
+        return true;
+      }
+
+      function sumPaymentAmount(selections) {
+        var total = 0;
+        if (!selections || !selections.length) return total;
+        for (var pi = 0; pi < selections.length; pi++) {
+          var meta = getSeasonMeta(selections[pi]);
+          if (meta) total += meta.price;
+        }
+        return total;
       }
 
       function setStep(step) {
@@ -166,8 +206,8 @@ const eTransferEmail = 'e-transfer@solker.ca';
           if (nameEl) nameEl.value = paymentPrefill.fullName || '';
           if (userEmailEl) userEmailEl.value = paymentPrefill.email || '';
           if (messageEl) messageEl.value = 'Registration for ' + (paymentPrefill.fullName || '') + ' - ' + (paymentPrefill.phone || '');
-          var amt = 50;
-          if (paymentPrefill.leagueSeason && paymentPrefill.leagueSeason.indexOf('Both') !== -1) amt = 100;
+          var amt = sumPaymentAmount(paymentPrefill.leagueSeasons);
+          if (!amt) amt = 50;
           if (amountEl) amountEl.textContent = '$' + amt + '.00';
           initStep2Recaptcha();
           var step2Panel = document.getElementById('step2Panel');
@@ -189,23 +229,37 @@ const eTransferEmail = 'e-transfer@solker.ca';
         step2RecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
       }
 
+      function getLeagueSeasonSelectionsFromForm(form) {
+        var wrap = form.querySelector('#leagueSeasons');
+        if (!wrap) return [];
+        var boxes = wrap.querySelectorAll('input.league-season-cb:checked');
+        return Array.prototype.map.call(boxes, function(b) { return b.value; });
+      }
+
       window.__onRegistrationSuccess = function() {
         var form = document.getElementById('registration-form');
         if (form) {
           var fn = form.querySelector('#fullName');
           var ph = form.querySelector('#phone');
-          var ls = form.querySelector('#leagueSeason');
           var em = form.querySelector('#email');
           paymentPrefill.fullName = fn ? fn.value.trim() : '';
           paymentPrefill.phone = ph ? ph.value.trim() : '';
-          paymentPrefill.leagueSeason = ls ? ls.value : '';
+          paymentPrefill.leagueSeasons = getLeagueSeasonSelectionsFromForm(form);
           paymentPrefill.email = em ? em.value.trim() : '';
+        }
+        if (!areAllSeasonsOpen(paymentPrefill.leagueSeasons)) {
+          var statusText = document.getElementById('registrationStatusText');
+          if (statusText) {
+            statusText.textContent = 'Registration is closed for one or more selected seasons.';
+            statusText.classList.add('text-red-500');
+          }
+          return;
         }
         setStep(2);
       };
 
       window.__onWaiverSuccessInFlow = function() {
-        paymentPrefill = { fullName: '', phone: '', leagueSeason: '', email: '' };
+        paymentPrefill = { fullName: '', phone: '', leagueSeasons: [], email: '' };
         window.__registrationFlowId = generateUuid();
         setStep(1);
         location.reload();

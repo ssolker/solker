@@ -28,7 +28,7 @@ const imgSrc = typeof imageSrc === 'string' ? imageSrc : imageSrc.src;
       <div class="backdrop-blur-md bg-forest/50 p-5">
         <p class="text-xs font-semibold uppercase tracking-wide text-orange">{badge}</p>
         <h2 class="font-heading mt-1 text-xl font-semibold text-white">{title}</h2>
-        {subtitle && <p class="mt-1 text-sm text-white/90">{subtitle}</p>}
+        {subtitle && <p class="mt-1 text-md text-white/90">{subtitle}</p>}
         <div class="mt-4 flex flex-wrap gap-2">
           {primaryButtonText && (
             <a href={primaryButtonHref} class="rounded bg-orange px-3 py-2 text-sm font-medium text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">
