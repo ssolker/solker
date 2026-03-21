@@ -1,6 +1,15 @@
 ---
+import { getRegistrationSeasons } from '../data/leagueCatalog';
+
 const { apiUrl, recaptchaSiteKey, context = 'standalone', registrationId = '' } = Astro.props;
 const isFlow = context === 'flow';
+const registrationSeasons = getRegistrationSeasons().map((season) => ({
+  submissionValue: season.submissionValue,
+  displayLabel: season.displayLabel,
+  price: season.price,
+  registrationClosesAt: season.registrationClosesAt,
+  teams: season.teams
+}));
 ---
 
 <form id="registration-form" class="mt-6 space-y-4" novalidate>
@@ -39,28 +48,67 @@ const isFlow = context === 'flow';
     </div>
   </div>
   <div>
-    <label for="leagueSeason" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> League / Season</label>
-    <select id="leagueSeason" name="leagueSeason" required class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange">
-      <option value="">Select...</option>
-      <option value="Soccer - Season 1 - 50">Soccer - Season 1 (May - Jun) - $50</option>
-      <option value="Soccer - Season 2 - 50">Soccer - Season 2 (Jul - Aug) - $50</option>
-      <option value="Soccer - Both Seasons - 100">Soccer - Both Seasons (May - Aug) - $100</option>
-    </select>
+    <span id="leagueSeasonsLabel" class="mb-2 block font-medium text-white"><span class="text-red-500">*</span> League / Season</span>
+    <div
+      id="leagueSeasons"
+      class="league-seasons-list space-y-1 rounded-lg border border-taupe/30 bg-forest-dark p-2"
+      role="group"
+      aria-labelledby="leagueSeasonsLabel"
+      aria-describedby="leagueSeasonsHelp"
+    >
+      {registrationSeasons.map((season, i) => (
+        <label
+          class="league-season-row flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-white/5 has-[:checked]:bg-orange/10 has-[:checked]:ring-1 has-[:checked]:ring-orange/50"
+        >
+          <input
+            type="checkbox"
+            name="leagueSeason"
+            id={`league-season-${i}`}
+            value={season.submissionValue}
+            class="league-season-cb mt-1 h-4 w-4 shrink-0 accent-orange"
+            data-display-label={season.displayLabel}
+          />
+          <span class="min-w-0 flex-1 text-sm text-white">
+            <span class="font-medium">{season.displayLabel}</span>
+            <span class="ml-2 text-taupe">${season.price}</span>
+          </span>
+        </label>
+      ))}
+    </div>
+    <div
+      id="leagueSeasonsSelectedSummary"
+      class="league-seasons-selected mt-3 hidden rounded-lg border border-orange/40 bg-orange/10 px-3 py-2"
+      role="status"
+      aria-live="polite"
+    >
+      <p class="text-xs font-semibold uppercase tracking-wide text-orange-200">Selected</p>
+      <ul id="leagueSeasonsSelectedList" class="mt-1 list-none space-y-1 text-sm text-white"></ul>
+    </div>
+    <p id="leagueSeasonsHelp" class="mt-2 text-xs text-taupe">Select every season you are registering for. Your choices appear under Selected below.</p>
+    <p id="registrationClosedHelp" class="mt-1 hidden text-xs text-red-500">Registration is closed for one or more selected seasons.</p>
   </div>
   <div>
     <span class="mb-2 block font-medium text-white"><span class="text-red-500">*</span> Registration Choices</span>
     <div class="flex flex-col gap-3">
       <label class="flex cursor-pointer items-start gap-2">
-        <input type="radio" id="regTypeFreeAgent" name="regType" value="freeAgent" class="mt-1 h-4 w-4 accent-orange" checked />
-        <span class="text-white">I am a Free Agent</span>
-      </label>
-      <label class="flex cursor-pointer items-start gap-2">
-        <input type="radio" id="regTypeExistingTeam" name="regType" value="existingTeam" class="mt-1 h-4 w-4 accent-orange" />
+        <input type="radio" id="regTypeExistingTeam" name="regType" value="existingTeam" class="mt-1 h-4 w-4 accent-orange" checked />
         <span class="text-white">I am joining an existing team</span>
       </label>
       <div id="existingTeamWrap" class="ml-6 mt-1" style="display: none;">
-        <label for="existingTeamName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Team name / Captain</label>
-        <input type="text" id="existingTeamName" name="existingTeamName" maxlength="100" placeholder="Team name or captain name" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
+        <label for="existingTeamName" class="mb-1 block font-medium text-white"><span class="text-red-500">*</span> Team / Captain</label>
+        <select id="existingTeamName" name="existingTeamName" class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange">
+          <option value="">Select a team...</option>
+        </select>
+      </div>
+      <label class="flex cursor-pointer items-start gap-2">
+        <input type="radio" id="regTypeFreeAgent" name="regType" value="freeAgent" class="mt-1 h-4 w-4 accent-orange" />
+        <span class="text-white">I am signing up as an individual</span>
+      </label>
+      <div id="freeAgentWrap" class="ml-6 mt-1" style="display: none;">
+        <div class="rounded-lg border border-amber-600/80 bg-amber-900/40 px-4 py-3 text-amber-100" role="alert">
+          <p class="font-semibold">WAITLIST NOTICE</p>
+          <p class="mt-1 text-sm">Individual signups are placed on a waitlist. You will be contacted with team placement details.</p>
+        </div>
       </div>
       <label class="flex cursor-pointer items-start gap-2">
         <input type="radio" id="regTypeNewTeam" name="regType" value="newTeam" class="mt-1 h-4 w-4 accent-orange" />
@@ -127,11 +175,100 @@ const isFlow = context === 'flow';
   @keyframes submit-spin {
     to { transform: rotate(360deg); }
   }
+  .league-seasons-list:focus-within {
+    outline: 1px solid var(--theme-orange, #ea580c);
+    outline-offset: 2px;
+  }
 </style>
 
 <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadRegForm&render=explicit" async defer />
-<script define:vars={{ apiUrl, recaptchaSiteKey, isFlow, registrationId }}>
+<script define:vars={{ apiUrl, recaptchaSiteKey, isFlow, registrationId, registrationSeasons }}>
   (function() {
+    function findSeasonMetaByValue(submissionValue) {
+      for (var i = 0; i < registrationSeasons.length; i++) {
+        if (registrationSeasons[i].submissionValue === submissionValue) return registrationSeasons[i];
+      }
+      return null;
+    }
+
+    function isSeasonOpen(submissionValue) {
+      var season = findSeasonMetaByValue(submissionValue);
+      if (!season || !season.registrationClosesAt) return true;
+      var closeAt = new Date(season.registrationClosesAt);
+      if (Number.isNaN(closeAt.getTime())) return true;
+      return Date.now() <= closeAt.getTime();
+    }
+
+    function getSelectedLeagueSeasonValues() {
+      var wrap = document.getElementById('leagueSeasons');
+      if (!wrap) return [];
+      var boxes = wrap.querySelectorAll('input.league-season-cb:checked');
+      return Array.prototype.map.call(boxes, function(b) { return b.value; });
+    }
+
+    function updateLeagueSeasonsSelectedSummary() {
+      var summary = document.getElementById('leagueSeasonsSelectedSummary');
+      var listEl = document.getElementById('leagueSeasonsSelectedList');
+      if (!summary || !listEl) return;
+      var selected = getSelectedLeagueSeasonValues();
+      listEl.innerHTML = '';
+      if (!selected.length) {
+        summary.classList.add('hidden');
+        return;
+      }
+      summary.classList.remove('hidden');
+      selected.forEach(function(val) {
+        var meta = findSeasonMetaByValue(val);
+        var text = meta && meta.displayLabel ? meta.displayLabel : val;
+        var li = document.createElement('li');
+        li.className = 'pl-0';
+        li.textContent = '✓ ' + text;
+        listEl.appendChild(li);
+      });
+    }
+
+    function updateTeamOptionsForSeasons() {
+      var existingTeamEl = document.getElementById('existingTeamName');
+      if (!existingTeamEl) return;
+      while (existingTeamEl.options.length > 1) existingTeamEl.remove(1);
+      var selected = getSelectedLeagueSeasonValues();
+      var seen = {};
+      selected.forEach(function(sv) {
+        var season = findSeasonMetaByValue(sv);
+        if (!season || !season.teams) return;
+        season.teams.forEach(function(team) {
+          var val = (team.teamName || '') + ' - ' + (team.captainName || '');
+          if (seen[val]) return;
+          seen[val] = true;
+          var option = document.createElement('option');
+          option.value = val;
+          option.textContent = (team.teamName || 'Unnamed Team') + ' (Captain: ' + (team.captainName || 'TBD') + ')';
+          existingTeamEl.appendChild(option);
+        });
+      });
+    }
+
+    function areAllSelectedSeasonsOpen() {
+      var selected = getSelectedLeagueSeasonValues();
+      if (!selected.length) return true;
+      for (var i = 0; i < selected.length; i++) {
+        if (!isSeasonOpen(selected[i])) return false;
+      }
+      return true;
+    }
+
+    function updateRegistrationClosedState() {
+      var closedHelpEl = document.getElementById('registrationClosedHelp');
+      var submitBtn = document.getElementById('registrationSubmitBtn');
+      if (!submitBtn) return;
+      var selected = getSelectedLeagueSeasonValues();
+      var allOpen = areAllSelectedSeasonsOpen();
+      var shouldDisable = selected.length > 0 && !allOpen;
+      submitBtn.disabled = shouldDisable;
+      submitBtn.title = shouldDisable ? 'Registration is closed for one or more selected seasons.' : '';
+      if (closedHelpEl) closedHelpEl.classList.toggle('hidden', !shouldDisable);
+    }
+
     window.onRecaptchaLoadRegForm = function() {
       if (typeof grecaptcha === 'undefined' || !recaptchaSiteKey) return;
       var wrap = document.getElementById('registration-recaptcha-wrap');
@@ -141,15 +278,19 @@ const isFlow = context === 'flow';
     function updateRegistrationChoiceVisibility() {
       var existingWrap = document.getElementById('existingTeamWrap');
       var newWrap = document.getElementById('newTeamWrap');
+      var freeAgentWrap = document.getElementById('freeAgentWrap');
       var existingTeam = document.getElementById('regTypeExistingTeam');
       var newTeam = document.getElementById('regTypeNewTeam');
+      var freeAgent = document.getElementById('regTypeFreeAgent');
       var existingNameEl = document.getElementById('existingTeamName');
       var newNameEl = document.getElementById('newTeamName');
       var agreementEl = document.getElementById('newTeamCaptainAgreement');
       var isExisting = existingTeam && existingTeam.checked;
       var isNew = newTeam && newTeam.checked;
+      var isFreeAgent = freeAgent && freeAgent.checked;
       if (existingWrap) existingWrap.style.display = isExisting ? 'block' : 'none';
       if (newWrap) newWrap.style.display = isNew ? 'block' : 'none';
+      if (freeAgentWrap) freeAgentWrap.style.display = isFreeAgent ? 'block' : 'none';
       if (existingNameEl) existingNameEl.required = isExisting;
       if (newNameEl) newNameEl.required = isNew;
       if (agreementEl) agreementEl.required = isNew;
@@ -161,6 +302,18 @@ const isFlow = context === 'flow';
       radio.addEventListener('change', updateRegistrationChoiceVisibility);
     });
     updateRegistrationChoiceVisibility();
+
+    var leagueSeasonsEl = document.getElementById('leagueSeasons');
+    if (leagueSeasonsEl) {
+      leagueSeasonsEl.addEventListener('change', function() {
+        updateTeamOptionsForSeasons();
+        updateRegistrationClosedState();
+        updateLeagueSeasonsSelectedSummary();
+      });
+      updateTeamOptionsForSeasons();
+      updateLeagueSeasonsSelectedSummary();
+    }
+    updateRegistrationClosedState();
 
     function restrictPhoneInput(el) {
       if (!el) return;
@@ -234,7 +387,7 @@ const isFlow = context === 'flow';
 
         var phone = (form.querySelector('#phone') && form.querySelector('#phone').value) ? form.querySelector('#phone').value.trim() : '';
         var postalCode = (form.querySelector('#postalCode') && form.querySelector('#postalCode').value) ? form.querySelector('#postalCode').value.trim().toUpperCase() : '';
-        var leagueSeason = form.querySelector('#leagueSeason') ? form.querySelector('#leagueSeason').value : '';
+        var leagueSeasons = getSelectedLeagueSeasonValues();
         if (!fullName || !email) {
           if (statusSpinner) statusSpinner.style.display = 'none';
           if (statusText) statusText.textContent = 'Please fill in your name and email.';
@@ -262,10 +415,18 @@ const isFlow = context === 'flow';
           if (statusText) statusText.textContent = 'Please enter your postal code in the format XXX-XXX.';
           return;
         }
-        if (!leagueSeason) {
+        if (!leagueSeasons.length) {
           if (statusSpinner) statusSpinner.style.display = 'none';
-          if (statusText) statusText.textContent = 'Please select a league / season.';
+          if (statusText) statusText.textContent = 'Please select at least one league / season.';
           return;
+        }
+        for (var si = 0; si < leagueSeasons.length; si++) {
+          if (!isSeasonOpen(leagueSeasons[si])) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Registration is closed for one or more selected seasons.';
+            updateRegistrationClosedState();
+            return;
+          }
         }
         var token = '';
         if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && window.registrationRecaptchaId !== undefined) {
@@ -292,7 +453,7 @@ const isFlow = context === 'flow';
         if (registrationChoice === 'existingTeam') {
           if (!existingTeamNameEl || !existingTeamNameEl.value.trim()) {
             if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Please enter the team name or captain name.';
+            if (statusText) statusText.textContent = 'Please select an existing team.';
             return;
           }
           teamOrFreeAgentValue = existingTeamNameEl.value.trim();
@@ -320,7 +481,7 @@ const isFlow = context === 'flow';
           email: email,
           phone: phone,
           postalCode: postalCode,
-          leagueSeason: leagueSeason,
+          leagueSeasons: leagueSeasons,
           registrationChoice: registrationChoice,
           teamOrFreeAgent: teamOrFreeAgentValue,
           newTeamCaptainAgreement: registrationChoice === 'newTeam' && newTeamCaptainAgreementEl && newTeamCaptainAgreementEl.checked,
@@ -342,12 +503,18 @@ const isFlow = context === 'flow';
           .then(function(json) {
             if (statusSpinner) statusSpinner.style.display = 'none';
             if (json.success) {
-              if (statusText) { statusText.textContent = json.message || 'Submitted.'; statusText.classList.add('text-green-600'); }
+              var shouldAdvanceFlow = isFlow && registrationChoice === 'existingTeam';
+              if (statusText) {
+                statusText.textContent = shouldAdvanceFlow
+                  ? (json.message || 'Submitted.')
+                  : 'Registration received. You will be contacted about your submission.';
+                statusText.classList.add('text-green-600');
+              }
               submitBtn.style.display = 'none';
               var recWrap = document.getElementById('registration-recaptcha-wrap');
               if (recWrap) recWrap.innerHTML = '';
-              if (successActions) successActions.style.display = 'flex';
-              if (isFlow && typeof window.__onRegistrationSuccess === 'function') {
+              if (successActions) successActions.style.display = shouldAdvanceFlow ? 'flex' : 'none';
+              if (shouldAdvanceFlow && typeof window.__onRegistrationSuccess === 'function') {
                 window.__onRegistrationSuccess();
               }
             } else {

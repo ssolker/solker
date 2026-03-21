@@ -1,5 +1,6 @@
 import soccerIllustrationSpring from '../assets/soccer/soccer_spring.svg';
 import soccerIllustrationSummer from '../assets/soccer/soccer_summer.svg';
+import { leagueCatalog, isRegistrationOpen } from './leagueCatalog';
 
 const soccerSpringImageCredit =
   'Illustration by <a href="https://unsplash.com/@fadhilsanad?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Fast Ink</a> on <a href="https://unsplash.com/illustrations/a-person-standing-on-top-of-a-soccer-ball-JYoednJRax0?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>';
@@ -19,32 +20,36 @@ export interface League {
   secondaryButtonHref?: string;
 }
 
-export const leagues: League[] = [
-  {
-    title: '6v6 Co-Ed Soccer (Season 1)',
-    subtitle: 'Thursday Nights (May 7th - June 25th)',
-    badge: 'Coming soon!',
-    imageSrc: soccerIllustrationSpring,
-    imageAlt: 'Person standing on a soccer ball',
-    imageCredit: soccerSpringImageCredit,
-    primaryButtonText: 'Register',
-    primaryButtonHref: '/league/registration',
+var soccerLeague = leagueCatalog.find(function(entry) { return entry.leagueKey === 'soccer-6v6-coed'; });
+var soccerSeasons = soccerLeague ? soccerLeague.seasons : [];
+
+function formatRange(startDate: string, endDate: string): string {
+  var start = new Date(startDate);
+  var end = new Date(endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '';
+  var month = function(d: Date) { return d.toLocaleString('en-CA', { month: 'long' }); };
+  if (start.getMonth() === end.getMonth()) {
+    return month(start) + ' ' + start.getDate() + 'th - ' + month(end) + ' ' + end.getDate() + 'th';
+  }
+  return month(start) + ' - ' + month(end);
+}
+
+export const leagues: League[] = soccerSeasons.map(function(season, index) {
+  var isOpen = isRegistrationOpen(season.registrationClosesAt);
+  var badge = isOpen ? (index === 0 ? 'Coming soon!' : 'Dates TBD') : 'Registration Closed';
+  return {
+    title: '6v6 Co-Ed Soccer (' + season.seasonLabel + ')',
+    subtitle: 'Thursday Nights (' + formatRange(season.startDate, season.endDate) + ')',
+    badge: badge,
+    imageSrc: index === 0 ? soccerIllustrationSpring : soccerIllustrationSummer,
+    imageAlt: index === 0 ? 'Person standing on a soccer ball' : 'Two soccer players in action',
+    imageCredit: index === 0 ? soccerSpringImageCredit : soccerSummerImageCredit,
+    primaryButtonText: isOpen ? 'Register' : 'Registration Closed',
+    primaryButtonHref: isOpen ? '/league/registration' : undefined,
     secondaryButtonText: 'Learn More',
     secondaryButtonHref: '/league/soccer#rules',
-  },
-  {
-    title: '6v6 Co-Ed Soccer (Season 2)',
-    subtitle: 'Thursday Nights (July - August)',
-    badge: 'Dates TBD',
-    imageSrc: soccerIllustrationSummer,
-    imageAlt: 'Two soccer players in action',
-    imageCredit: soccerSummerImageCredit,
-    primaryButtonText: 'Register',
-    primaryButtonHref: '/league/registration',
-    secondaryButtonText: 'Learn More',
-    secondaryButtonHref: '/league/soccer#rules',
-  },
-];
+  };
+});
 
 export function filterLeagues(leagues: League[], filter?: string): League[] {
   if (!filter || filter.trim() === '') return leagues;

@@ -1,0 +1,95 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import LeagueNav from '../../components/LeagueNav.astro';
+import Footer from '../../components/Footer.astro';
+
+const eTransferEmail = 'e-transfer@solker.ca';
+---
+
+<Layout
+  title="Payment Info — League — Solker"
+  description="Payment information for league registration and next steps."
+>
+  <Fragment slot="header-nav">
+    <LeagueNav />
+  </Fragment>
+
+  <main class="flex-1 px-4 py-8 md:py-12">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">
+        Payment Information
+      </h1>
+      <p class="mt-2 text-taupe">
+        This page provides payment details only. No submission is required here.
+      </p>
+
+      <section class="mt-6 space-y-4 rounded-lg border border-taupe/30 bg-forest-dark p-4">
+        <h2 class="text-base font-bold text-white">e-Transfer Instructions</h2>
+        <p class="text-md text-taupe">
+          Send your e-Transfer to:
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <p id="paymentEmailValue" class="text-lg font-semibold text-white">{eTransferEmail}</p>
+          <button
+            id="copyPaymentEmailBtn"
+            type="button"
+            class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-sm font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange"
+          >
+            Copy
+          </button>
+        </div>
+        <p id="copyPaymentEmailStatus" class="text-xs text-taupe" aria-live="polite"></p>
+        <p class="text-md text-taupe">
+          Include your full name in the transfer message so we can match your registration.
+        </p>
+      </section>
+
+      <section class="mt-4 rounded-lg border border-amber-600/70 bg-amber-900/30 p-4 text-amber-100">
+        <p class="font-semibold">Important</p>
+        <p class="mt-1 text-md">
+          Registration is only considered complete after payment is received and your waiver is signed.
+        </p>
+        <p class="mt-2 text-md">
+          Cash can be accepted if e-Transfer cannot be made, but it must be paid before playing.
+        </p>
+      </section>
+
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <a
+          href="/league/waiver"
+          class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange"
+        >
+          Go to Waiver
+        </a>
+        <a
+          href="/league/soccer"
+          class="text-sm font-medium text-orange hover:text-orange-light"
+        >
+          Back to Soccer league
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
+</Layout>
+
+<script define:vars={{ eTransferEmail }}>
+  (function() {
+    var copyBtn = document.getElementById('copyPaymentEmailBtn');
+    var statusEl = document.getElementById('copyPaymentEmailStatus');
+    if (!copyBtn) return;
+
+    copyBtn.addEventListener('click', function() {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        if (statusEl) statusEl.textContent = 'Copy is not supported in this browser.';
+        return;
+      }
+      navigator.clipboard.writeText(eTransferEmail).then(function() {
+        if (statusEl) statusEl.textContent = 'Email copied.';
+      }).catch(function() {
+        if (statusEl) statusEl.textContent = 'Unable to copy. Please copy manually.';
+      });
+    });
+  })();
+</script>
