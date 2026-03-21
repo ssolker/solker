@@ -39,7 +39,7 @@ export const leagues: League[] = soccerSeasons.map(function(season, index) {
   var badge = isOpen ? (index === 0 ? 'Coming soon!' : 'Dates TBD') : 'Registration Closed';
   return {
     title: '6v6 Co-Ed Soccer (' + season.seasonLabel + ')',
-    subtitle: 'Thursday Nights (' + formatRange(season.startDate, season.endDate) + ')',
+    subtitle: 'Thursday or Monday Nights (TBD) (' + formatRange(season.startDate, season.endDate) + ')',
     badge: badge,
     imageSrc: index === 0 ? soccerIllustrationSpring : soccerIllustrationSummer,
     imageAlt: index === 0 ? 'Person standing on a soccer ball' : 'Two soccer players in action',

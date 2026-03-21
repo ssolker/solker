@@ -27,7 +27,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
   {
     leagueKey: 'soccer-6v6-coed',
     leagueSportName: '6v6 Co-Ed Soccer',
-    gameDay: 'Thursday',
+    gameDay: 'Thursday Or Monday (TBD)',
     gameTime: 'Evenings',
     seasons: [
       {
@@ -38,7 +38,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         price: 50,
         startDate: '2026-05-07',
         endDate: '2026-06-25',
-        registrationClosesAt: '2026-05-05T23:59:59-04:00',
+        registrationClosesAt: '2026-02-05T23:59:59-04:00',
         teams: [
           { teamName: 'Bender', captainName: 'Aiden Bender' },
           { teamName: 'Butler', captainName: 'Darcey Butler' },
@@ -54,7 +54,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         price: 50,
         startDate: '2026-07-01',
         endDate: '2026-08-31',
-        registrationClosesAt: '2026-06-29T23:59:59-04:00',
+        registrationClosesAt: '2026-02-29T23:59:59-04:00',
         teams: [
           { teamName: 'Bender', captainName: 'Aiden Bender' },
           { teamName: 'Butler', captainName: 'Darcey Butler' },
