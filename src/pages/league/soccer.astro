@@ -4,6 +4,7 @@ import LeagueNav from '../../components/LeagueNav.astro';
 import ActiveLeagues from '../../components/ActiveLeagues.astro';
 import LeagueQuickLinks from '../../components/LeagueQuickLinks.astro';
 import CollapsibleSection from '../../components/CollapsibleSection.astro';
+import SoccerLeagueStandings from '../../components/SoccerLeagueStandings.astro';
 import Footer from '../../components/Footer.astro';
 ---
 
@@ -42,6 +43,8 @@ import Footer from '../../components/Footer.astro';
                 <li><strong>Captains/Rep:</strong> Each team must designate one representative. Confirmed Captains receive a "Captain's Kit" with instructions and equipment prior to the season.</li>
                 <li><strong>Game Time:</strong> Two 20-minute halves, 5-minute halftime.</li>
                 <li><strong>Game Day:</strong> Each team is scheduled for two games per night.</li>
+                <li><strong>Attire:</strong> Please bring a light and dark shirt to each game. Jerseys will not be provided at this moment.</li>
+                <li><strong>Cleats:</strong> Metal spikes are prohibited. Playing barefoot or open-toed shoes is not allowed.</li>
               </ul>
               <h3 class="font-semibold text-white mt-4">Season Structure & Fees</h3>
               <ul class="list-disc pl-5 space-y-1">
@@ -93,14 +96,7 @@ import Footer from '../../components/Footer.astro';
       </div>
     </section>
 
-    <section id="standings" class="bg-forest-light/40 px-4 py-12 md:py-16" aria-labelledby="standings-heading">
-      <div class="mx-auto max-w-5xl text-center">
-        <h2 id="standings-heading" class="font-heading text-2xl font-bold text-white md:text-3xl">
-          Standings & Schedule
-        </h2>
-        <p class="mt-2 text-taupe">Coming soon.</p>
-      </div>
-    </section>
+    <SoccerLeagueStandings />
   </main>
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>

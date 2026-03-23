@@ -9,6 +9,7 @@ interface Props {
 }
 
 const { filter, heading = 'Current Leagues' } = Astro.props;
+/** `leagues` only includes seasons with `isActive: true` in `leagueCatalog.ts`. */
 const filtered = filterLeagues(leagues, filter);
 ---
 

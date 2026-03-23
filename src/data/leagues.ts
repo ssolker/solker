@@ -20,26 +20,32 @@ export interface League {
   secondaryButtonHref?: string;
 }
 
-var soccerLeague = leagueCatalog.find(function(entry) { return entry.leagueKey === 'soccer-6v6-coed'; });
-var soccerSeasons = soccerLeague ? soccerLeague.seasons : [];
+var soccerLeague = leagueCatalog.find(function (entry) {
+  return entry.leagueKey === 'soccer-6v6-coed';
+});
+var soccerGameDay = soccerLeague ? soccerLeague.gameDay : '';
+/** Only seasons marked active in league catalog (single source of truth). */
+var soccerSeasons = soccerLeague ? soccerLeague.seasons.filter(function (s) { return s.isActive; }) : [];
 
 function formatRange(startDate: string, endDate: string): string {
   var start = new Date(startDate);
   var end = new Date(endDate);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '';
-  var month = function(d: Date) { return d.toLocaleString('en-CA', { month: 'long' }); };
+  var month = function (d: Date) {
+    return d.toLocaleString('en-CA', { month: 'long' });
+  };
   if (start.getMonth() === end.getMonth()) {
     return month(start) + ' ' + start.getDate() + 'th - ' + month(end) + ' ' + end.getDate() + 'th';
   }
   return month(start) + ' - ' + month(end);
 }
 
-export const leagues: League[] = soccerSeasons.map(function(season, index) {
+export const leagues: League[] = soccerSeasons.map(function (season, index) {
   var isOpen = isRegistrationOpen(season.registrationClosesAt);
   var badge = isOpen ? (index === 0 ? 'Coming soon!' : 'Dates TBD') : 'Registration Closed';
   return {
     title: '6v6 Co-Ed Soccer (' + season.seasonLabel + ')',
-    subtitle: 'Thursday or Monday Nights (TBD) (' + formatRange(season.startDate, season.endDate) + ')',
+    subtitle: soccerGameDay + ' (' + formatRange(season.startDate, season.endDate) + ')',
     badge: badge,
     imageSrc: index === 0 ? soccerIllustrationSpring : soccerIllustrationSummer,
     imageAlt: index === 0 ? 'Person standing on a soccer ball' : 'Two soccer players in action',
@@ -47,7 +53,7 @@ export const leagues: League[] = soccerSeasons.map(function(season, index) {
     primaryButtonText: isOpen ? 'Register' : 'Registration Closed',
     primaryButtonHref: isOpen ? '/league/registration' : undefined,
     secondaryButtonText: 'Learn More',
-    secondaryButtonHref: '/league/soccer#rules',
+    secondaryButtonHref: '/league/soccer#rules'
   };
 });
 
