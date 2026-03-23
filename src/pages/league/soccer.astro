@@ -17,9 +17,11 @@ import Footer from '../../components/Footer.astro';
     <div class="bg-orange/90 px-4 py-2 text-center text-sm font-medium text-white" role="status">
       Under construction — we're getting things ready.
     </div>
-
+    
     <ActiveLeagues filter="soccer" heading="Active Soccer Leagues" />
-
+    
+    <LeagueQuickLinks />
+    
     <SoccerLeagueStandings />
 
     <section id="rules" class="px-4 py-12 md:py-16" aria-labelledby="rules-heading">
@@ -96,7 +98,6 @@ import Footer from '../../components/Footer.astro';
       </div>
     </section>
 
-    <LeagueQuickLinks />
   </main>
   <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
 </Layout>

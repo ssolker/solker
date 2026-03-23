@@ -4,7 +4,7 @@ import { getSoccerSeasonsForClient } from '../data/leagueCatalog';
 const seasonsJson = getSoccerSeasonsForClient();
 ---
 
-<section id="standings" class="bg-forest-light/40 px-4 py-12 md:py-16" aria-labelledby="standings-heading">
+<section id="standings-and-schedule" class="bg-forest-light/40 px-4 py-12 md:py-16" aria-labelledby="standings-heading">
   <div class="mx-auto max-w-5xl">
     <h2 id="standings-heading" class="font-heading text-center text-2xl font-bold text-white md:text-3xl">
       Standings & Schedule
@@ -419,47 +419,92 @@ const seasonsJson = getSoccerSeasonsForClient();
 </script>
 
 <style is:global>
+  /**
+   * Print only the chosen block: hide everything else with display:none (not visibility),
+   * so layout height matches the table and extra blank pages are avoided.
+   */
   @media print {
-    body.print-soccer-basic * {
-      visibility: hidden !important;
+    @page {
+      margin: 12mm;
     }
+
+    body.print-soccer-basic,
+    body.print-soccer-basic html,
+    body.print-soccer-full,
+    body.print-soccer-full html,
+    body.print-soccer-standings,
+    body.print-soccer-standings html {
+      min-height: 0 !important;
+      height: auto !important;
+      overflow: visible !important;
+      background: #fff !important;
+      color: #000 !important;
+    }
+
+    body.print-soccer-basic > div,
+    body.print-soccer-full > div,
+    body.print-soccer-standings > div {
+      min-height: 0 !important;
+      height: auto !important;
+      padding-top: 0 !important;
+    }
+
+    body.print-soccer-basic main,
+    body.print-soccer-full main,
+    body.print-soccer-standings main {
+      min-height: 0 !important;
+      height: auto !important;
+    }
+
+    body.print-soccer-basic header,
+    body.print-soccer-basic footer,
+    body.print-soccer-full header,
+    body.print-soccer-full footer,
+    body.print-soccer-standings header,
+    body.print-soccer-standings footer {
+      display: none !important;
+    }
+
+    /* Everything in the page shell except #standings */
+    body.print-soccer-basic > div > main > *:not(#standings),
+    body.print-soccer-full > div > main > *:not(#standings),
+    body.print-soccer-standings > div > main > *:not(#standings) {
+      display: none !important;
+    }
+
+    body.print-soccer-basic > div > footer,
+    body.print-soccer-full > div > footer,
+    body.print-soccer-standings > div > footer {
+      display: none !important;
+    }
+
+    /* Section chrome: hide heading; show only the printable block inside the root */
+    body.print-soccer-basic #standings > div > h2,
+    body.print-soccer-full #standings > div > h2,
+    body.print-soccer-standings #standings > div > h2 {
+      display: none !important;
+    }
+
+    body.print-soccer-basic #standings,
+    body.print-soccer-full #standings,
+    body.print-soccer-standings #standings {
+      padding: 0 !important;
+      margin: 0 !important;
+      background: transparent !important;
+    }
+
+    body.print-soccer-basic #soccer-league-root > div > *:not(#print-soccer-basic),
+    body.print-soccer-full #soccer-league-root > div > *:not(#print-soccer-full),
+    body.print-soccer-standings #soccer-league-root > div > *:not(#print-soccer-standings) {
+      display: none !important;
+    }
+
     body.print-soccer-basic #print-soccer-basic,
-    body.print-soccer-basic #print-soccer-basic * {
-      visibility: visible !important;
-    }
-    body.print-soccer-basic #print-soccer-basic {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-    }
-
-    body.print-soccer-full * {
-      visibility: hidden !important;
-    }
     body.print-soccer-full #print-soccer-full,
-    body.print-soccer-full #print-soccer-full * {
-      visibility: visible !important;
-    }
-    body.print-soccer-full #print-soccer-full {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-    }
-
-    body.print-soccer-standings * {
-      visibility: hidden !important;
-    }
-    body.print-soccer-standings #print-soccer-standings,
-    body.print-soccer-standings #print-soccer-standings * {
-      visibility: visible !important;
-    }
     body.print-soccer-standings #print-soccer-standings {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
+      position: static !important;
+      width: 100% !important;
+      max-width: none !important;
     }
   }
 </style>
