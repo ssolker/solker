@@ -3,23 +3,35 @@ export interface TeamInfo {
   captainName: string;
 }
 
-/** One row in the basic 8-week calendar (e.g. Victoria Day off). */
+/** One row in the basic 8-week calendar. */
 export interface WeeklyScheduleRow {
   weekLabel: string;
   dateLabel: string;
   status: string;
 }
 
-/** One match in the full schedule. */
+/**
+ * One match in the full schedule — all data lives here (no auto-generation).
+ * - `startTime`: shown in the full schedule (e.g. "6:30 PM").
+ * - `homeGoals` / `awayGoals`: set when final; omit or `null` if not played yet.
+ * - `result`: optional override text for the Result column (e.g. "Postponed"). If omitted, Result is derived from goals or shows "—".
+ * - `spiritHome` / `spiritAway`: optional; used only for standings tie-break (not shown in the schedule table).
+ */
 export interface SeasonFixture {
   id: string;
   date: string;
+  startTime: string;
   fieldName: string;
   homeTeam: string;
   awayTeam: string;
+  homeGoals?: number | null;
+  awayGoals?: number | null;
+  result?: string | null;
+  spiritHome?: number | null;
+  spiritAway?: number | null;
 }
 
-/** Standings row stored in catalog (baseline); client may recompute from entered scores. */
+/** Standings row stored in catalog (optional baseline); UI standings are computed from fixtures. */
 export interface SeasonStandingRow {
   teamName: string;
   wins: number;
@@ -35,6 +47,7 @@ export interface LeagueSeason {
   seasonKey: string;
   seasonLabel: string;
   displayLabel: string;
+  leagueLabel: string;
   submissionValue: string;
   price: number;
   startDate: string;
@@ -61,48 +74,7 @@ export interface LeagueCatalogEntry {
   seasons: LeagueSeason[];
 }
 
-const DEFAULT_FIELD = 'Cowan Park';
 const SOC_ADDRESS = 'Cowan Park, Woodstock, Ontario';
-
-/** Double round-robin: every pair plays twice (home/away). */
-function buildDoubleRoundRobinFixtures(
-  seasonKey: string,
-  teamNames: string[],
-  gameDates: string[],
-  fieldName: string
-): SeasonFixture[] {
-  const pairs: { home: string; away: string }[] = [];
-  for (let i = 0; i < teamNames.length; i++) {
-    for (let j = i + 1; j < teamNames.length; j++) {
-      pairs.push({ home: teamNames[i], away: teamNames[j] });
-      pairs.push({ home: teamNames[j], away: teamNames[i] });
-    }
-  }
-  const n = pairs.length;
-  const bucketSizes =
-    gameDates.length >= 8
-      ? [4, 4, 4, 4, 4, 4, 3, 3]
-      : Array(gameDates.length).fill(Math.ceil(n / gameDates.length));
-  let pi = 0;
-  let fi = 0;
-  const fixtures: SeasonFixture[] = [];
-  for (let d = 0; d < gameDates.length && pi < n; d++) {
-    const count = Math.min(bucketSizes[d] ?? 4, n - pi);
-    for (let k = 0; k < count && pi < n; k++) {
-      const p = pairs[pi];
-      fixtures.push({
-        id: `${seasonKey}-g${String(fi + 1).padStart(2, '0')}`,
-        date: gameDates[d],
-        fieldName,
-        homeTeam: p.home,
-        awayTeam: p.away
-      });
-      pi++;
-      fi++;
-    }
-  }
-  return fixtures;
-}
 
 function emptyStandings(teamNames: string[]): SeasonStandingRow[] {
   return teamNames.map((teamName) => ({
@@ -125,27 +97,53 @@ const soccerS1Teams: TeamInfo[] = [
   { teamName: 'Taylor', captainName: 'Zack Taylor' }
 ];
 
-const soccerSeason1GameDates = [
-  '2026-05-04',
-  '2026-05-11',
-  '2026-05-25',
-  '2026-06-01',
-  '2026-06-08',
-  '2026-06-15',
-  '2026-06-22',
-  '2026-06-29'
+const soccerSeason1Weekly: WeeklyScheduleRow[] = [
+  { weekLabel: 'Week 1', dateLabel: 'Monday, May 4', status: 'Season Opener' },
+  { weekLabel: 'Week 2', dateLabel: 'Monday, May 11', status: 'Regular Season' },
+  { weekLabel: '—', dateLabel: 'Monday, May 18', status: 'NO GAMES (Victoria Day)' },
+  { weekLabel: 'Week 3', dateLabel: 'Monday, May 25', status: 'Regular Season' },
+  { weekLabel: 'Week 4', dateLabel: 'Monday, June 1', status: 'Regular Season' },
+  { weekLabel: 'Week 5', dateLabel: 'Monday, June 8', status: 'Regular Season' },
+  { weekLabel: 'Week 6', dateLabel: 'Monday, June 15', status: 'Regular Season' },
+  { weekLabel: 'Week 7', dateLabel: 'Monday, June 22', status: 'Regular Season' },
+  { weekLabel: 'Week 8', dateLabel: 'Monday, June 29', status: 'Finals / Championship Night' }
 ];
 
-const soccerSeason1Weekly: WeeklyScheduleRow[] = [
-  { weekLabel: 'Week 1', dateLabel: 'May 4', status: 'Season Opener' },
-  { weekLabel: 'Week 2', dateLabel: 'May 11', status: 'Regular Season' },
-  { weekLabel: '—', dateLabel: 'May 18', status: 'NO GAMES (Victoria Day)' },
-  { weekLabel: 'Week 3', dateLabel: 'May 25', status: 'Regular Season' },
-  { weekLabel: 'Week 4', dateLabel: 'June 1', status: 'Regular Season' },
-  { weekLabel: 'Week 5', dateLabel: 'June 8', status: 'Regular Season' },
-  { weekLabel: 'Week 6', dateLabel: 'June 15', status: 'Regular Season' },
-  { weekLabel: 'Week 7', dateLabel: 'June 22', status: 'Regular Season' },
-  { weekLabel: 'Week 8', dateLabel: 'June 29', status: 'Finals / Championship Night' }
+/**
+ * Season 1 full schedule — edit this list only (copy rows to add games).
+ * Standings are calculated from `homeGoals` / `awayGoals` and optional `spiritHome` / `spiritAway`.
+ */
+const SOCCER_SEASON_1_FIXTURES: SeasonFixture[] = [
+  // {
+  //   id: 'soccer-season-1-g01',
+  //   date: '2026-05-04',
+  //   startTime: '6:30 PM',
+  //   fieldName: 'Cowan Park',
+  //   homeTeam: 'Batth',
+  //   awayTeam: 'Bender',
+  //   homeGoals: null,
+  //   awayGoals: null
+  // },
+  // {
+  //   id: 'soccer-season-1-g02',
+  //   date: '2026-05-04',
+  //   startTime: '7:30 PM',
+  //   fieldName: 'Cowan Park',
+  //   homeTeam: 'Butler',
+  //   awayTeam: 'Myers',
+  //   homeGoals: null,
+  //   awayGoals: null
+  // },
+  // {
+  //   id: 'soccer-season-1-g03',
+  //   date: '2026-05-11',
+  //   startTime: '6:30 PM',
+  //   fieldName: 'Cowan Park',
+  //   homeTeam: 'Solker',
+  //   awayTeam: 'Taylor',
+  //   homeGoals: null,
+  //   awayGoals: null
+  // }
 ];
 
 export const leagueCatalog: LeagueCatalogEntry[] = [
@@ -159,6 +157,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         seasonKey: 'soccer-season-1',
         seasonLabel: 'Season 1',
         displayLabel: 'Soccer - Season 1 (May - Jun) - $50',
+        leagueLabel: 'Soccer - Season 1 (May - Jun) 2026',
         submissionValue: 'Soccer - Season 1 - 50',
         price: 50,
         startDate: '2026-05-04',
@@ -167,14 +166,9 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         teams: soccerS1Teams,
         isActive: true,
         address: SOC_ADDRESS,
-        gameTimeDetail: '6:30pm–8:30pm',
+        gameTimeDetail: 'Game 1: 6:30pm–7:15pm, Game 2: 7:30pm-8:15pm',
         weeklySchedule: soccerSeason1Weekly,
-        fixtures: buildDoubleRoundRobinFixtures(
-          'soccer-season-1',
-          soccerS1Teams.map((t) => t.teamName),
-          soccerSeason1GameDates,
-          DEFAULT_FIELD
-        ),
+        fixtures: SOCCER_SEASON_1_FIXTURES,
         standingsMode: 'table',
         standings: emptyStandings(soccerS1Teams.map((t) => t.teamName))
       },
@@ -182,6 +176,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         seasonKey: 'soccer-season-2',
         seasonLabel: 'Season 2',
         displayLabel: 'Soccer - Season 2 (Jul - Aug) - $50',
+        leagueLabel: 'Soccer - Season 2 (Jul - Aug) 2026',
         submissionValue: 'Soccer - Season 2 - 50',
         price: 50,
         startDate: '2026-07-01',
@@ -190,7 +185,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         teams: soccerS1Teams.map((t) => ({ ...t })),
         isActive: true,
         address: SOC_ADDRESS,
-        gameTimeDetail: '6:30pm–8:30pm',
+        gameTimeDetail: 'Game 1: 6:30pm–7:15pm, Game 2: 7:30pm-8:15pm',
         weeklySchedule: [
           { weekLabel: 'TBD', dateLabel: 'Jul – Aug', status: 'Schedule TBD' }
         ],
@@ -219,6 +214,7 @@ export function getRegistrationSeasons() {
       seasonKey: season.seasonKey,
       seasonLabel: season.seasonLabel,
       displayLabel: season.displayLabel,
+      leagueLabel: season.leagueLabel,
       submissionValue: season.submissionValue,
       price: season.price,
       startDate: season.startDate,
@@ -253,6 +249,7 @@ export type SoccerSeasonPayload = Pick<
   | 'seasonKey'
   | 'seasonLabel'
   | 'displayLabel'
+  | 'leagueLabel'
   | 'isActive'
   | 'address'
   | 'gameTimeDetail'
@@ -274,6 +271,7 @@ export function getSoccerSeasonsForClient(): SoccerSeasonPayload[] {
     seasonKey: s.seasonKey,
     seasonLabel: s.seasonLabel,
     displayLabel: s.displayLabel,
+    leagueLabel: s.leagueLabel,
     isActive: s.isActive,
     address: s.address,
     gameTimeDetail: s.gameTimeDetail,

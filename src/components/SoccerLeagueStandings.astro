@@ -9,10 +9,10 @@ const seasonsJson = getSoccerSeasonsForClient();
     <h2 id="standings-heading" class="font-heading text-center text-2xl font-bold text-white md:text-3xl">
       Standings & Schedule
     </h2>
-    <p class="mt-2 text-center text-sm text-taupe">
+    <!-- <p class="mt-2 text-center text-md text-taupe">
       Select an active or previous league. Schedule and standings use data from the league catalog (local for now). To update scores without redeploying, host JSON and fetch at runtime — see comment in
       <code class="rounded bg-forest-dark px-1 text-xs">src/data/leagueCatalog.ts</code>.
-    </p>
+    </p> -->
 
     <div id="soccer-league-root" class="mt-8 min-h-[12rem] text-left"></div>
   </div>
@@ -38,25 +38,6 @@ const seasonsJson = getSoccerSeasonsForClient();
       );
     }
 
-    function storageKey(sk) {
-      return 'solker-league-scores-' + sk;
-    }
-
-    function loadScores(sk) {
-      try {
-        var raw = localStorage.getItem(storageKey(sk));
-        return raw ? JSON.parse(raw) : {};
-      } catch (e) {
-        return {};
-      }
-    }
-
-    function saveScores(sk, data) {
-      try {
-        localStorage.setItem(storageKey(sk), JSON.stringify(data));
-      } catch (e) {}
-    }
-
     function getSeason(key) {
       for (var i = 0; i < seasons.length; i++) {
         if (seasons[i].seasonKey === key) return seasons[i];
@@ -64,7 +45,12 @@ const seasonsJson = getSoccerSeasonsForClient();
       return null;
     }
 
-    function computeStandings(season, scores) {
+    function numOrNaN(v) {
+      return typeof v === 'number' && !Number.isNaN(v);
+    }
+
+    /** Standings from catalog fixtures only (homeGoals / awayGoals / spirit* on each fixture). */
+    function computeStandings(season) {
       var teamNames = season.teams.map(function (t) {
         return t.teamName;
       });
@@ -73,16 +59,11 @@ const seasonsJson = getSoccerSeasonsForClient();
         stats[t] = { w: 0, l: 0, tie: 0, gf: 0, ga: 0, spiritSum: 0, spiritN: 0 };
       });
       season.fixtures.forEach(function (fx) {
-        var sc = scores[fx.id] || {};
-        var hg =
-          sc.homeGoals !== undefined && sc.homeGoals !== '' && sc.homeGoals !== null
-            ? parseInt(String(sc.homeGoals), 10)
-            : NaN;
-        var ag =
-          sc.awayGoals !== undefined && sc.awayGoals !== '' && sc.awayGoals !== null
-            ? parseInt(String(sc.awayGoals), 10)
-            : NaN;
-        if (!Number.isFinite(hg) || !Number.isFinite(ag)) return;
+        var hg = fx.homeGoals;
+        var ag = fx.awayGoals;
+        var hgn = numOrNaN(hg);
+        var agn = numOrNaN(ag);
+        if (!hgn || !agn) return;
         stats[fx.homeTeam].gf += hg;
         stats[fx.homeTeam].ga += ag;
         stats[fx.awayTeam].gf += ag;
@@ -97,13 +78,13 @@ const seasonsJson = getSoccerSeasonsForClient();
           stats[fx.homeTeam].tie += 1;
           stats[fx.awayTeam].tie += 1;
         }
-        var sh = parseFloat(sc.spiritHome);
-        var sa = parseFloat(sc.spiritAway);
-        if (Number.isFinite(sh)) {
+        var sh = fx.spiritHome;
+        var sa = fx.spiritAway;
+        if (numOrNaN(sh)) {
           stats[fx.homeTeam].spiritSum += sh;
           stats[fx.homeTeam].spiritN += 1;
         }
-        if (Number.isFinite(sa)) {
+        if (numOrNaN(sa)) {
           stats[fx.awayTeam].spiritSum += sa;
           stats[fx.awayTeam].spiritN += 1;
         }
@@ -137,65 +118,13 @@ const seasonsJson = getSoccerSeasonsForClient();
       return rows;
     }
 
-    function winnerLabel(fx, sc) {
-      var hg =
-        sc.homeGoals !== undefined && sc.homeGoals !== '' && sc.homeGoals !== null
-          ? parseInt(String(sc.homeGoals), 10)
-          : NaN;
-      var ag =
-        sc.awayGoals !== undefined && sc.awayGoals !== '' && sc.awayGoals !== null
-          ? parseInt(String(sc.awayGoals), 10)
-          : NaN;
-      if (!Number.isFinite(hg) || !Number.isFinite(ag)) return '—';
-      if (hg > ag) return esc(fx.homeTeam) + ' wins';
-      if (ag > hg) return esc(fx.awayTeam) + ' wins';
-      return 'Draw';
-    }
-
-    function updateScoreOnly(season, inp) {
-      var id = inp.getAttribute('data-fx');
-      var field = inp.getAttribute('data-field');
-      if (!id || !field) return;
-      var all = loadScores(season.seasonKey);
-      if (!all[id]) all[id] = {};
-      all[id][field] = inp.value;
-      saveScores(season.seasonKey, all);
-      var fx = null;
-      for (var i = 0; i < season.fixtures.length; i++) {
-        if (season.fixtures[i].id === id) {
-          fx = season.fixtures[i];
-          break;
-        }
-      }
-      var resultEl = document.getElementById('soccer-result-' + id);
-      if (resultEl && fx) resultEl.innerHTML = winnerLabel(fx, all[id]);
-      var tbody = document.getElementById('soccer-standings-tbody');
-      if (tbody && season.standingsMode !== 'comingSoon') {
-        var rows = computeStandings(season, loadScores(season.seasonKey));
-        var trs = [];
-        rows.forEach(function (r, idx) {
-          trs.push(
-            '<tr class="border-b border-taupe/20 text-white"><td class="py-2 pr-2">' +
-              (idx + 1) +
-              '</td><td class="py-2 pr-2 font-semibold">' +
-              esc(r.teamName) +
-              '</td><td class="py-2 pr-2">' +
-              r.points +
-              '</td><td class="py-2 pr-2">' +
-              r.wins +
-              '</td><td class="py-2 pr-2">' +
-              r.losses +
-              '</td><td class="py-2 pr-2">' +
-              r.ties +
-              '</td><td class="py-2 pr-2">' +
-              r.goalsFor +
-              '</td><td class="py-2">' +
-              r.goalsAgainst +
-              '</td></tr>'
-          );
-        });
-        tbody.innerHTML = trs.join('');
-      }
+    /** Result column: optional `result` string, else scoreline from goals, else — */
+    function resultLine(fx) {
+      if (fx.result != null && String(fx.result).trim() !== '') return esc(String(fx.result).trim());
+      var hg = fx.homeGoals;
+      var ag = fx.awayGoals;
+      if (numOrNaN(hg) && numOrNaN(ag)) return esc(hg) + ' – ' + esc(ag);
+      return '—';
     }
 
     var state = {
@@ -243,15 +172,14 @@ const seasonsJson = getSoccerSeasonsForClient();
         return;
       }
 
-      var scores = loadScores(season.seasonKey);
-      var standingsRows = computeStandings(season, scores);
+      var standingsRows = computeStandings(season);
 
       var parts = [];
       parts.push('<div class="space-y-8">');
 
       parts.push('<div class="no-print flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">');
       parts.push('<div class="flex flex-col gap-1">');
-      parts.push('<label for="soccer-select-active" class="text-sm font-medium text-taupe">Active league</label>');
+      parts.push('<label for="soccer-select-active" class="text-lg font-medium text-taupe">Active league</label>');
       parts.push(
         '<select id="soccer-select-active" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white">'
       );
@@ -263,32 +191,32 @@ const seasonsJson = getSoccerSeasonsForClient();
             '"' +
             (state.seasonKey === s.seasonKey ? ' selected' : '') +
             '>' +
-            esc(s.displayLabel) +
+            esc(s.leagueLabel) +
             '</option>'
         );
       });
       parts.push('</select></div>');
 
       parts.push('<div class="flex flex-col gap-1">');
-      parts.push('<label for="soccer-select-previous" class="text-sm font-medium text-taupe">Previous league</label>');
-      parts.push(
-        '<select id="soccer-select-previous" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white">'
-      );
-      parts.push('<option value="">—</option>');
-      prev.forEach(function (s) {
-        parts.push(
-          '<option value="' +
-            esc(s.seasonKey) +
-            '"' +
-            (state.seasonKey === s.seasonKey ? ' selected' : '') +
-            '>' +
-            esc(s.displayLabel) +
-            '</option>'
-        );
-      });
+      // parts.push('<label for="soccer-select-previous" class="text-md font-medium text-taupe">Previous league</label>');
+      // parts.push(
+      //   '<select id="soccer-select-previous" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white">'
+      // );
+      // parts.push('<option value="">—</option>');
+      // prev.forEach(function (s) {
+      //   parts.push(
+      //     '<option value="' +
+      //       esc(s.seasonKey) +
+      //       '"' +
+      //       (state.seasonKey === s.seasonKey ? ' selected' : '') +
+      //       '>' +
+      //       esc(s.displayLabel) +
+      //       '</option>'
+      //   );
+      // });
       parts.push('</select></div></div>');
 
-      parts.push('<div class="rounded-lg border border-taupe/20 bg-forest-dark/50 p-4 text-sm text-taupe">');
+      parts.push('<div class="rounded-lg border border-taupe/20 bg-forest-dark/50 p-4 text-md text-taupe">');
       parts.push('<p><strong class="text-white">Location:</strong> ' + esc(season.address) + '</p>');
       parts.push(
         '<p class="mt-1"><strong class="text-white">Game window:</strong> ' +
@@ -299,14 +227,14 @@ const seasonsJson = getSoccerSeasonsForClient();
 
       parts.push('<div class="no-print flex flex-wrap gap-2">');
       parts.push(
-        '<button type="button" class="rounded-lg px-3 py-1.5 text-sm font-semibold ' +
+        '<button type="button" class="rounded-lg px-3 py-1.5 text-md font-semibold ' +
           (state.scheduleMode === 'basic'
             ? 'bg-orange text-white'
             : 'border border-taupe/30 bg-forest-dark text-white') +
-          '" data-schedule-mode="basic">Basic schedule</button>'
+          '" data-schedule-mode="basic">Game Days</button>'
       );
       parts.push(
-        '<button type="button" class="rounded-lg px-3 py-1.5 text-sm font-semibold ' +
+        '<button type="button" class="rounded-lg px-3 py-1.5 text-md font-semibold ' +
           (state.scheduleMode === 'full'
             ? 'bg-orange text-white'
             : 'border border-taupe/30 bg-forest-dark text-white') +
@@ -316,10 +244,10 @@ const seasonsJson = getSoccerSeasonsForClient();
 
       if (state.scheduleMode === 'basic') {
         parts.push('<div id="print-soccer-basic" class="print-soccer-block">');
-        parts.push('<div class="flex justify-end no-print"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-sm font-semibold text-white" data-print="print-soccer-basic">Print</button></div>');
+        parts.push('<div class="flex justify-end no-print"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-md font-semibold text-white" data-print="print-soccer-basic">Print</button></div>');
         parts.push('<div class="mt-2 overflow-x-auto rounded-lg border border-taupe/30 bg-forest-dark/80 p-4">');
-        parts.push('<h3 class="font-heading mb-3 text-lg font-bold text-white">The 8-Week Calendar (2026)</h3>');
-        parts.push('<table class="w-full min-w-[28rem] border-collapse text-left text-sm"><thead><tr class="border-b border-taupe/30 text-taupe">');
+        parts.push('<h3 class="font-heading mb-3 text-lg font-bold text-white">The 8-Week Calendar</h3>');
+        parts.push('<table class="w-full min-w-[28rem] border-collapse text-left text-md"><thead><tr class="border-b border-taupe/30 text-taupe">');
         parts.push('<th class="py-2 pr-2 font-semibold">Week</th><th class="py-2 pr-2 font-semibold">Date</th><th class="py-2 font-semibold">Status</th>');
         parts.push('</tr></thead><tbody>');
         season.weeklySchedule.forEach(function (row) {
@@ -340,9 +268,9 @@ const seasonsJson = getSoccerSeasonsForClient();
         });
         parts.push('<div id="print-soccer-full" class="print-soccer-block">');
         parts.push('<div class="no-print mb-3 flex flex-wrap items-center gap-3">');
-        parts.push('<label class="text-sm text-taupe" for="soccer-team-filter">Team filter</label>');
+        parts.push('<label class="text-md text-taupe" for="soccer-team-filter">Team filter</label>');
         parts.push(
-          '<select id="soccer-team-filter" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-sm text-white">'
+          '<select id="soccer-team-filter" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-md text-white">'
         );
         parts.push('<option value="">All teams</option>');
         teamNames.forEach(function (n) {
@@ -358,7 +286,7 @@ const seasonsJson = getSoccerSeasonsForClient();
         });
         parts.push('</select>');
         parts.push(
-          '<button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-sm font-semibold text-white" data-print="print-soccer-full">Print schedule</button>'
+          '<button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-md font-semibold text-white" data-print="print-soccer-full">Print schedule</button>'
         );
         parts.push('</div>');
 
@@ -368,10 +296,10 @@ const seasonsJson = getSoccerSeasonsForClient();
           parts.push('<p class="text-taupe">Full schedule not published yet.</p>');
         } else {
           parts.push(
-            '<table class="w-full min-w-[40rem] border-collapse text-left text-sm"><thead><tr class="border-b border-taupe/30 text-taupe">'
+            '<table class="w-full min-w-[48rem] border-collapse text-left text-md"><thead><tr class="border-b border-taupe/30 text-taupe">'
           );
           parts.push(
-            '<th class="py-2 pr-2 font-semibold">Date</th><th class="py-2 pr-2 font-semibold">Field</th><th class="py-2 pr-2 font-semibold">Matchup</th><th class="py-2 pr-2 font-semibold">Result</th>'
+            '<th class="py-2 pr-2 font-semibold">Date</th><th class="py-2 pr-2 font-semibold">Start</th><th class="py-2 pr-2 font-semibold">Field</th><th class="py-2 pr-2 font-semibold">Matchup</th><th class="py-2 pr-2 font-semibold">Result</th>'
           );
           parts.push('</tr></thead><tbody>');
 
@@ -383,9 +311,9 @@ const seasonsJson = getSoccerSeasonsForClient();
             ) {
               return;
             }
-            var sc = scores[fx.id] || {};
             parts.push('<tr class="border-b border-taupe/20 align-top text-white">');
             parts.push('<td class="py-2 pr-2 whitespace-nowrap">' + formatDate(fx.date) + '</td>');
+            parts.push('<td class="py-2 pr-2 whitespace-nowrap">' + esc(fx.startTime || '') + '</td>');
             parts.push('<td class="py-2 pr-2">' + esc(fx.fieldName) + '</td>');
             parts.push(
               '<td class="py-2 pr-2">' +
@@ -394,66 +322,8 @@ const seasonsJson = getSoccerSeasonsForClient();
                 esc(fx.awayTeam) +
                 '</td>'
             );
-            parts.push(
-              '<td id="soccer-result-' +
-                fx.id +
-                '" class="py-2 pr-2">' +
-                winnerLabel(fx, sc) +
-                '</td>'
-            );
+            parts.push('<td class="py-2 pr-2">' + resultLine(fx) + '</td>');
             parts.push('</tr>');
-            parts.push(
-              '<tr class="border-b border-taupe/30 no-print bg-forest-dark/40 text-xs text-taupe">'
-            );
-            parts.push('<td colspan="4" class="py-2">');
-            parts.push(
-              '<details class="text-left"><summary class="cursor-pointer text-orange">Score entry (local browser)</summary>'
-            );
-            parts.push('<div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">');
-            parts.push(
-              '<label class="flex flex-col gap-1">' +
-                esc(fx.homeTeam) +
-                ' goals <input type="number" min="0" class="rounded border border-taupe/30 bg-forest-dark px-2 py-1 text-white" data-fx="' +
-                esc(fx.id) +
-                '" data-field="homeGoals" value="' +
-                esc(sc.homeGoals != null ? sc.homeGoals : '') +
-                '" /></label>'
-            );
-            parts.push(
-              '<label class="flex flex-col gap-1">' +
-                esc(fx.awayTeam) +
-                ' goals <input type="number" min="0" class="rounded border border-taupe/30 bg-forest-dark px-2 py-1 text-white" data-fx="' +
-                esc(fx.id) +
-                '" data-field="awayGoals" value="' +
-                esc(sc.awayGoals != null ? sc.awayGoals : '') +
-                '" /></label>'
-            );
-            parts.push(
-              '<label class="flex flex-col gap-1">Spirit ' +
-                esc(fx.homeTeam) +
-                ' <input type="number" step="0.1" class="rounded border border-taupe/30 bg-forest-dark px-2 py-1 text-white" data-fx="' +
-                esc(fx.id) +
-                '" data-field="spiritHome" value="' +
-                esc(sc.spiritHome != null ? sc.spiritHome : '') +
-                '" /></label>'
-            );
-            parts.push(
-              '<label class="flex flex-col gap-1">Spirit ' +
-                esc(fx.awayTeam) +
-                ' <input type="number" step="0.1" class="rounded border border-taupe/30 bg-forest-dark px-2 py-1 text-white" data-fx="' +
-                esc(fx.id) +
-                '" data-field="spiritAway" value="' +
-                esc(sc.spiritAway != null ? sc.spiritAway : '') +
-                '" /></label>'
-            );
-            parts.push(
-              '<label class="sm:col-span-2 lg:col-span-4 flex flex-col gap-1">Notes <input type="text" class="rounded border border-taupe/30 bg-forest-dark px-2 py-1 text-white" data-fx="' +
-                esc(fx.id) +
-                '" data-field="notes" value="' +
-                esc(sc.notes != null ? sc.notes : '') +
-                '" /></label>'
-            );
-            parts.push('</div></details></td></tr>');
           });
 
           parts.push('</tbody></table>');
@@ -463,18 +333,18 @@ const seasonsJson = getSoccerSeasonsForClient();
 
       if (season.standingsMode === 'comingSoon') {
         parts.push('<div id="print-soccer-standings" class="print-soccer-block">');
-        parts.push('<div class="flex justify-end no-print"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-sm font-semibold text-white" data-print="print-soccer-standings">Print</button></div>');
+        parts.push('<div class="flex justify-end no-print"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-md font-semibold text-white" data-print="print-soccer-standings">Print</button></div>');
         parts.push(
           '<div class="rounded-lg border border-taupe/30 bg-forest-dark/80 p-6 text-center text-taupe">Standings coming soon.</div></div>'
         );
       } else {
         parts.push('<div id="print-soccer-standings" class="print-soccer-block">');
-        parts.push('<div class="flex justify-end no-print"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-sm font-semibold text-white" data-print="print-soccer-standings">Print standings</button></div>');
+        parts.push('<div class="flex justify-end no-print"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-md font-semibold text-white" data-print="print-soccer-standings">Print standings</button></div>');
         parts.push('<div class="overflow-x-auto rounded-lg border border-taupe/30 bg-forest-dark/80 p-4">');
         parts.push('<h3 class="font-heading mb-3 text-lg font-bold text-white">Standings</h3>');
         parts.push('<p class="mb-3 text-xs text-taupe">Points: Win = 3, Tie = 1, Loss = 0. Spirit average is used as a hidden tie-breaker.</p>');
         parts.push(
-          '<table class="w-full min-w-[36rem] border-collapse text-left text-sm"><thead><tr class="border-b border-taupe/30 text-taupe">'
+          '<table class="w-full min-w-[36rem] border-collapse text-left text-md"><thead><tr class="border-b border-taupe/30 text-taupe">'
         );
         parts.push(
           '<th class="py-2 pr-2 font-semibold">#</th><th class="py-2 pr-2 font-semibold">Team</th><th class="py-2 pr-2 font-semibold">PTS</th><th class="py-2 pr-2 font-semibold">W</th><th class="py-2 pr-2 font-semibold">L</th><th class="py-2 pr-2 font-semibold">T</th><th class="py-2 pr-2 font-semibold">GF</th><th class="py-2 font-semibold">GA</th>'
@@ -540,15 +410,6 @@ const seasonsJson = getSoccerSeasonsForClient();
           if (m === 'print-soccer-basic') printBlock('print-soccer-basic');
           else if (m === 'print-soccer-full') printBlock('print-soccer-full');
           else if (m === 'print-soccer-standings') printBlock('print-soccer-standings');
-        });
-      });
-
-      root.querySelectorAll('input[data-fx]').forEach(function (inp) {
-        inp.addEventListener('change', function () {
-          updateScoreOnly(season, inp);
-        });
-        inp.addEventListener('blur', function () {
-          updateScoreOnly(season, inp);
         });
       });
     }
