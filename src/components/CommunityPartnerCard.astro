@@ -1,0 +1,48 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  imageSrc: { src: string } | string;
+  imageAlt: string;
+  ctaText?: string;
+  class?: string;
+}
+
+const {
+  href,
+  title,
+  description,
+  imageSrc,
+  imageAlt,
+  ctaText = 'Visit website',
+  class: className = ''
+} = Astro.props;
+
+const resolvedImageSrc = typeof imageSrc === 'string' ? imageSrc : imageSrc.src;
+---
+
+<a
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  class:list={[
+    'group relative block w-full max-w-md overflow-hidden rounded-xl border border-taupe/30 bg-sage-dark transition hover:border-taupe-light/50 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest',
+    className
+  ]}
+  aria-label={`Visit ${title} website`}
+>
+  <img
+    src={resolvedImageSrc}
+    alt={imageAlt}
+    class="h-32 w-full object-cover object-center sm:h-36"
+    loading="lazy"
+  />
+  <div class="border-t border-taupe/20 bg-sage px-4 py-2 text-left">
+    <h3 class="font-heading text-lg font-bold text-white sm:text-xl">{title}</h3>
+    <p class="mt-1 text-sm text-white/90">{description}</p>
+    <span class="mt-1 inline-block text-sm font-semibold text-white group-hover:text-orange-light">
+      {ctaText} →
+    </span>
+  </div>
+</a>
