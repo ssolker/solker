@@ -11,6 +11,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 const eTransferEmail = 'e-transfer@solker.ca';
 const registrationSeasons = getRegistrationSeasons().map((season) => ({
   submissionValue: season.submissionValue,
+  displayLabel: season.displayLabel,
   price: season.price,
   registrationClosesAt: season.registrationClosesAt
 }));
@@ -104,7 +105,7 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
             Submit and Proceed to Waiver
           </button>
           <!-- <button type="button" id="mockProceedToWaiverBtn" class="mt-2 w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
-            Mock Proceed to Waiver
+            Mocky Proceed to Waiver
           </button> -->
         <div id="paymentStatusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
           <span id="paymentStatusSpinner" class="submit-spinner h-10 w-10 rounded-full border-2 border-sage-dark border-t-orange" aria-hidden="true" style="display: none;"></span>
@@ -121,6 +122,64 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
     </div>
   </main>
 
+  <!-- Shown after waiver success in the 3-step flow; hidden from print via registration-complete-print -->
+  <div
+    id="registrationCompleteModal"
+    class="registration-complete-modal registration-complete-print fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="registrationCompleteModalTitle"
+    aria-hidden="true"
+  >
+    <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-taupe/30 bg-forest-dark p-6 shadow-xl">
+      <h2 id="registrationCompleteModalTitle" class="font-heading text-xl font-bold text-white">
+        Registration complete
+      </h2>
+      <p class="mt-2 text-sm text-taupe">
+        You can print a copy of your signed waiver for your records, or restart registration to register someone else.
+      </p>
+      <div class="mt-4 space-y-3 rounded-lg border border-taupe/20 bg-forest-dark/80 p-4 text-sm">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-orange-200">Name &amp; email</p>
+          <p id="registrationCompleteModalName" class="mt-1 font-medium text-white"></p>
+          <p id="registrationCompleteModalEmail" class="text-taupe"></p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-orange-200">Seasons</p>
+          <ul id="registrationCompleteModalSeasons" class="mt-1 list-disc space-y-1 pl-5 text-white"></ul>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-orange-200">Team</p>
+          <p id="registrationCompleteModalTeam" class="mt-1 text-white"></p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-orange-200">Payment</p>
+          <p id="registrationCompleteModalPayment" class="mt-1 text-white"></p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-orange-200">Waiver</p>
+          <p id="registrationCompleteModalWaiver" class="mt-1 text-white">Submitted and signed</p>
+        </div>
+      </div>
+      <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
+        <button
+          type="button"
+          id="registrationCompleteModalPrintBtn"
+          class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange"
+        >
+          Print waiver
+        </button>
+        <button
+          type="button"
+          id="registrationCompleteModalRestartBtn"
+          class="rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange"
+        >
+          Restart registration
+        </button>
+      </div>
+    </div>
+  </div>
+
   <style>
     .step-dot.bg-orange { background-color: var(--theme-orange, #ea580c); }
     .step-dot.bg-transparent { background-color: transparent; }
@@ -132,13 +191,36 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
     @keyframes submit-spin {
       to { transform: rotate(360deg); }
     }
+    .registration-complete-modal:not(.hidden) {
+      display: flex;
+    }
+    @media print {
+      .registration-complete-print {
+        display: none !important;
+        visibility: hidden !important;
+      }
+    }
   </style>
 
   <script define:vars={{ apiUrl, eTransferEmail, recaptchaSiteKey, registrationSeasons }}>
     (function() {
       var currentStep = 1;
-      var paymentPrefill = { fullName: '', phone: '', leagueSeasons: /** @type {string[]} */ ([]), email: '' };
+      function emptyPaymentPrefill() {
+        return {
+          fullName: '',
+          phone: '',
+          leagueSeasons: /** @type {string[]} */ ([]),
+          leagueSeasonLabels: /** @type {string[]} */ ([]),
+          email: '',
+          registrationChoice: '',
+          teamSummary: '',
+          paymentMethod: '',
+          paymentMethodLabel: ''
+        };
+      }
+      var paymentPrefill = emptyPaymentPrefill();
       var step2RecaptchaId = null;
+      var modalPreviousFocus = /** @type {HTMLElement | null} */ (null);
 
       function generateUuid() {
         return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -236,6 +318,96 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
         return Array.prototype.map.call(boxes, function(b) { return b.value; });
       }
 
+      function seasonLabelsFromValues(values) {
+        return (values || []).map(function(sv) {
+          var m = getSeasonMeta(sv);
+          return m && m.displayLabel ? m.displayLabel : sv;
+        });
+      }
+
+      function readTeamSummaryFromRegistrationForm(form) {
+        var regTypeExistingTeam = form.querySelector('#regTypeExistingTeam');
+        var regTypeNewTeam = form.querySelector('#regTypeNewTeam');
+        var regTypeFreeAgent = form.querySelector('#regTypeFreeAgent');
+        var existingTeamNameEl = form.querySelector('#existingTeamName');
+        var newTeamNameEl = form.querySelector('#newTeamName');
+        var registrationChoice = regTypeExistingTeam && regTypeExistingTeam.checked ? 'existingTeam' : (regTypeNewTeam && regTypeNewTeam.checked ? 'newTeam' : 'freeAgent');
+        var teamSummary = 'Free agent';
+        if (registrationChoice === 'existingTeam') {
+          teamSummary = existingTeamNameEl && existingTeamNameEl.value.trim() ? existingTeamNameEl.value.trim() : 'Existing team';
+        } else if (registrationChoice === 'newTeam') {
+          teamSummary = newTeamNameEl && newTeamNameEl.value.trim() ? newTeamNameEl.value.trim() : 'New team';
+        }
+        return { registrationChoice: registrationChoice, teamSummary: teamSummary };
+      }
+
+      function syncStep2FieldsToPrefill() {
+        var nameEl = document.getElementById('paymentName');
+        var emailEl = document.getElementById('paymentUserEmail');
+        var methodEl = document.querySelector('input[name="paymentMethod"]:checked');
+        var method = methodEl ? methodEl.value : 'etransfer';
+        paymentPrefill.fullName = nameEl && nameEl.value ? nameEl.value.trim() : paymentPrefill.fullName;
+        paymentPrefill.email = emailEl && emailEl.value ? emailEl.value.trim() : paymentPrefill.email;
+        paymentPrefill.paymentMethod = method;
+        paymentPrefill.paymentMethodLabel = method === 'cash' ? 'Cash' : 'E-Transfer';
+      }
+
+      function populateRegistrationCompleteModal() {
+        var nameEl = document.getElementById('registrationCompleteModalName');
+        var emailEl = document.getElementById('registrationCompleteModalEmail');
+        var seasonsEl = document.getElementById('registrationCompleteModalSeasons');
+        var teamEl = document.getElementById('registrationCompleteModalTeam');
+        var payEl = document.getElementById('registrationCompleteModalPayment');
+        if (nameEl) nameEl.textContent = paymentPrefill.fullName || '—';
+        if (emailEl) emailEl.textContent = paymentPrefill.email || '—';
+        if (seasonsEl) {
+          seasonsEl.innerHTML = '';
+          var labels = paymentPrefill.leagueSeasonLabels && paymentPrefill.leagueSeasonLabels.length
+            ? paymentPrefill.leagueSeasonLabels
+            : seasonLabelsFromValues(paymentPrefill.leagueSeasons);
+          if (!labels.length) {
+            var li0 = document.createElement('li');
+            li0.textContent = '—';
+            seasonsEl.appendChild(li0);
+          } else {
+            labels.forEach(function(lbl) {
+              var li = document.createElement('li');
+              li.textContent = lbl;
+              seasonsEl.appendChild(li);
+            });
+          }
+        }
+        if (teamEl) teamEl.textContent = paymentPrefill.teamSummary || '—';
+        if (payEl) payEl.textContent = paymentPrefill.paymentMethodLabel || (paymentPrefill.paymentMethod === 'cash' ? 'Cash' : 'E-Transfer');
+      }
+
+      function openRegistrationCompleteModal() {
+        var modal = document.getElementById('registrationCompleteModal');
+        if (!modal) return;
+        modalPreviousFocus = /** @type {HTMLElement} */ (document.activeElement);
+        populateRegistrationCompleteModal();
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        var printBtn = document.getElementById('registrationCompleteModalPrintBtn');
+        if (printBtn) printBtn.focus();
+        else modal.focus();
+      }
+
+      function closeRegistrationCompleteModal() {
+        var modal = document.getElementById('registrationCompleteModal');
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        if (modalPreviousFocus && typeof modalPreviousFocus.focus === 'function') {
+          modalPreviousFocus.focus();
+        }
+        modalPreviousFocus = null;
+      }
+
+      window.__openRegistrationCompleteModal = function() {
+        openRegistrationCompleteModal();
+      };
+
       window.__onRegistrationSuccess = function() {
         var form = document.getElementById('registration-form');
         if (form) {
@@ -245,7 +417,13 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
           paymentPrefill.fullName = fn ? fn.value.trim() : '';
           paymentPrefill.phone = ph ? ph.value.trim() : '';
           paymentPrefill.leagueSeasons = getLeagueSeasonSelectionsFromForm(form);
+          paymentPrefill.leagueSeasonLabels = seasonLabelsFromValues(paymentPrefill.leagueSeasons);
           paymentPrefill.email = em ? em.value.trim() : '';
+          var teamInfo = readTeamSummaryFromRegistrationForm(form);
+          paymentPrefill.registrationChoice = teamInfo.registrationChoice;
+          paymentPrefill.teamSummary = teamInfo.teamSummary;
+          paymentPrefill.paymentMethod = '';
+          paymentPrefill.paymentMethodLabel = '';
         }
         if (!areAllSeasonsOpen(paymentPrefill.leagueSeasons)) {
           var statusText = document.getElementById('registrationStatusText');
@@ -259,7 +437,8 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
       };
 
       window.__onWaiverSuccessInFlow = function() {
-        paymentPrefill = { fullName: '', phone: '', leagueSeasons: [], email: '' };
+        closeRegistrationCompleteModal();
+        paymentPrefill = emptyPaymentPrefill();
         window.__registrationFlowId = generateUuid();
         setStep(1);
         location.reload();
@@ -350,6 +529,7 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
               if (statusSpinner) statusSpinner.style.display = 'none';
               if (json.success) {
                 if (statusText) { statusText.textContent = ''; statusText.classList.add('text-green-600'); }
+                syncStep2FieldsToPrefill();
                 setStep(3);
               } else {
                 if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
@@ -366,9 +546,46 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
         var mockProceedBtn = document.getElementById('mockProceedToWaiverBtn');
         if (mockProceedBtn) {
           mockProceedBtn.addEventListener('click', function() {
+            syncStep2FieldsToPrefill();
             setStep(3);
           });
         }
+
+        var regCompletePrint = document.getElementById('registrationCompleteModalPrintBtn');
+        if (regCompletePrint) {
+          regCompletePrint.addEventListener('click', function() {
+            window.print();
+          });
+        }
+        var regCompleteRestart = document.getElementById('registrationCompleteModalRestartBtn');
+        if (regCompleteRestart) {
+          regCompleteRestart.addEventListener('click', function() {
+            if (typeof window.__onWaiverSuccessInFlow === 'function') window.__onWaiverSuccessInFlow();
+          });
+        }
+
+        document.addEventListener('keydown', function(ev) {
+          var modal = document.getElementById('registrationCompleteModal');
+          if (!modal || modal.classList.contains('hidden')) return;
+          if (ev.key !== 'Tab') return;
+          var printBtn = document.getElementById('registrationCompleteModalPrintBtn');
+          var restartBtn = document.getElementById('registrationCompleteModalRestartBtn');
+          if (!printBtn || !restartBtn) return;
+          var focusables = [printBtn, restartBtn];
+          var active = document.activeElement;
+          var ix = focusables.indexOf(/** @type {HTMLElement} */ (active));
+          if (ev.shiftKey) {
+            if (ix <= 0) {
+              ev.preventDefault();
+              restartBtn.focus();
+            }
+          } else {
+            if (ix < 0 || ix === focusables.length - 1) {
+              ev.preventDefault();
+              printBtn.focus();
+            }
+          }
+        });
       });
     })();
   </script>

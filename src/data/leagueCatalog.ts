@@ -94,7 +94,9 @@ const soccerS1Teams: TeamInfo[] = [
   { teamName: 'Butler', captainName: 'Darcey Butler' },
   { teamName: 'Myers', captainName: 'Cloey Myers' },
   { teamName: 'Solker', captainName: 'Shuaib Solker' },
-  { teamName: 'Taylor', captainName: 'Zack Taylor' }
+  { teamName: 'Taylor', captainName: 'Zack Taylor' },
+  { teamName: 'Thomas', captainName: 'Jonathan Thomas' },
+  { teamName: '8 - TBD', captainName: 'Team 8' }
 ];
 
 const soccerSeason1Weekly: WeeklyScheduleRow[] = [
@@ -107,6 +109,19 @@ const soccerSeason1Weekly: WeeklyScheduleRow[] = [
   { weekLabel: 'Week 6', dateLabel: 'Monday, June 15', status: 'Regular Season' },
   { weekLabel: 'Week 7', dateLabel: 'Monday, June 22', status: 'Regular Season' },
   { weekLabel: 'Week 8', dateLabel: 'Monday, June 29', status: 'Finals / Championship Night' }
+];
+
+const soccerSeason2Weekly: WeeklyScheduleRow[] = [
+  { weekLabel: 'Proposed Dates', dateLabel: '—', status: 'Not Firmed Yet' },
+  { weekLabel: 'Week 1', dateLabel: 'Monday, July 6', status: 'Season Opener' },
+  { weekLabel: 'Week 2', dateLabel: 'Monday, July 13', status: 'Regular Season' },
+  { weekLabel: 'Week 3', dateLabel: 'Monday, July 20', status: 'Regular Season' },
+  { weekLabel: 'Week 4', dateLabel: 'Monday, July 27', status: 'Regular Season' },
+  { weekLabel: '—', dateLabel: 'Monday, August 3', status: 'NO GAMES (Civic Holiday)' },
+  { weekLabel: 'Week 5', dateLabel: 'Monday, August 10', status: 'Regular Season' },
+  { weekLabel: 'Week 6', dateLabel: 'Monday, August 17', status: 'Regular Season' },
+  { weekLabel: 'Week 7', dateLabel: 'Monday, August 24', status: 'Regular Season' },
+  { weekLabel: 'Week 8', dateLabel: 'Monday, August 31', status: 'Finals / Championship Night' }
 ];
 
 /**
@@ -186,9 +201,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         isActive: true,
         address: SOC_ADDRESS,
         gameTimeDetail: 'Game 1: 6:30pm–7:15pm, Game 2: 7:30pm-8:15pm',
-        weeklySchedule: [
-          { weekLabel: 'TBD', dateLabel: 'Jul – Aug', status: 'Schedule TBD' }
-        ],
+        weeklySchedule: soccerSeason2Weekly,
         fixtures: [],
         standingsMode: 'comingSoon',
         standings: emptyStandings(soccerS1Teams.map((t) => t.teamName))
