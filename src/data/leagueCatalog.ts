@@ -96,7 +96,7 @@ const soccerS1Teams: TeamInfo[] = [
   { teamName: 'Solker', captainName: 'Shuaib Solker' },
   { teamName: 'Taylor', captainName: 'Zack Taylor' },
   { teamName: 'Thomas', captainName: 'Jonathan Thomas' },
-  { teamName: '8 - TBD', captainName: 'Team 8' }
+  { teamName: 'Thompson', captainName: 'Annika Thompson' }
 ];
 
 const soccerSeason1Weekly: WeeklyScheduleRow[] = [
