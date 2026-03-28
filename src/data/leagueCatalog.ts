@@ -194,7 +194,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         leagueLabel: 'Soccer - Season 2 (Jul - Aug) 2026',
         submissionValue: 'Soccer - Season 2 - 50',
         price: 50,
-        startDate: '2026-07-01',
+        startDate: '2026-07-06',
         endDate: '2026-08-31',
         registrationClosesAt: '2026-06-01T23:59:59-04:00',
         teams: soccerS1Teams.map((t) => ({ ...t })),

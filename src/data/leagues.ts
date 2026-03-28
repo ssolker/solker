@@ -42,7 +42,7 @@ function formatRange(startDate: string, endDate: string): string {
 
 export const leagues: League[] = soccerSeasons.map(function (season, index) {
   var isOpen = isRegistrationOpen(season.registrationClosesAt);
-  var badge = isOpen ? (index === 0 ? 'Registration Open!' : 'Coming Soon!') : 'Registration Closed';
+  var badge = isOpen ? 'Registration Open!' : 'Registration Closed';
   return {
     title: '6v6 Co-Ed Soccer (' + season.seasonLabel + ')',
     subtitle: soccerGameDay + ' (' + formatRange(season.startDate, season.endDate) + ')',
