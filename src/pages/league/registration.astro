@@ -101,12 +101,12 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
 
           <div id="step2RecaptchaWrap" class="flex justify-center py-2"></div>
 
-          <button type="button" id="proceedToWaiverBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+          <!-- <button type="button" id="proceedToWaiverBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
             Submit and Proceed to Waiver
-          </button>
-          <!-- <button type="button" id="mockProceedToWaiverBtn" class="mt-2 w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
-            Mocky Proceed to Waiver
           </button> -->
+          <button type="button" id="mockProceedToWaiverBtn" class="mt-2 w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+            Mocky Proceed to Waiver
+          </button>
         <div id="paymentStatusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
           <span id="paymentStatusSpinner" class="submit-spinner h-10 w-10 rounded-full border-2 border-sage-dark border-t-orange" aria-hidden="true" style="display: none;"></span>
           <p id="paymentStatusText" class="min-h-[1.5em] text-center text-sm font-medium text-red-500"></p>
@@ -263,6 +263,7 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
       }
 
       function setStep(step) {
+        var prev = currentStep;
         currentStep = step;
         document.getElementById('step1Panel').classList.toggle('hidden', step !== 1);
         document.getElementById('step2Panel').classList.toggle('hidden', step !== 2);
@@ -292,8 +293,6 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
           if (!amt) amt = 50;
           if (amountEl) amountEl.textContent = '$' + amt + '.00';
           initStep2Recaptcha();
-          var step2Panel = document.getElementById('step2Panel');
-          if (step2Panel) step2Panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         if (step === 3) {
           var waiverFullNameEl = document.getElementById('waiverFullName');
@@ -301,6 +300,7 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
           if (waiverFullNameEl) waiverFullNameEl.value = paymentPrefill.fullName || '';
           if (waiverEmailEl) waiverEmailEl.value = paymentPrefill.email || '';
         }
+        if (step !== prev) window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
       function initStep2Recaptcha() {
@@ -408,7 +408,9 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
         openRegistrationCompleteModal();
       };
 
-      window.__onRegistrationSuccess = function() {
+      window.__onRegistrationSuccess = function(opts) {
+        opts = opts || {};
+        var skipPaymentStep = !!opts.skipPaymentStep;
         var form = document.getElementById('registration-form');
         if (form) {
           var fn = form.querySelector('#fullName');
@@ -433,7 +435,13 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
           }
           return;
         }
-        setStep(2);
+        if (skipPaymentStep) {
+          paymentPrefill.paymentMethod = 'etransfer';
+          paymentPrefill.paymentMethodLabel = 'E-Transfer';
+          setStep(3);
+        } else {
+          setStep(2);
+        }
       };
 
       window.__onWaiverSuccessInFlow = function() {
@@ -471,7 +479,8 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
         });
         document.getElementById('paymentMessage').addEventListener('input', function() {});
 
-        document.getElementById('proceedToWaiverBtn').addEventListener('click', function() {
+        var proceedToWaiverBtn = document.getElementById('proceedToWaiverBtn');
+        if (proceedToWaiverBtn) proceedToWaiverBtn.addEventListener('click', function() {
           var btn = this;
           var statusSpinner = document.getElementById('paymentStatusSpinner');
           var statusText = document.getElementById('paymentStatusText');
