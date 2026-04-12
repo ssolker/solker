@@ -16,6 +16,7 @@ export interface WeeklyScheduleRow {
  * - `homeGoals` / `awayGoals`: set when final; omit or `null` if not played yet.
  * - `result`: optional override text for the Result column (e.g. "Postponed"). If omitted, Result is derived from goals or shows "—".
  * - `spiritHome` / `spiritAway`: optional; used only for standings tie-break (not shown in the schedule table).
+ * - `countsForStandings`: when false, fixture is excluded from standings (e.g. playoffs). Defaults to true.
  */
 export interface SeasonFixture {
   id: string;
@@ -29,6 +30,8 @@ export interface SeasonFixture {
   result?: string | null;
   spiritHome?: number | null;
   spiritAway?: number | null;
+  /** Omit or true for regular season; false for cup/playoff games */
+  countsForStandings?: boolean;
 }
 
 /** Standings row stored in catalog (optional baseline); UI standings are computed from fixtures. */
@@ -125,40 +128,76 @@ const soccerSeason2Weekly: WeeklyScheduleRow[] = [
 ];
 
 /**
- * Season 1 full schedule — edit this list only (copy rows to add games).
- * Standings are calculated from `homeGoals` / `awayGoals` and optional `spiritHome` / `spiritAway`.
+ * Season 1: double round-robin built as two single round-robins back-to-back (waves 0-6 then 7-13).
+ * Each team meets every other team once before any rematch. Week 1 opener (6:30) unchanged.
+ * Fields: J, H, G, K. Finals night: 6:30 semis; 7:30 championship + 3rd (top), 5th + 7th (bottom).
+ * Playoffs: countsForStandings false.
  */
 const SOCCER_SEASON_1_FIXTURES: SeasonFixture[] = [
-  // {
-  //   id: 'soccer-season-1-g01',
-  //   date: '2026-05-04',
-  //   startTime: '6:30 PM',
-  //   fieldName: 'Cowan Park',
-  //   homeTeam: 'Batth',
-  //   awayTeam: 'Bender',
-  //   homeGoals: null,
-  //   awayGoals: null
-  // },
-  // {
-  //   id: 'soccer-season-1-g02',
-  //   date: '2026-05-04',
-  //   startTime: '7:30 PM',
-  //   fieldName: 'Cowan Park',
-  //   homeTeam: 'Butler',
-  //   awayTeam: 'Myers',
-  //   homeGoals: null,
-  //   awayGoals: null
-  // },
-  // {
-  //   id: 'soccer-season-1-g03',
-  //   date: '2026-05-11',
-  //   startTime: '6:30 PM',
-  //   fieldName: 'Cowan Park',
-  //   homeTeam: 'Solker',
-  //   awayTeam: 'Taylor',
-  //   homeGoals: null,
-  //   awayGoals: null
-  // }
+  { id: 'soccer-season-1-g01', date: '2026-05-04', startTime: '6:30 PM', fieldName: 'Field J', homeTeam: 'Butler', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g02', date: '2026-05-04', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Solker' },
+  { id: 'soccer-season-1-g03', date: '2026-05-04', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Batth', awayTeam: 'Myers' },
+  { id: 'soccer-season-1-g04', date: '2026-05-04', startTime: '6:30 PM', fieldName: 'Field K', homeTeam: 'Thomas', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g05', date: '2026-05-04', startTime: '7:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Bender' },
+  { id: 'soccer-season-1-g06', date: '2026-05-04', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Butler', awayTeam: 'Myers' },
+  { id: 'soccer-season-1-g07', date: '2026-05-04', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Solker', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g08', date: '2026-05-04', startTime: '7:30 PM', fieldName: 'Field K', homeTeam: 'Taylor', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g09', date: '2026-05-11', startTime: '6:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Butler' },
+  { id: 'soccer-season-1-g10', date: '2026-05-11', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Myers' },
+  { id: 'soccer-season-1-g11', date: '2026-05-11', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Solker', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g12', date: '2026-05-11', startTime: '6:30 PM', fieldName: 'Field K', homeTeam: 'Taylor', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g13', date: '2026-05-11', startTime: '7:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Solker' },
+  { id: 'soccer-season-1-g14', date: '2026-05-11', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g15', date: '2026-05-11', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Butler', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g16', date: '2026-05-11', startTime: '7:30 PM', fieldName: 'Field K', homeTeam: 'Myers', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g17', date: '2026-05-25', startTime: '6:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g18', date: '2026-05-25', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g19', date: '2026-05-25', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Butler', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g20', date: '2026-05-25', startTime: '6:30 PM', fieldName: 'Field K', homeTeam: 'Myers', awayTeam: 'Solker' },
+  { id: 'soccer-season-1-g21', date: '2026-05-25', startTime: '7:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g22', date: '2026-05-25', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g23', date: '2026-05-25', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Butler', awayTeam: 'Solker' },
+  { id: 'soccer-season-1-g24', date: '2026-05-25', startTime: '7:30 PM', fieldName: 'Field K', homeTeam: 'Myers', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g25', date: '2026-06-01', startTime: '6:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g26', date: '2026-06-01', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Butler' },
+  { id: 'soccer-season-1-g27', date: '2026-06-01', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Myers', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g28', date: '2026-06-01', startTime: '6:30 PM', fieldName: 'Field K', homeTeam: 'Solker', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g29', date: '2026-06-01', startTime: '7:30 PM', fieldName: 'Field J', homeTeam: 'Butler', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g30', date: '2026-06-01', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Solker' },
+  { id: 'soccer-season-1-g31', date: '2026-06-01', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Batth', awayTeam: 'Myers' },
+  { id: 'soccer-season-1-g32', date: '2026-06-01', startTime: '7:30 PM', fieldName: 'Field K', homeTeam: 'Thomas', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g33', date: '2026-06-08', startTime: '6:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Bender' },
+  { id: 'soccer-season-1-g34', date: '2026-06-08', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Butler', awayTeam: 'Myers' },
+  { id: 'soccer-season-1-g35', date: '2026-06-08', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Solker', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g36', date: '2026-06-08', startTime: '6:30 PM', fieldName: 'Field K', homeTeam: 'Taylor', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g37', date: '2026-06-08', startTime: '7:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Butler' },
+  { id: 'soccer-season-1-g38', date: '2026-06-08', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Myers' },
+  { id: 'soccer-season-1-g39', date: '2026-06-08', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Solker', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g40', date: '2026-06-08', startTime: '7:30 PM', fieldName: 'Field K', homeTeam: 'Taylor', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g41', date: '2026-06-15', startTime: '6:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Solker' },
+  { id: 'soccer-season-1-g42', date: '2026-06-15', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g43', date: '2026-06-15', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Butler', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g44', date: '2026-06-15', startTime: '6:30 PM', fieldName: 'Field K', homeTeam: 'Myers', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g45', date: '2026-06-15', startTime: '7:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g46', date: '2026-06-15', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g47', date: '2026-06-15', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Butler', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g48', date: '2026-06-15', startTime: '7:30 PM', fieldName: 'Field K', homeTeam: 'Myers', awayTeam: 'Solker' },
+  { id: 'soccer-season-1-g49', date: '2026-06-22', startTime: '6:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g50', date: '2026-06-22', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g51', date: '2026-06-22', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Butler', awayTeam: 'Solker' },
+  { id: 'soccer-season-1-g52', date: '2026-06-22', startTime: '6:30 PM', fieldName: 'Field K', homeTeam: 'Myers', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g53', date: '2026-06-22', startTime: '7:30 PM', fieldName: 'Field J', homeTeam: 'Batth', awayTeam: 'Thompson' },
+  { id: 'soccer-season-1-g54', date: '2026-06-22', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Butler' },
+  { id: 'soccer-season-1-g55', date: '2026-06-22', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Myers', awayTeam: 'Thomas' },
+  { id: 'soccer-season-1-g56', date: '2026-06-22', startTime: '7:30 PM', fieldName: 'Field K', homeTeam: 'Solker', awayTeam: 'Taylor' },
+  { id: 'soccer-season-1-g57', date: '2026-06-29', startTime: '6:30 PM', fieldName: 'Field J', homeTeam: 'Seed 1', awayTeam: 'Seed 4', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-1-g58', date: '2026-06-29', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Seed 2', awayTeam: 'Seed 3', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-1-g59', date: '2026-06-29', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Seed 5', awayTeam: 'Seed 8', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-1-g60', date: '2026-06-29', startTime: '6:30 PM', fieldName: 'Field K', homeTeam: 'Seed 6', awayTeam: 'Seed 7', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-1-g61', date: '2026-06-29', startTime: '7:30 PM', fieldName: 'Field J', homeTeam: 'Winner (1 v 4)', awayTeam: 'Winner (2 v 3)', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-1-g62', date: '2026-06-29', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Loser (1 v 4)', awayTeam: 'Loser (2 v 3)', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-1-g63', date: '2026-06-29', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Winner (5 v 8)', awayTeam: 'Winner (6 v 7)', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-1-g64', date: '2026-06-29', startTime: '7:30 PM', fieldName: 'Field K', homeTeam: 'Loser (5 v 8)', awayTeam: 'Loser (6 v 7)', countsForStandings: false, result: 'TBD' },
 ];
 
 export const leagueCatalog: LeagueCatalogEntry[] = [
@@ -181,7 +220,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         teams: soccerS1Teams,
         isActive: true,
         address: SOC_ADDRESS,
-        gameTimeDetail: 'Game 1: 6:30pm–7:15pm, Game 2: 7:30pm-8:15pm',
+        gameTimeDetail: 'Regular season: two waves (6:30 and 7:30), four games per wave on Fields J/H/G/K. Championship night: semis 6:30; 7:30 has four placement games (1st, 3rd, 5th, 7th).',
         weeklySchedule: soccerSeason1Weekly,
         fixtures: SOCCER_SEASON_1_FIXTURES,
         standingsMode: 'table',

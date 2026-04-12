@@ -59,6 +59,8 @@ const seasonsJson = getSoccerSeasonsForClient();
         stats[t] = { w: 0, l: 0, tie: 0, gf: 0, ga: 0, spiritSum: 0, spiritN: 0 };
       });
       season.fixtures.forEach(function (fx) {
+        if (fx.countsForStandings === false) return;
+        if (!stats[fx.homeTeam] || !stats[fx.awayTeam]) return;
         var hg = fx.homeGoals;
         var ag = fx.awayGoals;
         var hgn = numOrNaN(hg);
@@ -465,10 +467,10 @@ const seasonsJson = getSoccerSeasonsForClient();
       display: none !important;
     }
 
-    /* Everything in the page shell except #standings */
-    body.print-soccer-basic > div > main > *:not(#standings),
-    body.print-soccer-full > div > main > *:not(#standings),
-    body.print-soccer-standings > div > main > *:not(#standings) {
+    /* Everything in the page shell except the standings & schedule section */
+    body.print-soccer-basic > div > main > *:not(#standings-and-schedule),
+    body.print-soccer-full > div > main > *:not(#standings-and-schedule),
+    body.print-soccer-standings > div > main > *:not(#standings-and-schedule) {
       display: none !important;
     }
 
@@ -479,15 +481,15 @@ const seasonsJson = getSoccerSeasonsForClient();
     }
 
     /* Section chrome: hide heading; show only the printable block inside the root */
-    body.print-soccer-basic #standings > div > h2,
-    body.print-soccer-full #standings > div > h2,
-    body.print-soccer-standings #standings > div > h2 {
+    body.print-soccer-basic #standings-and-schedule > div > h2,
+    body.print-soccer-full #standings-and-schedule > div > h2,
+    body.print-soccer-standings #standings-and-schedule > div > h2 {
       display: none !important;
     }
 
-    body.print-soccer-basic #standings,
-    body.print-soccer-full #standings,
-    body.print-soccer-standings #standings {
+    body.print-soccer-basic #standings-and-schedule,
+    body.print-soccer-full #standings-and-schedule,
+    body.print-soccer-standings #standings-and-schedule {
       padding: 0 !important;
       margin: 0 !important;
       background: transparent !important;
