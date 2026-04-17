@@ -53,7 +53,7 @@ export const leagues: League[] = soccerSeasons.map(function (season, index) {
     primaryButtonText: isOpen ? 'Register' : 'Registration Closed',
     primaryButtonHref: isOpen ? '/league/registration' : undefined,
     secondaryButtonText: 'Learn More',
-    secondaryButtonHref: '/league/soccer#rules'
+    secondaryButtonHref: '/league/soccer#quick-links'
   };
 });
 
