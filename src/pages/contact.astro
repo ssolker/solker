@@ -1,9 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Footer from '../components/Footer.astro';
+import { getFormsApiUrl, getRecaptchaSiteKeyV3, getRecaptchaSiteKeyV2 } from '../env/publicForms';
 
-const apiUrl = import.meta.env.PUBLIC_FORMS_API_URL || '';
-const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
+const apiUrl = getFormsApiUrl();
+const recaptchaSiteKey = getRecaptchaSiteKeyV3();
+const recaptchaSiteKeyV2 = getRecaptchaSiteKeyV2();
+const showContactV2Initially = !recaptchaSiteKey && !!recaptchaSiteKeyV2;
 ---
 
 <Layout
@@ -36,7 +39,14 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
           <textarea id="message" name="message" required maxlength="3000" placeholder="Your message… (max 3000 characters)" rows="5" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
         </div>
 
-        <div id="recaptcha-wrap" class="flex justify-center"></div>
+        <div id="recaptcha-wrap" class="min-h-0" aria-hidden="true"></div>
+        {recaptchaSiteKeyV2 && (
+          <div
+            id="contact-recaptcha-v2-wrap"
+            class:list={['flex justify-center', showContactV2Initially ? '' : 'hidden']}
+            aria-hidden={showContactV2Initially ? 'false' : 'true'}
+          />
+        )}
 
         <button type="submit" id="submitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
           Send
@@ -55,6 +65,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
       </div>
 
       <p class="mt-6 text-sm text-taupe">
+        This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy" class="text-orange hover:text-orange-light" rel="noopener noreferrer">Privacy Policy</a> and <a href="https://policies.google.com/terms" class="text-orange hover:text-orange-light" rel="noopener noreferrer">Terms of Service</a> apply.
+      </p>
+      <p class="mt-2 text-sm text-taupe">
         Submissions are used only to respond to your inquiry. See our <a href="/legal#privacy" class="text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest">Privacy Policy</a>.
       </p>
     </div>
@@ -70,14 +83,47 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     }
   </style>
 
-  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadContact&render=explicit" async defer />
-  <script define:vars={{ apiUrl, recaptchaSiteKey }}>
-    (function() {
-      window.onRecaptchaLoadContact = function() {
-        if (typeof grecaptcha === 'undefined' || !recaptchaSiteKey) return;
-        var wrap = document.getElementById('recaptcha-wrap');
-        if (wrap) window.contactRecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
+  {recaptchaSiteKeyV2 && !recaptchaSiteKey && (
+    <script define:vars={{ recaptchaSiteKeyV2 }}>
+      window.solkerContactV2Onload = function() {
+        var wrap = document.getElementById('contact-recaptcha-v2-wrap');
+        if (!wrap || !recaptchaSiteKeyV2 || typeof grecaptcha === 'undefined') return;
+        if (wrap.getAttribute('data-rc-widget-id')) return;
+        var wid = grecaptcha.render(wrap, { sitekey: recaptchaSiteKeyV2, theme: 'dark' });
+        wrap.setAttribute('data-rc-widget-id', String(wid));
       };
+    </script>
+  )}
+  {recaptchaSiteKeyV2 && !recaptchaSiteKey && (
+    <script src="https://www.google.com/recaptcha/api.js?onload=solkerContactV2Onload&render=explicit" async defer />
+  )}
+  {recaptchaSiteKey && <script src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`} async defer />}
+  <script define:vars={{ apiUrl, recaptchaSiteKey, recaptchaSiteKeyV2 }}>
+    (function() {
+      var contactV2Mode = false;
+
+      function getContactV2WidgetId() {
+        var wrap = document.getElementById('contact-recaptcha-v2-wrap');
+        if (!wrap) return null;
+        var raw = wrap.getAttribute('data-rc-widget-id');
+        return raw != null && raw !== '' ? parseInt(raw, 10) : null;
+      }
+
+      function ensureContactV2WidgetVisible() {
+        var wrap = document.getElementById('contact-recaptcha-v2-wrap');
+        if (!wrap || !recaptchaSiteKeyV2 || typeof grecaptcha === 'undefined') return null;
+        wrap.classList.remove('hidden');
+        wrap.setAttribute('aria-hidden', 'false');
+        var existing = getContactV2WidgetId();
+        if (existing !== null && !isNaN(existing)) return existing;
+        try {
+          var wid = grecaptcha.render(wrap, { sitekey: recaptchaSiteKeyV2, theme: 'dark' });
+          wrap.setAttribute('data-rc-widget-id', String(wid));
+          return wid;
+        } catch (e) {
+          return null;
+        }
+      }
 
       var form = document.getElementById('contact-form');
       if (form) {
@@ -103,18 +149,14 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             if (statusText) statusText.textContent = 'Please enter a valid email address.';
             return;
           }
-          var token = '';
-          if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && window.contactRecaptchaId !== undefined) {
-            token = grecaptcha.getResponse(window.contactRecaptchaId);
-            if (!token) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (statusText) statusText.textContent = 'Please complete the verification below.';
-              return;
-            }
+          if (!recaptchaSiteKey && !recaptchaSiteKeyV2) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_RECAPTCHA_SITE_KEY_V3 or PUBLIC_RECAPTCHA_SITE_KEY (v2).';
+            return;
           }
           if (!apiUrl) {
             if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL.';
+            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL (or PUBLIC_FORMS_API_URL_DEV for local dev).';
             return;
           }
 
@@ -122,40 +164,102 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
           if (statusSpinner) statusSpinner.style.display = 'block';
           if (statusText) { statusText.textContent = 'Sending…'; statusText.classList.remove('text-red-500', 'text-green-600'); }
 
-          var payload = {
-            action: 'contact',
-            data: {
-              email: email,
-              subject: document.getElementById('subject').value.trim(),
-              message: message
-            },
-            recaptchaToken: token
-          };
+          function failContact(msg) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) { statusText.textContent = msg; statusText.classList.add('text-red-500'); }
+            submitBtn.disabled = false;
+          }
 
-          fetch(apiUrl, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            redirect: 'follow'
-          })
-            .then(function(res) { return res.json(); })
-            .then(function(json) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (json.success) {
-                if (statusText) { statusText.textContent = json.message || 'Message sent.'; statusText.classList.add('text-green-600'); }
-                submitBtn.style.display = 'none';
-                var recWrap = document.getElementById('recaptcha-wrap');
-                if (recWrap) recWrap.innerHTML = '';
-              } else {
-                if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
-                submitBtn.disabled = false;
+          if (typeof grecaptcha === 'undefined') {
+            failContact('Spam protection could not load. Please refresh and try again.');
+            return;
+          }
+
+          function handleContactJson(json) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (json.success) {
+              contactV2Mode = false;
+              if (statusText) { statusText.textContent = json.message || 'Message sent.'; statusText.classList.remove('text-red-500', 'text-taupe'); statusText.classList.add('text-green-600'); }
+              submitBtn.style.display = 'none';
+              var recWrap = document.getElementById('recaptcha-wrap');
+              if (recWrap) recWrap.innerHTML = '';
+              var v2w = document.getElementById('contact-recaptcha-v2-wrap');
+              if (v2w) {
+                v2w.classList.add('hidden');
+                v2w.setAttribute('aria-hidden', 'true');
               }
-            })
-            .catch(function(err) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+            } else {
+              if (json.recaptchaV2Required && recaptchaSiteKeyV2) {
+                var wid = ensureContactV2WidgetVisible();
+                if (wid !== null && !isNaN(wid)) {
+                  contactV2Mode = true;
+                  if (statusText) {
+                    statusText.textContent = json.error || 'Complete the checkbox below, then submit again.';
+                    statusText.classList.remove('text-red-500', 'text-green-600');
+                    statusText.classList.add('text-taupe');
+                  }
+                  submitBtn.disabled = false;
+                  return;
+                }
+              }
+              if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
               submitBtn.disabled = false;
+            }
+          }
+
+          function postContact(token) {
+            var payload = {
+              action: 'contact',
+              data: {
+                email: email,
+                subject: document.getElementById('subject').value.trim(),
+                message: message
+              },
+              recaptchaToken: token
+            };
+
+            fetch(apiUrl, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              redirect: 'follow'
+            })
+              .then(function(res) { return res.json(); })
+              .then(handleContactJson)
+              .catch(function(err) {
+                if (statusSpinner) statusSpinner.style.display = 'none';
+                if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+                submitBtn.disabled = false;
+              });
+          }
+
+          var useV2Token = !!recaptchaSiteKeyV2 && (!recaptchaSiteKey || contactV2Mode);
+          if (useV2Token) {
+            var v2id = getContactV2WidgetId();
+            if (v2id === null || isNaN(v2id)) {
+              failContact('Spam protection could not load. Please refresh and try again.');
+              return;
+            }
+            var v2token = grecaptcha.getResponse(v2id);
+            if (!v2token) {
+              failContact(!recaptchaSiteKey || contactV2Mode ? 'Please complete the checkbox below, then submit again.' : 'Please complete the verification below.');
+              return;
+            }
+            postContact(v2token);
+            return;
+          }
+
+          grecaptcha.ready(function() {
+            grecaptcha.execute(recaptchaSiteKey, { action: 'contact' }).then(function(token) {
+              if (!token) {
+                failContact('Spam protection check failed. Please try again.');
+                return;
+              }
+              postContact(token);
+            }).catch(function() {
+              failContact('Spam protection check failed. Please try again.');
             });
+          });
         });
       }
 

@@ -1,8 +1,19 @@
 ---
 import { getRegistrationSeasons } from '../data/leagueCatalog';
 
-const { apiUrl, recaptchaSiteKey, context = 'standalone', registrationId = '' } = Astro.props;
+const {
+  apiUrl,
+  /** reCAPTCHA v3 site key (`grecaptcha.execute`). */
+  recaptchaSiteKey = '',
+  /** Optional v2 site key: checkbox after v3 fails (`recaptchaV2Required`) or v2-only mode. */
+  recaptchaSiteKeyV2 = '',
+  context = 'standalone',
+  registrationId = '',
+  /** When false, parent page loads `api.js?render=` once (e.g. registration flow). */
+  includeRecaptchaScript = true
+} = Astro.props;
 const isFlow = context === 'flow';
+const showV2Initially = !recaptchaSiteKey && !!recaptchaSiteKeyV2;
 const registrationSeasons = getRegistrationSeasons().map((season) => ({
   submissionValue: season.submissionValue,
   displayLabel: season.displayLabel,
@@ -142,7 +153,14 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
     <textarea id="notes" name="notes" maxlength="1000" placeholder="Any additional information... (max 1000 characters)" rows="3" class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"></textarea>
   </div>
 
-  <div id="registration-recaptcha-wrap" class="flex justify-center"></div>
+  <div id="registration-recaptcha-wrap" class="min-h-0" aria-hidden="true"></div>
+  {recaptchaSiteKeyV2 && (
+    <div
+      id="registration-recaptcha-v2-wrap"
+      class:list={['mt-2 flex justify-center', showV2Initially ? '' : 'hidden']}
+      aria-hidden={showV2Initially ? 'false' : 'true'}
+    />
+  )}
 
   <button type="submit" id="registrationSubmitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
     Submit Registration
@@ -180,9 +198,49 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
   }
 </style>
 
-<script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadRegForm&render=explicit" async defer />
-<script define:vars={{ apiUrl, recaptchaSiteKey, isFlow, registrationId, registrationSeasons }}>
+{includeRecaptchaScript && recaptchaSiteKeyV2 && !recaptchaSiteKey && (
+  <script define:vars={{ recaptchaSiteKeyV2 }}>
+    window.solkerRegistrationFormV2Onload = function() {
+      var wrap = document.getElementById('registration-recaptcha-v2-wrap');
+      if (!wrap || !recaptchaSiteKeyV2 || typeof grecaptcha === 'undefined') return;
+      if (wrap.getAttribute('data-rc-widget-id')) return;
+      var wid = grecaptcha.render(wrap, { sitekey: recaptchaSiteKeyV2, theme: 'dark' });
+      wrap.setAttribute('data-rc-widget-id', String(wid));
+    };
+  </script>
+)}
+{includeRecaptchaScript && recaptchaSiteKeyV2 && !recaptchaSiteKey && (
+  <script src="https://www.google.com/recaptcha/api.js?onload=solkerRegistrationFormV2Onload&render=explicit" async defer />
+)}
+{includeRecaptchaScript && recaptchaSiteKey && (
+  <script src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`} async defer />
+)}
+<script define:vars={{ apiUrl, recaptchaSiteKey, recaptchaSiteKeyV2, isFlow, registrationId, registrationSeasons }}>
   (function() {
+    var regV2Mode = false;
+
+    function getRegV2WidgetId() {
+      var wrap = document.getElementById('registration-recaptcha-v2-wrap');
+      if (!wrap) return null;
+      var raw = wrap.getAttribute('data-rc-widget-id');
+      return raw != null && raw !== '' ? parseInt(raw, 10) : null;
+    }
+
+    function ensureRegV2WidgetVisible() {
+      var wrap = document.getElementById('registration-recaptcha-v2-wrap');
+      if (!wrap || !recaptchaSiteKeyV2 || typeof grecaptcha === 'undefined') return null;
+      wrap.classList.remove('hidden');
+      wrap.setAttribute('aria-hidden', 'false');
+      var existing = getRegV2WidgetId();
+      if (existing !== null && !isNaN(existing)) return existing;
+      try {
+        var wid = grecaptcha.render(wrap, { sitekey: recaptchaSiteKeyV2, theme: 'dark' });
+        wrap.setAttribute('data-rc-widget-id', String(wid));
+        return wid;
+      } catch (e) {
+        return null;
+      }
+    }
     function findSeasonMetaByValue(submissionValue) {
       for (var i = 0; i < registrationSeasons.length; i++) {
         if (registrationSeasons[i].submissionValue === submissionValue) return registrationSeasons[i];
@@ -267,12 +325,6 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
       submitBtn.title = shouldDisable ? 'Registration is closed for one or more selected seasons.' : '';
       if (closedHelpEl) closedHelpEl.classList.toggle('hidden', !shouldDisable);
     }
-
-    window.onRecaptchaLoadRegForm = function() {
-      if (typeof grecaptcha === 'undefined' || !recaptchaSiteKey) return;
-      var wrap = document.getElementById('registration-recaptcha-wrap');
-      if (wrap) window.registrationRecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
-    };
 
     function updateRegistrationChoiceVisibility() {
       var existingWrap = document.getElementById('existingTeamWrap');
@@ -427,18 +479,14 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
             return;
           }
         }
-        var token = '';
-        if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && window.registrationRecaptchaId !== undefined) {
-          token = grecaptcha.getResponse(window.registrationRecaptchaId);
-          if (!token) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Please complete the verification below.';
-            return;
-          }
+        if (!recaptchaSiteKey && !recaptchaSiteKeyV2) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_RECAPTCHA_SITE_KEY_V3 or PUBLIC_RECAPTCHA_SITE_KEY (v2).';
+          return;
         }
         if (!apiUrl) {
           if (statusSpinner) statusSpinner.style.display = 'none';
-          if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL.';
+          if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL (or PUBLIC_FORMS_API_URL_DEV for local dev).';
           return;
         }
 
@@ -475,57 +523,120 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
         if (statusText) { statusText.textContent = 'Submitting…'; statusText.classList.remove('text-red-500', 'text-green-600'); }
         if (successActions) successActions.style.display = 'none';
 
-        var data = {
-          fullName: fullName,
-          email: email,
-          phone: phone,
-          postalCode: postalCode,
-          leagueSeasons: leagueSeasons,
-          registrationChoice: registrationChoice,
-          teamOrFreeAgent: teamOrFreeAgentValue,
-          newTeamCaptainAgreement: registrationChoice === 'newTeam' && newTeamCaptainAgreementEl && newTeamCaptainAgreementEl.checked,
-          emergencyName: (form.querySelector('#emergencyName') && form.querySelector('#emergencyName').value) ? form.querySelector('#emergencyName').value.trim() : '',
-          emergencyPhone: (form.querySelector('#emergencyPhone') && form.querySelector('#emergencyPhone').value) ? form.querySelector('#emergencyPhone').value.trim() : '',
-          notes: (form.querySelector('#notes') && form.querySelector('#notes').value) ? form.querySelector('#notes').value.trim() : ''
-        };
-        if (isFlow && (typeof window.__registrationFlowId !== 'undefined' && window.__registrationFlowId)) data.registrationId = window.__registrationFlowId;
+        function failReg(msg) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (statusText) { statusText.textContent = msg; statusText.classList.add('text-red-500'); }
+          submitBtn.disabled = false;
+        }
 
-        var payload = { action: 'registration', data: data, recaptchaToken: token };
+        if (typeof grecaptcha === 'undefined') {
+          failReg('Spam protection could not load. Please refresh and try again.');
+          return;
+        }
 
-        fetch(apiUrl, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          redirect: 'follow'
-        })
-          .then(function(res) { return res.json(); })
-          .then(function(json) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (json.success) {
-              var shouldAdvanceFlow = isFlow && registrationChoice === 'existingTeam';
-              if (statusText) {
-                statusText.textContent = shouldAdvanceFlow
-                  ? (json.message || 'Submitted.')
-                  : 'Registration received. You will be contacted about your submission.';
-                statusText.classList.add('text-green-600');
-              }
-              submitBtn.style.display = 'none';
-              var recWrap = document.getElementById('registration-recaptcha-wrap');
-              if (recWrap) recWrap.innerHTML = '';
-              if (successActions) successActions.style.display = shouldAdvanceFlow ? 'flex' : 'none';
-              if (shouldAdvanceFlow && typeof window.__onRegistrationSuccess === 'function') {
-                window.__onRegistrationSuccess();
-              }
-            } else {
-              if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
-              submitBtn.disabled = false;
+        function handleRegistrationJson(json) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (json.success) {
+            regV2Mode = false;
+            var shouldAdvanceFlow = isFlow && registrationChoice === 'existingTeam';
+            if (statusText) {
+              statusText.textContent = shouldAdvanceFlow
+                ? (json.message || 'Submitted.')
+                : 'Registration received. You will be contacted about your submission.';
+              statusText.classList.remove('text-red-500', 'text-taupe');
+              statusText.classList.add('text-green-600');
             }
-          })
-          .catch(function(err) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+            submitBtn.style.display = 'none';
+            var recWrap = document.getElementById('registration-recaptcha-wrap');
+            if (recWrap) recWrap.innerHTML = '';
+            var v2w = document.getElementById('registration-recaptcha-v2-wrap');
+            if (v2w) {
+              v2w.classList.add('hidden');
+              v2w.setAttribute('aria-hidden', 'true');
+            }
+            if (successActions) successActions.style.display = shouldAdvanceFlow ? 'flex' : 'none';
+            if (shouldAdvanceFlow && typeof window.__onRegistrationSuccess === 'function') {
+              window.__onRegistrationSuccess();
+            }
+          } else {
+            if (json.recaptchaV2Required && recaptchaSiteKeyV2) {
+              var wid = ensureRegV2WidgetVisible();
+              if (wid !== null && !isNaN(wid)) {
+                regV2Mode = true;
+                if (statusText) {
+                  statusText.textContent = json.error || 'Complete the checkbox below, then submit again.';
+                  statusText.classList.remove('text-red-500', 'text-green-600');
+                  statusText.classList.add('text-taupe');
+                }
+                submitBtn.disabled = false;
+                return;
+              }
+            }
+            if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
             submitBtn.disabled = false;
+          }
+        }
+
+        function postRegistration(token) {
+          var data = {
+            fullName: fullName,
+            email: email,
+            phone: phone,
+            postalCode: postalCode,
+            leagueSeasons: leagueSeasons,
+            registrationChoice: registrationChoice,
+            teamOrFreeAgent: teamOrFreeAgentValue,
+            newTeamCaptainAgreement: registrationChoice === 'newTeam' && newTeamCaptainAgreementEl && newTeamCaptainAgreementEl.checked,
+            emergencyName: (form.querySelector('#emergencyName') && form.querySelector('#emergencyName').value) ? form.querySelector('#emergencyName').value.trim() : '',
+            emergencyPhone: (form.querySelector('#emergencyPhone') && form.querySelector('#emergencyPhone').value) ? form.querySelector('#emergencyPhone').value.trim() : '',
+            notes: (form.querySelector('#notes') && form.querySelector('#notes').value) ? form.querySelector('#notes').value.trim() : ''
+          };
+          if (isFlow && (typeof window.__registrationFlowId !== 'undefined' && window.__registrationFlowId)) data.registrationId = window.__registrationFlowId;
+
+          var payload = { action: 'registration', data: data, recaptchaToken: token };
+
+          fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            redirect: 'follow'
+          })
+            .then(function(res) { return res.json(); })
+            .then(handleRegistrationJson)
+            .catch(function(err) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+              submitBtn.disabled = false;
+            });
+        }
+
+        var useV2Token = !!recaptchaSiteKeyV2 && (!recaptchaSiteKey || regV2Mode);
+        if (useV2Token) {
+          var v2id = getRegV2WidgetId();
+          if (v2id === null || isNaN(v2id)) {
+            failReg('Spam protection could not load. Please refresh and try again.');
+            return;
+          }
+          var v2token = grecaptcha.getResponse(v2id);
+          if (!v2token) {
+            failReg(!recaptchaSiteKey || regV2Mode ? 'Please complete the checkbox below, then submit again.' : 'Please complete the verification below.');
+            return;
+          }
+          postRegistration(v2token);
+          return;
+        }
+
+        grecaptcha.ready(function() {
+          grecaptcha.execute(recaptchaSiteKey, { action: 'registration' }).then(function(token) {
+            if (!token) {
+              failReg('Spam protection check failed. Please try again.');
+              return;
+            }
+            postRegistration(token);
+          }).catch(function() {
+            failReg('Spam protection check failed. Please try again.');
           });
+        });
       });
     }
 

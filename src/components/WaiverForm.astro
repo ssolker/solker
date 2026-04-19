@@ -1,6 +1,15 @@
 ---
-const { apiUrl, recaptchaSiteKey, context = 'standalone', registrationId = '' } = Astro.props;
+const {
+  apiUrl,
+  recaptchaSiteKey = '',
+  recaptchaSiteKeyV2 = '',
+  context = 'standalone',
+  registrationId = '',
+  /** When false, parent page loads `api.js?render=` once (e.g. registration flow). */
+  includeRecaptchaScript = true
+} = Astro.props;
 const isFlow = context === 'flow';
+const showV2Initially = !recaptchaSiteKey && !!recaptchaSiteKeyV2;
 ---
 
 <div class="waiver-form waiver-print-area mt-6">
@@ -82,7 +91,14 @@ const isFlow = context === 'flow';
       <label for="waiverEmailCopy" class="cursor-pointer text-white">Send me a copy of the waiver by email</label>
     </div>
 
-    <div id="waiver-recaptcha-wrap" class="flex justify-center"></div>
+    <div id="waiver-recaptcha-wrap" class="min-h-0" aria-hidden="true"></div>
+    {recaptchaSiteKeyV2 && (
+      <div
+        id="waiver-recaptcha-v2-wrap"
+        class:list={['mt-2 flex justify-center', showV2Initially ? '' : 'hidden']}
+        aria-hidden={showV2Initially ? 'false' : 'true'}
+      />
+    )}
 
     <button type="submit" id="waiverSubmitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
       Submit Waiver
@@ -117,15 +133,55 @@ const isFlow = context === 'flow';
     :global(body *) { visibility: hidden; }
     :global(.waiver-print-area), :global(.waiver-print-area *) { visibility: visible; }
     :global(.waiver-print-area) { position: absolute; left: 0; top: 0; width: 100%; max-width: none; }
-    :global(.waiver-print-area) .waiver-banner, :global(.waiver-print-area) .btn-clear, :global(.waiver-print-area) .btn-print, :global(.waiver-print-area) #waiverSubmitBtn, :global(.waiver-print-area) #waiverMockSubmitBtn, :global(.waiver-print-area) #waiver-recaptcha-wrap, :global(.waiver-print-area) .signature-actions, :global(.waiver-print-area) #waiverClearBtn, :global(.waiver-print-area) #waiverPrintBtn, :global(.waiver-print-area) #waiverEmailCopy, :global(.waiver-print-area) label[for="waiverEmailCopy"], :global(.waiver-print-area) .waiver-no-print, :global(.waiver-print-area) #waiverStatusMessage { display: none !important; }
+    :global(.waiver-print-area) .waiver-banner, :global(.waiver-print-area) .btn-clear, :global(.waiver-print-area) .btn-print, :global(.waiver-print-area) #waiverSubmitBtn, :global(.waiver-print-area) #waiverMockSubmitBtn, :global(.waiver-print-area) #waiver-recaptcha-wrap, :global(.waiver-print-area) #waiver-recaptcha-v2-wrap, :global(.waiver-print-area) .signature-actions, :global(.waiver-print-area) #waiverClearBtn, :global(.waiver-print-area) #waiverPrintBtn, :global(.waiver-print-area) #waiverEmailCopy, :global(.waiver-print-area) label[for="waiverEmailCopy"], :global(.waiver-print-area) .waiver-no-print, :global(.waiver-print-area) #waiverStatusMessage { display: none !important; }
     :global(.waiver-print-area) .waiver-doc, :global(.waiver-print-area) .signature-wrapper { border: 1px solid #ccc; }
   }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js" />
-<script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadWaiverForm&render=explicit" async defer />
-<script define:vars={{ apiUrl, recaptchaSiteKey, isFlow, registrationId }}>
+{includeRecaptchaScript && recaptchaSiteKeyV2 && !recaptchaSiteKey && (
+  <script define:vars={{ recaptchaSiteKeyV2 }}>
+    window.solkerWaiverFormV2Onload = function() {
+      var wrap = document.getElementById('waiver-recaptcha-v2-wrap');
+      if (!wrap || !recaptchaSiteKeyV2 || typeof grecaptcha === 'undefined') return;
+      if (wrap.getAttribute('data-rc-widget-id')) return;
+      var wid = grecaptcha.render(wrap, { sitekey: recaptchaSiteKeyV2, theme: 'dark' });
+      wrap.setAttribute('data-rc-widget-id', String(wid));
+    };
+  </script>
+)}
+{includeRecaptchaScript && recaptchaSiteKeyV2 && !recaptchaSiteKey && (
+  <script src="https://www.google.com/recaptcha/api.js?onload=solkerWaiverFormV2Onload&render=explicit" async defer />
+)}
+{includeRecaptchaScript && recaptchaSiteKey && (
+  <script src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`} async defer />
+)}
+<script define:vars={{ apiUrl, recaptchaSiteKey, recaptchaSiteKeyV2, isFlow, registrationId }}>
   (function() {
+    var waiverV2Mode = false;
+
+    function getWaiverV2WidgetId() {
+      var wrap = document.getElementById('waiver-recaptcha-v2-wrap');
+      if (!wrap) return null;
+      var raw = wrap.getAttribute('data-rc-widget-id');
+      return raw != null && raw !== '' ? parseInt(raw, 10) : null;
+    }
+
+    function ensureWaiverV2WidgetVisible() {
+      var wrap = document.getElementById('waiver-recaptcha-v2-wrap');
+      if (!wrap || !recaptchaSiteKeyV2 || typeof grecaptcha === 'undefined') return null;
+      wrap.classList.remove('hidden');
+      wrap.setAttribute('aria-hidden', 'false');
+      var existing = getWaiverV2WidgetId();
+      if (existing !== null && !isNaN(existing)) return existing;
+      try {
+        var wid = grecaptcha.render(wrap, { sitekey: recaptchaSiteKeyV2, theme: 'dark' });
+        wrap.setAttribute('data-rc-widget-id', String(wid));
+        return wid;
+      } catch (e) {
+        return null;
+      }
+    }
     var waiverDateEl = document.getElementById('waiverDateValue');
     if (waiverDateEl) {
       var d = new Date();
@@ -156,13 +212,6 @@ const isFlow = context === 'flow';
     document.addEventListener('click', function printBtnHandler(ev) {
       if (ev.target && ev.target.id === 'waiverPrintBtn') window.print();
     });
-
-    var recaptchaWidgetId = null;
-    window.onRecaptchaLoadWaiverForm = function() {
-      if (typeof grecaptcha === 'undefined' || !recaptchaSiteKey) return;
-      var wrap = document.getElementById('waiver-recaptcha-wrap');
-      if (wrap) recaptchaWidgetId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
-    };
 
     var form = document.getElementById('waiver-form');
     if (form) {
@@ -196,19 +245,14 @@ const isFlow = context === 'flow';
           if (statusText) statusText.textContent = 'Please provide a signature.';
           return;
         }
-        var token = '';
-        if (typeof grecaptcha !== 'undefined' && recaptchaSiteKey && recaptchaWidgetId !== null) {
-          token = grecaptcha.getResponse(recaptchaWidgetId);
-          if (!token) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Please complete the verification below.';
-            return;
-          }
+        if (!recaptchaSiteKey && !recaptchaSiteKeyV2) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_RECAPTCHA_SITE_KEY_V3 or PUBLIC_RECAPTCHA_SITE_KEY (v2).';
+          return;
         }
-
         if (!apiUrl) {
           if (statusSpinner) statusSpinner.style.display = 'none';
-          if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL.';
+          if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL (or PUBLIC_FORMS_API_URL_DEV for local dev).';
           return;
         }
 
@@ -216,50 +260,112 @@ const isFlow = context === 'flow';
         if (statusSpinner) statusSpinner.style.display = 'block';
         if (statusText) { statusText.textContent = 'Verifying and submitting…'; statusText.classList.remove('text-red-500', 'text-green-600'); }
 
-        var dateSignedEl = document.getElementById('waiverDateValue');
-        var dateSigned = dateSignedEl ? dateSignedEl.textContent : new Date().toLocaleDateString();
-        var emailCopyEl = form.querySelector('#waiverEmailCopy');
-        var data = {
-          name: fullName,
-          email: email,
-          signatureData: signaturePad.toDataURL('image/png'),
-          dateSigned: dateSigned,
-          emailCopy: !!(emailCopyEl && emailCopyEl.checked)
-        };
-        if (isFlow && (typeof window.__registrationFlowId !== 'undefined' && window.__registrationFlowId)) data.registrationId = window.__registrationFlowId;
-        else if (!isFlow) data.registrationId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '';
+        function failWaiver(msg) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (statusText) { statusText.textContent = msg; statusText.classList.add('text-red-500'); }
+          submitBtn.disabled = false;
+        }
 
-        var payload = { action: 'waiver', data: data, recaptchaToken: token };
+        if (typeof grecaptcha === 'undefined') {
+          failWaiver('Spam protection could not load. Please refresh and try again.');
+          return;
+        }
 
-        fetch(apiUrl, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          redirect: 'follow'
-        })
-          .then(function(res) { return res.json(); })
-          .then(function(json) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (json.success) {
-              if (statusText) { statusText.textContent = json.message || 'Success!'; statusText.classList.add('text-green-600'); }
-              submitBtn.style.display = 'none';
-              var recWrap = document.getElementById('waiver-recaptcha-wrap');
-              if (recWrap) recWrap.innerHTML = '';
-              var successActions = document.getElementById('waiverSuccessActions');
-              if (successActions) successActions.style.display = 'flex';
-              if (isFlow && typeof window.__openRegistrationCompleteModal === 'function') {
-                window.__openRegistrationCompleteModal();
-              }
-            } else {
-              if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
-              submitBtn.disabled = false;
+        function handleWaiverJson(json) {
+          if (statusSpinner) statusSpinner.style.display = 'none';
+          if (json.success) {
+            waiverV2Mode = false;
+            if (statusText) { statusText.textContent = json.message || 'Success!'; statusText.classList.remove('text-red-500', 'text-taupe'); statusText.classList.add('text-green-600'); }
+            submitBtn.style.display = 'none';
+            var recWrap = document.getElementById('waiver-recaptcha-wrap');
+            if (recWrap) recWrap.innerHTML = '';
+            var v2w = document.getElementById('waiver-recaptcha-v2-wrap');
+            if (v2w) {
+              v2w.classList.add('hidden');
+              v2w.setAttribute('aria-hidden', 'true');
             }
-          })
-          .catch(function(err) {
-            if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+            var successActions = document.getElementById('waiverSuccessActions');
+            if (successActions) successActions.style.display = 'flex';
+            if (isFlow && typeof window.__openRegistrationCompleteModal === 'function') {
+              window.__openRegistrationCompleteModal();
+            }
+          } else {
+            if (json.recaptchaV2Required && recaptchaSiteKeyV2) {
+              var wid = ensureWaiverV2WidgetVisible();
+              if (wid !== null && !isNaN(wid)) {
+                waiverV2Mode = true;
+                if (statusText) {
+                  statusText.textContent = json.error || 'Complete the checkbox below, then submit again.';
+                  statusText.classList.remove('text-red-500', 'text-green-600');
+                  statusText.classList.add('text-taupe');
+                }
+                submitBtn.disabled = false;
+                return;
+              }
+            }
+            if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
             submitBtn.disabled = false;
+          }
+        }
+
+        function postWaiver(token) {
+          var dateSignedEl = document.getElementById('waiverDateValue');
+          var dateSigned = dateSignedEl ? dateSignedEl.textContent : new Date().toLocaleDateString();
+          var emailCopyEl = form.querySelector('#waiverEmailCopy');
+          var data = {
+            name: fullName,
+            email: email,
+            signatureData: signaturePad.toDataURL('image/png'),
+            dateSigned: dateSigned,
+            emailCopy: !!(emailCopyEl && emailCopyEl.checked)
+          };
+          if (isFlow && (typeof window.__registrationFlowId !== 'undefined' && window.__registrationFlowId)) data.registrationId = window.__registrationFlowId;
+          else if (!isFlow) data.registrationId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '';
+
+          var payload = { action: 'waiver', data: data, recaptchaToken: token };
+
+          fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            redirect: 'follow'
+          })
+            .then(function(res) { return res.json(); })
+            .then(handleWaiverJson)
+            .catch(function(err) {
+              if (statusSpinner) statusSpinner.style.display = 'none';
+              if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+              submitBtn.disabled = false;
+            });
+        }
+
+        var useV2Token = !!recaptchaSiteKeyV2 && (!recaptchaSiteKey || waiverV2Mode);
+        if (useV2Token) {
+          var v2id = getWaiverV2WidgetId();
+          if (v2id === null || isNaN(v2id)) {
+            failWaiver('Spam protection could not load. Please refresh and try again.');
+            return;
+          }
+          var v2token = grecaptcha.getResponse(v2id);
+          if (!v2token) {
+            failWaiver(!recaptchaSiteKey || waiverV2Mode ? 'Please complete the checkbox below, then submit again.' : 'Please complete the verification below.');
+            return;
+          }
+          postWaiver(v2token);
+          return;
+        }
+
+        grecaptcha.ready(function() {
+          grecaptcha.execute(recaptchaSiteKey, { action: 'waiver' }).then(function(token) {
+            if (!token) {
+              failWaiver('Spam protection check failed. Please try again.');
+              return;
+            }
+            postWaiver(token);
+          }).catch(function() {
+            failWaiver('Spam protection check failed. Please try again.');
           });
+        });
       });
     }
 

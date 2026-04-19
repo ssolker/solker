@@ -71,6 +71,19 @@ Open [http://localhost:4321](http://localhost:4321).
 npm run preview
 ```
 
+## Environment variables (forms + reCAPTCHA)
+
+The league registration flow, standalone waiver, and contact form read from `src/env/publicForms.ts`.
+
+| Variable | When |
+| -------- | ---- |
+| `PUBLIC_FORMS_API_URL` | **Required** for production builds (`npm run build` / GitHub Actions). Apps Script Web App URL. |
+| `PUBLIC_FORMS_API_URL_DEV` | Optional. Used only in **`astro dev`** if set; otherwise dev falls back to `PUBLIC_FORMS_API_URL`. |
+| `PUBLIC_RECAPTCHA_SITE_KEY_V3` | **Recommended.** reCAPTCHA v3 site key (`api.js?render=…`, `grecaptcha.execute`). |
+| `PUBLIC_RECAPTCHA_SITE_KEY` | Optional **v2** site key (checkbox). If the API returns `recaptchaV2Required` after a low v3 score, the site shows this checkbox and resubmits with a v2 token. Must pair with `RECAPTCHA_SECRET` in Apps Script. |
+
+**GitHub Actions:** Repository **secrets** `PUBLIC_RECAPTCHA_SITE_KEY_V3` and optionally `PUBLIC_RECAPTCHA_SITE_KEY` (v2). Repository **variable** `PUBLIC_FORMS_API_URL`. See `.github/workflows/deploy.yml`.
+
 ## Deploy
 
 1. **Work on `dev`.** All feature work and commits happen on the `dev` branch.

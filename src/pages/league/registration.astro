@@ -5,9 +5,12 @@ import Footer from '../../components/Footer.astro';
 import RegistrationForm from '../../components/RegistrationForm.astro';
 import WaiverForm from '../../components/WaiverForm.astro';
 import { getRegistrationSeasons } from '../../data/leagueCatalog';
+import { getFormsApiUrl, getRecaptchaSiteKeyV3, getRecaptchaSiteKeyV2 } from '../../env/publicForms';
 
-const apiUrl = import.meta.env.PUBLIC_FORMS_API_URL || '';
-const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
+const apiUrl = getFormsApiUrl();
+const recaptchaSiteKeyV3 = getRecaptchaSiteKeyV3();
+const recaptchaSiteKeyV2 = getRecaptchaSiteKeyV2();
+const registrationFlowV2Only = !recaptchaSiteKeyV3 && !!recaptchaSiteKeyV2;
 const eTransferEmail = 'e-transfer@solker.ca';
 const registrationSeasons = getRegistrationSeasons().map((season) => ({
   submissionValue: season.submissionValue,
@@ -47,7 +50,13 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
 
       <!-- Step 1: Registration form -->
       <div id="step1Panel" class="step-panel mt-6" data-step="1">
-        <RegistrationForm apiUrl={apiUrl} recaptchaSiteKey={recaptchaSiteKey} context="flow" />
+        <RegistrationForm
+          apiUrl={apiUrl}
+          recaptchaSiteKey={recaptchaSiteKeyV3}
+          recaptchaSiteKeyV2={recaptchaSiteKeyV2}
+          context="flow"
+          includeRecaptchaScript={registrationFlowV2Only}
+        />
       </div>
 
       <!-- Step 2: Payment -->
@@ -99,7 +108,13 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
             <p class="mt-2 text-sm text-taupe font-semibold">If e-Transfer cannot be made, cash is an option but must be paid before you play.</p>
           </div>
 
-          <div id="step2RecaptchaWrap" class="flex justify-center py-2"></div>
+          {recaptchaSiteKeyV2 && (
+            <div
+              id="payment-recaptcha-v2-wrap"
+              class:list={['mt-2 flex justify-center', recaptchaSiteKeyV3 ? 'hidden' : '']}
+              aria-hidden={recaptchaSiteKeyV3 ? 'true' : 'false'}
+            />
+          )}
 
           <button type="button" id="proceedToWaiverBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
             Submit and Proceed to Waiver
@@ -115,8 +130,20 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
 
       <!-- Step 3: Waiver form -->
       <div id="step3Panel" class="step-panel mt-6 hidden" data-step="3">
-        <WaiverForm apiUrl={apiUrl} recaptchaSiteKey={recaptchaSiteKey} context="flow" />
+        <WaiverForm
+          apiUrl={apiUrl}
+          recaptchaSiteKey={recaptchaSiteKeyV3}
+          recaptchaSiteKeyV2={recaptchaSiteKeyV2}
+          context="flow"
+          includeRecaptchaScript={registrationFlowV2Only}
+        />
       </div>
+
+      <p class="mt-8 text-center text-xs text-taupe">
+        This site is protected by reCAPTCHA and the Google
+        <a href="https://policies.google.com/privacy" class="text-orange hover:text-orange-light">Privacy Policy</a> and
+        <a href="https://policies.google.com/terms" class="text-orange hover:text-orange-light">Terms of Service</a> apply.
+      </p>
 
       <a id="backToSoccerLink" href="/league/soccer" class="mt-6 inline-block text-sm font-medium text-orange hover:text-orange-light">Back to Soccer league</a>
     </div>
@@ -202,8 +229,35 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
     }
   </style>
 
-  <script define:vars={{ apiUrl, eTransferEmail, recaptchaSiteKey, registrationSeasons }}>
+  {recaptchaSiteKeyV3 && <script src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKeyV3}`} async defer />}
+
+  <script define:vars={{ apiUrl, eTransferEmail, recaptchaSiteKey: recaptchaSiteKeyV3, recaptchaSiteKeyV2, registrationSeasons }}>
     (function() {
+      var paymentV2Mode = false;
+
+      function getPaymentV2WidgetId() {
+        var wrap = document.getElementById('payment-recaptcha-v2-wrap');
+        if (!wrap) return null;
+        var raw = wrap.getAttribute('data-rc-widget-id');
+        return raw != null && raw !== '' ? parseInt(raw, 10) : null;
+      }
+
+      function ensurePaymentV2WidgetVisible() {
+        var wrap = document.getElementById('payment-recaptcha-v2-wrap');
+        if (!wrap || !recaptchaSiteKeyV2 || typeof grecaptcha === 'undefined') return null;
+        wrap.classList.remove('hidden');
+        wrap.setAttribute('aria-hidden', 'false');
+        var existing = getPaymentV2WidgetId();
+        if (existing !== null && !isNaN(existing)) return existing;
+        try {
+          var wid = grecaptcha.render(wrap, { sitekey: recaptchaSiteKeyV2, theme: 'dark' });
+          wrap.setAttribute('data-rc-widget-id', String(wid));
+          return wid;
+        } catch (e) {
+          return null;
+        }
+      }
+
       var currentStep = 1;
       function emptyPaymentPrefill() {
         return {
@@ -219,7 +273,6 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
         };
       }
       var paymentPrefill = emptyPaymentPrefill();
-      var step2RecaptchaId = null;
       var modalPreviousFocus = /** @type {HTMLElement | null} */ (null);
 
       function generateUuid() {
@@ -292,7 +345,6 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
           var amt = sumPaymentAmount(paymentPrefill.leagueSeasons);
           if (!amt) amt = 50;
           if (amountEl) amountEl.textContent = '$' + amt + '.00';
-          initStep2Recaptcha();
         }
         if (step === 3) {
           var waiverFullNameEl = document.getElementById('waiverFullName');
@@ -301,14 +353,6 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
           if (waiverEmailEl) waiverEmailEl.value = paymentPrefill.email || '';
         }
         if (step !== prev) window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      function initStep2Recaptcha() {
-        var wrap = document.getElementById('step2RecaptchaWrap');
-        if (!wrap || !recaptchaSiteKey) return;
-        if (wrap.innerHTML.trim()) return;
-        if (typeof grecaptcha === 'undefined') return;
-        step2RecaptchaId = grecaptcha.render(wrap, { sitekey: recaptchaSiteKey, theme: 'dark' });
       }
 
       function getLeagueSeasonSelectionsFromForm(form) {
@@ -502,16 +546,14 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
             if (statusText) { statusText.textContent = 'Please enter a valid email address.'; statusText.classList.add('text-red-500'); }
             return;
           }
-          var token = '';
-          if (typeof grecaptcha !== 'undefined' && step2RecaptchaId !== null) token = grecaptcha.getResponse(step2RecaptchaId);
-          if (!token) {
+          if (!recaptchaSiteKey && !recaptchaSiteKeyV2) {
             if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Please complete the verification above.';
+            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_RECAPTCHA_SITE_KEY_V3 or PUBLIC_RECAPTCHA_SITE_KEY (v2).';
             return;
           }
           if (!apiUrl) {
             if (statusSpinner) statusSpinner.style.display = 'none';
-            if (statusText) statusText.textContent = 'Form is not configured.';
+            if (statusText) statusText.textContent = 'Form is not configured. Set PUBLIC_FORMS_API_URL (or PUBLIC_FORMS_API_URL_DEV for local dev).';
             return;
           }
           var regId = window.__registrationFlowId;
@@ -523,33 +565,96 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
           var paymentMethodEl = document.querySelector('input[name="paymentMethod"]:checked');
           var paymentMethod = paymentMethodEl ? paymentMethodEl.value : 'etransfer';
 
+          function failPayment(msg) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (statusText) { statusText.textContent = msg; statusText.classList.add('text-red-500'); }
+            btn.disabled = false;
+          }
+
           btn.disabled = true;
           if (statusSpinner) statusSpinner.style.display = 'block';
           if (statusText) { statusText.textContent = ''; statusText.classList.remove('text-red-500', 'text-green-600'); }
 
-          fetch(apiUrl, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'paymentAcknowledged', data: { registrationId: regId, paymentMethod: paymentMethod }, recaptchaToken: token }),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            redirect: 'follow'
-          })
-            .then(function(res) { return res.json(); })
-            .then(function(json) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (json.success) {
-                if (statusText) { statusText.textContent = ''; statusText.classList.add('text-green-600'); }
-                syncStep2FieldsToPrefill();
-                setStep(3);
-              } else {
-                if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
-                btn.disabled = false;
+          if (typeof grecaptcha === 'undefined') {
+            failPayment('Spam protection could not load. Please refresh and try again.');
+            return;
+          }
+
+          function handlePaymentJson(json) {
+            if (statusSpinner) statusSpinner.style.display = 'none';
+            if (json.success) {
+              paymentV2Mode = false;
+              if (statusText) { statusText.textContent = ''; statusText.classList.remove('text-red-500', 'text-taupe'); statusText.classList.add('text-green-600'); }
+              var pw = document.getElementById('payment-recaptcha-v2-wrap');
+              if (pw) {
+                pw.classList.add('hidden');
+                pw.setAttribute('aria-hidden', 'true');
               }
-            })
-            .catch(function(err) {
-              if (statusSpinner) statusSpinner.style.display = 'none';
-              if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+              syncStep2FieldsToPrefill();
+              setStep(3);
+            } else {
+              if (json.recaptchaV2Required && recaptchaSiteKeyV2) {
+                var wid = ensurePaymentV2WidgetVisible();
+                if (wid !== null && !isNaN(wid)) {
+                  paymentV2Mode = true;
+                  if (statusText) {
+                    statusText.textContent = json.error || 'Complete the checkbox below, then submit again.';
+                    statusText.classList.remove('text-red-500', 'text-green-600');
+                    statusText.classList.add('text-taupe');
+                  }
+                  btn.disabled = false;
+                  return;
+                }
+              }
+              if (statusText) { statusText.textContent = json.error || 'Something went wrong.'; statusText.classList.add('text-red-500'); }
               btn.disabled = false;
+            }
+          }
+
+          function postPaymentAck(token) {
+            fetch(apiUrl, {
+              method: 'POST',
+              body: JSON.stringify({ action: 'paymentAcknowledged', data: { registrationId: regId, paymentMethod: paymentMethod }, recaptchaToken: token }),
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              redirect: 'follow'
+            })
+              .then(function(res) { return res.json(); })
+              .then(handlePaymentJson)
+              .catch(function(err) {
+                if (statusSpinner) statusSpinner.style.display = 'none';
+                if (statusText) { statusText.textContent = err.message || 'Network error. Please try again.'; statusText.classList.add('text-red-500'); }
+                btn.disabled = false;
+              });
+          }
+
+          var useV2Token = !!recaptchaSiteKeyV2 && (!recaptchaSiteKey || paymentV2Mode);
+          if (useV2Token) {
+            var v2id = getPaymentV2WidgetId();
+            if (v2id === null || isNaN(v2id)) v2id = ensurePaymentV2WidgetVisible();
+            if (v2id === null || isNaN(v2id)) {
+              failPayment('Spam protection could not load. Please refresh and try again.');
+              return;
+            }
+            var v2token = grecaptcha.getResponse(v2id);
+            if (!v2token) {
+              failPayment(!recaptchaSiteKey || paymentV2Mode ? 'Please complete the checkbox below, then submit again.' : 'Please complete the verification below.');
+              return;
+            }
+            postPaymentAck(v2token);
+            return;
+          }
+
+          grecaptcha.ready(function() {
+            grecaptcha.execute(recaptchaSiteKey, { action: 'payment_acknowledged' }).then(function(token) {
+              if (!token) {
+                failPayment('Spam protection check failed. Please try again.');
+                return;
+              }
+              postPaymentAck(token);
+            }).catch(function() {
+              failPayment('Spam protection check failed. Please try again.');
             });
+          });
         });
 
         var mockProceedBtn = document.getElementById('mockProceedToWaiverBtn');
