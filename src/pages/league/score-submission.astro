@@ -5,8 +5,8 @@ import Footer from '../../components/Footer.astro';
 ---
 
 <Layout
-  title="Score Submission — League — Solker"
-  description="Submit game scores for the Woodstock recreational league."
+  title="How to Submit Scores — League — Solker"
+  description="Captains: open Schedule, load scores, Edit, fill the form, refresh to see updates."
 >
   <Fragment slot="header-nav">
     <LeagueNav />
@@ -14,21 +14,77 @@ import Footer from '../../components/Footer.astro';
 
   <main class="flex-1 px-4 py-8 md:py-12">
     <div class="mx-auto max-w-3xl">
-      <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">
-        Score Submission
-      </h1>
-      <p class="mt-2 text-taupe">
-        Submit scores and spirit ratings after each game.
-      </p>
-      <p class="mt-4 rounded-lg border border-taupe/30 bg-sage-dark px-4 py-6 text-taupe">
-        Score submission is coming soon. Captains will receive a link to the Game Day & Spirit Form.
-      </p>
-      <a
-        href="/league/soccer"
-        class="mt-6 inline-block text-sm font-medium text-orange hover:text-orange-light"
+      <div
+        class="rounded-xl border border-taupe/30 bg-forest-dark/90 p-6 shadow-xl ring-1 ring-black/10 backdrop-blur-sm md:p-8"
       >
-        Back to Soccer league
-      </a>
+        <div class="space-y-8 text-taupe">
+          <header>
+            <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">How to submit scores</h1>
+            <p class="mt-2 text-md leading-relaxed">
+              Both captains submit after each game. Use <strong class="text-white">Schedule</strong> on the soccer page, load scores, then <strong class="text-white">Edit</strong> your row.
+            </p>
+            <a
+              href="/league/soccer#standings-and-schedule"
+              class="mt-5 inline-block rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange-dark"
+            >
+              Open Standings &amp; Schedule
+            </a>
+          </header>
+
+          <section class="space-y-3" aria-labelledby="h-flow">
+            <h2 id="h-flow" class="font-heading text-lg font-bold text-white">Steps</h2>
+            <ol class="list-decimal space-y-2 pl-5 text-md leading-relaxed">
+              <li>
+                <a href="/league/soccer" class="font-medium text-orange hover:text-orange-light">Soccer league</a> →
+                <strong class="text-white">Schedule</strong> (not Game Days). Use filters if needed to find your game.
+              </li>
+              <li>
+                In the Schedule card, click <strong class="text-white">Load Scores</strong> or <strong class="text-white">Refresh Scores</strong>. Wait until it finishes.
+              </li>
+              <li>
+                Click <strong class="text-white">Edit</strong> on your game (only when scores are loaded and the game is not <strong class="text-white">verified</strong>).
+              </li>
+              <li>
+                Complete the form and submit. On success, use <strong class="text-white">Refresh Scores</strong> again before submitting another change.
+              </li>
+            </ol>
+          </section>
+
+          <section class="space-y-3" aria-labelledby="h-form">
+            <h2 id="h-form" class="font-heading text-lg font-bold text-white">Form</h2>
+            <ul class="list-disc space-y-1.5 pl-5 text-md leading-relaxed">
+              <li><strong class="text-white">Your team</strong> — home or away.</li>
+              <li><strong class="text-white">Email</strong> — required.</li>
+              <li><strong class="text-white">Home / away goals</strong> — Number <strong class="text-white">ie. 5</strong>.</li>
+              <li><strong class="text-white">Spirit (1–5)</strong> — required.</li>
+              <li><strong class="text-white">Notes</strong> — optional (max 500 characters).</li>
+            </ul>
+            <p class="text-sm leading-relaxed">
+              Spirit and notes are <strong class="text-white">not</strong> pre-filled when you open Edit (including your own). Enter them each time.
+            </p>
+          </section>
+
+          <section class="space-y-2" aria-labelledby="h-status">
+            <h2 id="h-status" class="font-heading text-lg font-bold text-white">Status</h2>
+            <p class="text-md leading-relaxed">
+              <strong class="text-white">pending</strong> — waiting on both sides or league follow-up.
+              <strong class="text-white">reviewing</strong> — both submitted; league may still confirm or resolve a score mismatch.
+              <strong class="text-white">verified</strong> — locked; Edit stays off. Contact the league if something is wrong.
+            </p>
+          </section>
+
+          <section class="space-y-2" aria-labelledby="h-standings">
+            <h2 id="h-standings" class="font-heading text-lg font-bold text-white">Standings</h2>
+            <p class="text-md leading-relaxed">
+              Same page: <strong class="text-white">Refresh Standings</strong> loads the league table. Only <strong class="text-white">verified</strong> games count there.
+            </p>
+          </section>
+
+          <footer class="border-t border-taupe/20 pt-6">
+            <a href="/league/soccer" class="text-sm font-medium text-orange hover:text-orange-light">Back to Soccer league</a>
+          </footer>
+        </div>
+      </div>
     </div>
   </main>
 

@@ -82,6 +82,8 @@ The league registration flow, standalone waiver, and contact form read from `src
 | `PUBLIC_RECAPTCHA_SITE_KEY_V3` | **Recommended.** reCAPTCHA v3 site key (`api.js?render=…`, `grecaptcha.execute`). |
 | `PUBLIC_RECAPTCHA_SITE_KEY` | Optional **v2** site key (checkbox). If the API returns `recaptchaV2Required` after a low v3 score, the site shows this checkbox and resubmits with a v2 token. Must pair with `RECAPTCHA_SECRET` in Apps Script. |
 
+When `PUBLIC_FORMS_API_URL` and `PUBLIC_RECAPTCHA_SITE_KEY_V3` (or v2-only) are set, the **Soccer** page’s Standings & Schedule section can load captain scores and official standings from the same Web App (`gamescorerow`, `gamescoresubmit`, `gamestandings`). Configure `GAME_SCORES_SHEET_ID` in Apps Script per `google-workspace-apps` README (schedule fields are sent from the site with each submit).
+
 **GitHub Actions:** Repository **secrets** `PUBLIC_RECAPTCHA_SITE_KEY_V3` and optionally `PUBLIC_RECAPTCHA_SITE_KEY` (v2). Repository **variable** `PUBLIC_FORMS_API_URL`. See `.github/workflows/deploy.yml`.
 
 ## Deploy

@@ -1,7 +1,12 @@
 ---
 import { getSoccerSeasonsForClient } from '../data/leagueCatalog';
+import { getFormsApiUrl, getRecaptchaSiteKeyV3, getRecaptchaSiteKeyV2 } from '../env/publicForms';
 
 const seasonsJson = getSoccerSeasonsForClient();
+const formsApiUrl = getFormsApiUrl();
+const recaptchaSiteKeyV3 = getRecaptchaSiteKeyV3();
+const recaptchaSiteKeyV2 = getRecaptchaSiteKeyV2();
+const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaSiteKeyV2));
 ---
 
 <section id="standings-and-schedule" class="bg-forest-light/40 px-4 py-12 md:py-16" aria-labelledby="standings-heading">
@@ -15,10 +20,161 @@ const seasonsJson = getSoccerSeasonsForClient();
     </p> -->
 
     <div id="soccer-league-root" class="mt-8 min-h-[12rem] text-left"></div>
+    {
+      scoreFeaturesEnabled && (
+        <div
+          id="soccer-score-modal-overlay"
+          class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="soccer-score-modal-title"
+        >
+          <div
+            id="soccer-score-modal-panel"
+            class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-taupe/30 bg-forest-dark p-5 text-white shadow-xl"
+          >
+            <div
+              id="soccer-score-modal-submit-mask"
+              class="absolute inset-0 z-10 hidden flex flex-col items-center justify-center gap-3 rounded-xl bg-forest-dark/95 p-6 text-center"
+              aria-live="polite"
+              aria-hidden="true"
+            >
+              <span
+                class="inline-block h-8 w-8 shrink-0 animate-spin rounded-full border-2 border-taupe/40 border-t-orange"
+                aria-hidden="true"
+              ></span>
+              <p class="text-sm text-white">Submitting…</p>
+            </div>
+            <div class="flex items-start justify-between gap-2">
+              <h3 id="soccer-score-modal-title" class="font-heading text-lg font-bold">
+                Submit score
+              </h3>
+              <button
+                type="button"
+                id="soccer-score-modal-close"
+                class="rounded border border-taupe/40 px-2 py-1 text-sm text-taupe hover:bg-forest-light/30"
+              >
+                Close
+              </button>
+            </div>
+            <p id="soccer-score-modal-status" class="mt-2 text-sm text-taupe"></p>
+            <div id="soccer-score-modal-loading" class="mt-4 hidden text-sm text-taupe">
+              Loading…
+            </div>
+            <div id="soccer-score-modal-error" class="mt-2 hidden text-sm text-red-400"></div>
+            <form id="soccer-score-modal-form" class="mt-4 hidden space-y-3">
+              <input type="hidden" id="soccer-score-modal-game-id" value="" />
+              <div>
+                <label class="mb-1 block text-sm text-taupe" for="soccer-score-modal-team">Your team</label>
+                <select
+                  id="soccer-score-modal-team"
+                  class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white"
+                ></select>
+              </div>
+              <div>
+                <label class="mb-1 block text-sm text-taupe" for="soccer-score-modal-email">Your email</label>
+                <input
+                  type="email"
+                  id="soccer-score-modal-email"
+                  maxlength="254"
+                  required
+                  class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="mb-1 block text-sm text-taupe" for="soccer-score-modal-hs">Home goals</label>
+                  <input
+                    type="number"
+                    id="soccer-score-modal-hs"
+                    min="0"
+                    max="99"
+                    required
+                    class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label class="mb-1 block text-sm text-taupe" for="soccer-score-modal-as">Away goals</label>
+                  <input
+                    type="number"
+                    id="soccer-score-modal-as"
+                    min="0"
+                    max="99"
+                    required
+                    class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label class="mb-1 block text-sm text-taupe" for="soccer-score-modal-spirit">
+                  Spirit for opponent (1–5)
+                </label>
+                <select
+                  id="soccer-score-modal-spirit"
+                  required
+                  class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white"
+                >
+                  <option value="">—</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+              <div>
+                <label class="mb-1 block text-sm text-taupe" for="soccer-score-modal-notes">Notes (optional)</label>
+                <textarea
+                  id="soccer-score-modal-notes"
+                  maxlength="500"
+                  rows="2"
+                  class="w-full resize-y rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white"
+                ></textarea>
+              </div>
+              <div
+                id="soccer-score-recaptcha-v2-wrap"
+                class="hidden flex justify-center"
+                aria-hidden="true"
+              ></div>
+              <div id="soccer-score-modal-form-msg" class="min-h-[1.25rem] text-sm text-taupe"></div>
+              <button
+                type="submit"
+                id="soccer-score-modal-submit"
+                class="w-full rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark disabled:opacity-60"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+        <div
+          id="soccer-score-success-overlay"
+          class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="soccer-score-success-title"
+        >
+          <div class="w-full max-w-lg rounded-xl border border-taupe/30 bg-forest-dark p-6 text-white shadow-xl">
+            <h3 id="soccer-score-success-title" class="font-heading text-lg font-bold text-green-400">
+              Score saved
+            </h3>
+            <p class="mt-4 text-md leading-relaxed text-taupe">
+              Use <strong class="text-white">Refresh Scores</strong> on <strong class="text-white">Schedule</strong> to update the table. Do not submit again until you have refreshed.
+            </p>
+            <button
+              type="button"
+              id="soccer-score-success-dismiss"
+              class="mt-6 w-full rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
   </div>
 </section>
 
-<script define:vars={{ seasonsJson }}>
+<script define:vars={{ seasonsJson, formsApiUrl, recaptchaSiteKeyV3, recaptchaSiteKeyV2, scoreFeaturesEnabled }}>
   (function () {
     var seasons = seasonsJson;
 
@@ -43,6 +199,52 @@ const seasonsJson = getSoccerSeasonsForClient();
         if (seasons[i].seasonKey === key) return seasons[i];
       }
       return null;
+    }
+
+    function getFixtureFromSeasonById(gameId) {
+      var season = state.seasonKey ? getSeason(state.seasonKey) : null;
+      if (!season || !gameId) return null;
+      for (var i = 0; i < season.fixtures.length; i++) {
+        if (season.fixtures[i].id === gameId) return season.fixtures[i];
+      }
+      return null;
+    }
+
+    function pad2(n) {
+      return (n < 10 ? '0' : '') + n;
+    }
+
+    function todayYmdLocal() {
+      var d = new Date();
+      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    }
+
+    function sortedUniqueFixtureDates(season) {
+      var set = {};
+      if (!season || !season.fixtures) return [];
+      season.fixtures.forEach(function (fx) {
+        if (fx.date) set[fx.date] = true;
+      });
+      return Object.keys(set).sort();
+    }
+
+    /** Earliest fixture date on or after local today; if none left, last scheduled date. */
+    function computeDefaultNextGameDayYmd(season) {
+      var sorted = sortedUniqueFixtureDates(season);
+      if (!sorted.length) return '';
+      var today = todayYmdLocal();
+      for (var i = 0; i < sorted.length; i++) {
+        if (sorted[i] >= today) return sorted[i];
+      }
+      return sorted[sorted.length - 1];
+    }
+
+    function fixtureVisibleForScheduleFilter(fx, anchorYmd) {
+      if (state.scheduleScope === 'all') return true;
+      if (!anchorYmd) return true;
+      if (state.scheduleScope === 'next') return fx.date === anchorYmd;
+      if (state.scheduleScope === 'future') return fx.date >= anchorYmd;
+      return true;
     }
 
     function numOrNaN(v) {
@@ -120,8 +322,60 @@ const seasonsJson = getSoccerSeasonsForClient();
       return rows;
     }
 
+    function captainRowHasScoreline(row) {
+      return (
+        row &&
+        row.homeScore != null &&
+        row.awayScore != null &&
+        !Number.isNaN(Number(row.homeScore)) &&
+        !Number.isNaN(Number(row.awayScore))
+      );
+    }
+
+    /** Provisional scoreline from sheet when game is still pending (one or both captain rows). */
+    function pendingScorelineFromCache(c) {
+      if (!c || c.gameStatus !== 'pending') return null;
+      var h = c.homeCaptainRow;
+      var a = c.awayCaptainRow;
+      var hok = captainRowHasScoreline(h);
+      var aok = captainRowHasScoreline(a);
+      if (hok && aok) {
+        if (Number(h.homeScore) === Number(a.homeScore) && Number(h.awayScore) === Number(a.awayScore)) {
+          return { home: h.homeScore, away: h.awayScore, kind: 'pending' };
+        }
+        return { mismatch: true };
+      }
+      if (hok) return { home: h.homeScore, away: h.awayScore, kind: 'partial' };
+      if (aok) return { home: a.homeScore, away: a.awayScore, kind: 'partial' };
+      return null;
+    }
+
     /** Result column: optional `result` string, else scoreline from goals, else — */
     function resultLine(fx) {
+      if (scoreFeaturesEnabled && state.scheduleScoresLoaded) {
+        var c = state.gameScoreCache[fx.id];
+        if (c && (c.gameStatus === 'reviewing' || c.gameStatus === 'verified')) {
+          if (c.scoresAgree && c.agreedHomeScore != null && c.agreedAwayScore != null) {
+            return esc(c.agreedHomeScore) + ' – ' + esc(c.agreedAwayScore);
+          }
+          if (c.gameStatus === 'reviewing' && c.scoresAgree === false) {
+            return esc('Under review (mismatch)');
+          }
+        }
+        if (c && c.gameStatus === 'pending') {
+          var pen = pendingScorelineFromCache(c);
+          if (pen && pen.mismatch) {
+            return esc('Mismatched scores (pending)');
+          }
+          if (pen && pen.home != null && pen.away != null) {
+            var line = esc(String(pen.home)) + ' – ' + esc(String(pen.away));
+            if (pen.kind === 'partial') {
+              return line + ' <span class="text-xs text-taupe">(partial)</span>';
+            }
+            return line + ' <span class="text-xs text-taupe">(pending)</span>';
+          }
+        }
+      }
       if (fx.result != null && String(fx.result).trim() !== '') return esc(String(fx.result).trim());
       var hg = fx.homeGoals;
       var ag = fx.awayGoals;
@@ -129,10 +383,452 @@ const seasonsJson = getSoccerSeasonsForClient();
       return '—';
     }
 
+    function gameStatusBadge(fx) {
+      var c = state.gameScoreCache[fx.id];
+      var gs = c && c.gameStatus ? c.gameStatus : 'pending';
+      var cls =
+        gs === 'verified'
+          ? 'bg-emerald-700/80 text-white'
+          : gs === 'reviewing'
+            ? 'bg-amber-700/80 text-white'
+            : 'bg-forest-light/50 text-taupe';
+      return '<span class="inline-block rounded px-2 py-0.5 text-xs font-medium ' + cls + '">' + esc(gs) + '</span>';
+    }
+
+    function getScoreV2WidgetId() {
+      var wrap = document.getElementById('soccer-score-recaptcha-v2-wrap');
+      if (!wrap) return null;
+      var raw = wrap.getAttribute('data-rc-widget-id');
+      return raw != null && raw !== '' ? parseInt(raw, 10) : null;
+    }
+
+    function ensureScoreV2WidgetVisible() {
+      var wrap = document.getElementById('soccer-score-recaptcha-v2-wrap');
+      if (!wrap || !recaptchaSiteKeyV2 || typeof grecaptcha === 'undefined') return null;
+      wrap.classList.remove('hidden');
+      wrap.setAttribute('aria-hidden', 'false');
+      var existing = getScoreV2WidgetId();
+      if (existing !== null && !isNaN(existing)) return existing;
+      try {
+        var wid = grecaptcha.render(wrap, { sitekey: recaptchaSiteKeyV2, theme: 'dark' });
+        wrap.setAttribute('data-rc-widget-id', String(wid));
+        return wid;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function resetScoreV2Widget() {
+      var wrap = document.getElementById('soccer-score-recaptcha-v2-wrap');
+      if (!wrap) return;
+      var wid = getScoreV2WidgetId();
+      if (wid !== null && !isNaN(wid) && typeof grecaptcha !== 'undefined') {
+        try {
+          grecaptcha.reset(wid);
+        } catch (e) {}
+      }
+    }
+
+    function fetchScoreApi(action, data, onOk, onErr) {
+      if (!formsApiUrl) {
+        onErr('Forms API URL is not configured.');
+        return;
+      }
+      function postWithToken(token) {
+        fetch(formsApiUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: action, data: data, recaptchaToken: token || '' }),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          redirect: 'follow'
+        })
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (json) {
+            if (json.success) {
+              state.scoreV2Mode = false;
+              onOk(json);
+              return;
+            }
+            if (json.recaptchaV2Required && recaptchaSiteKeyV2) {
+              var w = ensureScoreV2WidgetVisible();
+              if (w !== null && !isNaN(w)) {
+                state.scoreV2Mode = true;
+                onErr(json.error || 'Complete the checkbox below, then try again.');
+                return;
+              }
+            }
+            onErr(json.error || 'Request failed.');
+          })
+          .catch(function (err) {
+            onErr(err.message || 'Network error.');
+          });
+      }
+
+      var useV2Only = !recaptchaSiteKeyV3 && !!recaptchaSiteKeyV2;
+      var useV2Path = useV2Only || state.scoreV2Mode;
+      if (useV2Path) {
+        var v2id = ensureScoreV2WidgetVisible();
+        if (v2id === null || isNaN(v2id)) {
+          onErr('Spam protection could not load.');
+          return;
+        }
+        var v2token = grecaptcha.getResponse(v2id);
+        if (!v2token) {
+          onErr('Please complete the verification checkbox, then try again.');
+          return;
+        }
+        postWithToken(v2token);
+        return;
+      }
+
+      if (!recaptchaSiteKeyV3) {
+        onErr('reCAPTCHA is not configured.');
+        return;
+      }
+      if (typeof grecaptcha === 'undefined') {
+        onErr('Spam protection could not load. Refresh and try again.');
+        return;
+      }
+      grecaptcha.ready(function () {
+        grecaptcha
+          .execute(recaptchaSiteKeyV3, { action: action })
+          .then(function (token) {
+            if (!token) {
+              onErr('Spam protection check failed.');
+              return;
+            }
+            postWithToken(token);
+          })
+          .catch(function () {
+            onErr('Spam protection check failed.');
+          });
+      });
+    }
+
+    function setSubmitMaskVisible(show) {
+      var m = document.getElementById('soccer-score-modal-submit-mask');
+      if (!m) return;
+      if (show) {
+        m.classList.remove('hidden');
+        m.setAttribute('aria-hidden', 'false');
+      } else {
+        m.classList.add('hidden');
+        m.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    function setSuccessScoreModalVisible(show) {
+      var el = document.getElementById('soccer-score-success-overlay');
+      if (!el) return;
+      if (show) {
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+      } else {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }
+    }
+
+    function setModalVisible(show) {
+      var el = document.getElementById('soccer-score-modal-overlay');
+      if (!el) return;
+      if (show) {
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+      } else {
+        state.scoreV2Mode = false;
+        setSubmitMaskVisible(false);
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }
+    }
+
+    function applyScorePayloadToCache(payload) {
+      if (!payload || !payload.gameId) return;
+      state.gameScoreCache[payload.gameId] = payload;
+    }
+
+    function mergeSeasonScoresFromResponse(season, gamesById) {
+      state.gameScoreCache = {};
+      var raw = gamesById;
+      if (typeof raw === 'string') {
+        try {
+          raw = JSON.parse(raw);
+        } catch (e) {
+          raw = {};
+        }
+      }
+      var byId = {};
+      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+        for (var key in raw) {
+          if (!Object.prototype.hasOwnProperty.call(raw, key)) continue;
+          var entry = raw[key];
+          if (!entry || typeof entry !== 'object') continue;
+          var gid = entry.gameId != null && String(entry.gameId) !== '' ? String(entry.gameId) : String(key);
+          byId[gid] = entry;
+        }
+      }
+      if (!season || !season.fixtures) return;
+      for (var i = 0; i < season.fixtures.length; i++) {
+        var fx = season.fixtures[i];
+        var g = byId[fx.id];
+        if (g) {
+          state.gameScoreCache[fx.id] = g;
+        } else {
+          state.gameScoreCache[fx.id] = {
+            seasonKey: state.seasonKey,
+            gameId: fx.id,
+            fixture: null,
+            homeCaptainRow: null,
+            awayCaptainRow: null,
+            homeSubmitted: false,
+            awaySubmitted: false,
+            gameStatus: 'pending',
+            scoresAgree: false,
+            bothRowsVerified: false,
+            agreedHomeScore: null,
+            agreedAwayScore: null,
+            message: ''
+          };
+        }
+      }
+    }
+
+    function loadScoresFromSheet() {
+      if (!state.seasonKey || state.scheduleScoresLoading || !scoreFeaturesEnabled) return;
+      state.scheduleScoresLoading = true;
+      state.scheduleScoresLoadError = '';
+      render();
+      fetchScoreApi(
+        'gamescoreseason',
+        { seasonKey: state.seasonKey },
+        function (json) {
+          state.scheduleScoresLoading = false;
+          var season = getSeason(state.seasonKey);
+          mergeSeasonScoresFromResponse(season, json.gamesById || {});
+          state.scheduleScoresLoaded = true;
+          render();
+        },
+        function (msg) {
+          state.scheduleScoresLoading = false;
+          state.scheduleScoresLoadError = msg || 'Could not load scores.';
+          render();
+        }
+      );
+    }
+
+    function viewOfficialStandings() {
+      if (!state.seasonKey || state.officialStandingsPhase === 'loading') return;
+      state.officialStandingsPhase = 'loading';
+      state.officialStandingsError = '';
+      state.officialStandings = null;
+      render();
+      fetchScoreApi(
+        'gamestandings',
+        { seasonKey: state.seasonKey },
+        function (json) {
+          state.officialStandings = { standings: json.standings || [], footnote: json.footnote || '' };
+          state.officialStandingsPhase = 'loaded';
+          render();
+        },
+        function (msg) {
+          state.officialStandingsPhase = 'idle';
+          state.officialStandingsError = msg || 'Could not load standings.';
+          render();
+        }
+      );
+    }
+
+    function hideOfficialStandings() {
+      state.officialStandingsPhase = 'idle';
+      state.officialStandings = null;
+      state.officialStandingsError = '';
+      render();
+    }
+
+    function openScoreModal(gameId) {
+      var season = state.seasonKey ? getSeason(state.seasonKey) : null;
+      if (!season || !scoreFeaturesEnabled) return;
+      var fx = null;
+      for (var i = 0; i < season.fixtures.length; i++) {
+        if (season.fixtures[i].id === gameId) {
+          fx = season.fixtures[i];
+          break;
+        }
+      }
+      if (!fx) return;
+
+      setSubmitMaskVisible(false);
+      var loading = document.getElementById('soccer-score-modal-loading');
+      var form = document.getElementById('soccer-score-modal-form');
+      var errEl = document.getElementById('soccer-score-modal-error');
+      var statusEl = document.getElementById('soccer-score-modal-status');
+      if (loading) loading.classList.remove('hidden');
+      if (form) form.classList.add('hidden');
+      if (errEl) {
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+      }
+      if (statusEl) statusEl.textContent = '';
+
+      setModalVisible(true);
+      if (loading) loading.classList.add('hidden');
+      if (errEl) errEl.classList.add('hidden');
+      var cached = state.gameScoreCache[gameId] || {};
+      if (form) form.classList.remove('hidden');
+      fillScoreModalForm(fx, cached);
+    }
+
+    function fillScoreModalForm(fx, payload) {
+      var gid = document.getElementById('soccer-score-modal-game-id');
+      var teamSel = document.getElementById('soccer-score-modal-team');
+      var statusEl = document.getElementById('soccer-score-modal-status');
+      if (gid) gid.value = fx.id;
+      if (statusEl) statusEl.textContent = payload.message || '';
+
+      if (teamSel) {
+        teamSel.innerHTML = '';
+        var o1 = document.createElement('option');
+        o1.value = fx.homeTeam;
+        o1.textContent = 'Home: ' + fx.homeTeam;
+        teamSel.appendChild(o1);
+        var o2 = document.createElement('option');
+        o2.value = fx.awayTeam;
+        o2.textContent = 'Away: ' + fx.awayTeam;
+        teamSel.appendChild(o2);
+      }
+
+      syncModalFieldsFromTeam(fx, payload);
+      updateScoreModalSubmitDisabled(fx, payload);
+    }
+
+    function getCaptainRowForTeam(payload, teamName, fxLocal) {
+      var home =
+        (payload && payload.fixture && payload.fixture.homeTeam) || (fxLocal && fxLocal.homeTeam);
+      var away =
+        (payload && payload.fixture && payload.fixture.awayTeam) || (fxLocal && fxLocal.awayTeam);
+      if (!payload || !home || !away) return null;
+      if (teamName === home) return payload.homeCaptainRow;
+      if (teamName === away) return payload.awayCaptainRow;
+      return null;
+    }
+
+    function syncModalFieldsFromTeam(fx, payload) {
+      var teamSel = document.getElementById('soccer-score-modal-team');
+      if (!teamSel) return;
+      var team = teamSel.value || fx.homeTeam;
+      var row = getCaptainRowForTeam(payload, team, fx);
+      var email = document.getElementById('soccer-score-modal-email');
+      var hs = document.getElementById('soccer-score-modal-hs');
+      var as = document.getElementById('soccer-score-modal-as');
+      var sp = document.getElementById('soccer-score-modal-spirit');
+      var notes = document.getElementById('soccer-score-modal-notes');
+      if (email) email.value = row && row.submitterEmail ? row.submitterEmail : '';
+      if (hs) hs.value = row && row.homeScore != null ? String(row.homeScore) : '';
+      if (as) as.value = row && row.awayScore != null ? String(row.awayScore) : '';
+      if (sp) sp.value = '';
+      if (notes) notes.value = '';
+      updateScoreModalSubmitDisabled(fx, payload);
+    }
+
+    function updateScoreModalSubmitDisabled(fx, payload) {
+      var btn = document.getElementById('soccer-score-modal-submit');
+      if (!btn) return;
+      if (!payload) {
+        btn.disabled = true;
+        return;
+      }
+      if (payload.gameStatus === 'verified') {
+        btn.disabled = true;
+        return;
+      }
+      var teamSel = document.getElementById('soccer-score-modal-team');
+      var team = teamSel ? teamSel.value : fx.homeTeam;
+      var row = getCaptainRowForTeam(payload, team, fx);
+      if (row && row.verified) {
+        btn.disabled = true;
+        return;
+      }
+      btn.disabled = false;
+    }
+
+    function submitScoreModal(ev) {
+      ev.preventDefault();
+      var gidEl = document.getElementById('soccer-score-modal-game-id');
+      var msgEl = document.getElementById('soccer-score-modal-form-msg');
+      if (!gidEl || !state.seasonKey) return;
+      var gameId = gidEl.value;
+      var teamSel = document.getElementById('soccer-score-modal-team');
+      var team = teamSel ? teamSel.value : '';
+      var email = document.getElementById('soccer-score-modal-email');
+      var hs = document.getElementById('soccer-score-modal-hs');
+      var as = document.getElementById('soccer-score-modal-as');
+      var sp = document.getElementById('soccer-score-modal-spirit');
+      var notes = document.getElementById('soccer-score-modal-notes');
+      if (msgEl) {
+        msgEl.textContent = '';
+        msgEl.classList.remove('text-red-400', 'text-green-500');
+      }
+
+      var fxSubmit = getFixtureFromSeasonById(gameId);
+      if (!fxSubmit) {
+        if (msgEl) {
+          msgEl.textContent = 'Could not find this game in the schedule.';
+          msgEl.classList.add('text-red-400');
+        }
+        return;
+      }
+
+      var payload = {
+        seasonKey: state.seasonKey,
+        gameId: gameId,
+        submitterTeam: team,
+        homeTeam: fxSubmit.homeTeam,
+        awayTeam: fxSubmit.awayTeam,
+        date: fxSubmit.date,
+        startTime: fxSubmit.startTime || '',
+        fieldName: fxSubmit.fieldName || '',
+        homeScore: hs ? Number(hs.value) : NaN,
+        awayScore: as ? Number(as.value) : NaN,
+        opponentSpiritScore: sp ? Number(sp.value) : NaN,
+        submitterEmail: email ? email.value.trim() : '',
+        notes: notes ? notes.value.trim() : ''
+      };
+
+      var sub = document.getElementById('soccer-score-modal-submit');
+      if (sub) sub.disabled = true;
+      setSubmitMaskVisible(true);
+
+      fetchScoreApi('gamescoresubmit', payload, function () {
+        setSubmitMaskVisible(false);
+        if (sub) sub.disabled = false;
+        resetScoreV2Widget();
+        setModalVisible(false);
+        setSuccessScoreModalVisible(true);
+      }, function (err) {
+        setSubmitMaskVisible(false);
+        if (msgEl) {
+          msgEl.textContent = err;
+          msgEl.classList.add('text-red-400');
+        }
+        if (sub) sub.disabled = false;
+      });
+    }
+
     var state = {
       seasonKey: null,
       scheduleMode: 'basic',
-      teamFilter: ''
+      teamFilter: '',
+      scheduleScope: 'next',
+      gameScoreCache: {},
+      scheduleScoresLoaded: false,
+      scheduleScoresLoading: false,
+      scheduleScoresLoadError: '',
+      officialStandings: null,
+      officialStandingsPhase: 'idle',
+      officialStandingsError: '',
+      scoreV2Mode: false
     };
 
     function printBlock(mode) {
@@ -174,7 +870,12 @@ const seasonsJson = getSoccerSeasonsForClient();
         return;
       }
 
-      var standingsRows = computeStandings(season);
+      var catalogStandingsRows = computeStandings(season);
+      var useOfficialStandingsPanel =
+        scoreFeaturesEnabled &&
+        season.fixtures &&
+        season.fixtures.length &&
+        season.standingsMode !== 'comingSoon';
 
       var parts = [];
       parts.push('<div class="space-y-8">');
@@ -240,7 +941,7 @@ const seasonsJson = getSoccerSeasonsForClient();
           (state.scheduleMode === 'full'
             ? 'bg-orange text-white'
             : 'border border-taupe/30 bg-forest-dark text-white') +
-          '" data-schedule-mode="full">Full schedule</button>'
+          '" data-schedule-mode="full">Schedule</button>'
       );
       parts.push('</div>');
 
@@ -268,11 +969,21 @@ const seasonsJson = getSoccerSeasonsForClient();
         var teamNames = season.teams.map(function (t) {
           return t.teamName;
         });
+        var showSheetScoreCols = scoreFeaturesEnabled && state.scheduleScoresLoaded;
+        var anchorYmd =
+          season.fixtures && season.fixtures.length ? computeDefaultNextGameDayYmd(season) : '';
+
         parts.push('<div id="print-soccer-full" class="print-soccer-block">');
-        parts.push('<div class="no-print mb-3 flex flex-wrap items-center gap-3">');
+        parts.push(
+          '<div class="no-print mb-3 flex w-full flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:justify-between">'
+        );
+        parts.push(
+          '<div class="flex min-w-0 w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">'
+        );
+        parts.push('<div class="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:max-w-xs">');
         parts.push('<label class="text-md text-taupe" for="soccer-team-filter">Team filter</label>');
         parts.push(
-          '<select id="soccer-team-filter" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-md text-white">'
+          '<select id="soccer-team-filter" class="w-full max-w-full rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-md text-white sm:min-w-[12rem]">'
         );
         parts.push('<option value="">All teams</option>');
         teamNames.forEach(function (n) {
@@ -286,49 +997,178 @@ const seasonsJson = getSoccerSeasonsForClient();
               '</option>'
           );
         });
-        parts.push('</select>');
+        parts.push('</select></div>');
+        if (season.fixtures && season.fixtures.length) {
+          parts.push('<div class="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:max-w-xs">');
+          parts.push('<label class="text-md text-taupe" for="soccer-schedule-scope">Show</label>');
+          parts.push(
+            '<select id="soccer-schedule-scope" class="w-full max-w-full rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-md text-white sm:min-w-[14rem]">'
+          );
+          parts.push(
+            '<option value="next"' +
+              (state.scheduleScope === 'next' ? ' selected' : '') +
+              '>Next game day</option><option value="future"' +
+              (state.scheduleScope === 'future' ? ' selected' : '') +
+              '>Future game days</option><option value="all"' +
+              (state.scheduleScope === 'all' ? ' selected' : '') +
+              '>All games</option>'
+          );
+          parts.push('</select></div>');
+        }
+        parts.push('</div>');
         parts.push(
-          '<button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-md font-semibold text-white" data-print="print-soccer-full">Print schedule</button>'
+          '<div class="flex shrink-0 flex-wrap items-center gap-2 md:justify-end"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-md font-semibold text-white" data-print="print-soccer-full">Print schedule</button></div>'
         );
         parts.push('</div>');
 
-        parts.push('<div class="overflow-x-auto rounded-lg border border-taupe/30 bg-forest-dark/80 p-4">');
-        parts.push('<h3 class="font-heading mb-3 text-lg font-bold text-white">Full schedule</h3>');
-        if (!season.fixtures || !season.fixtures.length) {
-          parts.push('<p class="text-taupe">Full schedule not published yet.</p>');
-        } else {
+        parts.push('<div class="rounded-lg border border-taupe/30 bg-forest-dark/80 p-4">');
+        parts.push(
+          '<div class="mb-3 flex w-full flex-wrap items-center justify-between gap-2">'
+        );
+        parts.push('<h3 class="font-heading text-lg font-bold text-white">Schedule</h3>');
+        parts.push('<div class="no-print flex min-w-0 flex-wrap items-center justify-end gap-2">');
+        if (scoreFeaturesEnabled && season.fixtures && season.fixtures.length) {
           parts.push(
-            '<table class="w-full min-w-[48rem] border-collapse text-left text-md"><thead><tr class="border-b border-taupe/30 text-taupe">'
+            '<button type="button" id="soccer-refresh-sheet-scores" class="rounded-lg border border-orange/60 bg-orange/20 px-3 py-1.5 text-sm font-semibold text-white hover:bg-orange/30 disabled:opacity-60"' +
+              (state.scheduleScoresLoading ? ' disabled' : '') +
+              '>' +
+              esc(state.scheduleScoresLoaded ? 'Refresh Scores' : 'Load Scores') +
+              '</button>'
           );
-          parts.push(
-            '<th class="py-2 pr-2 font-semibold">Date</th><th class="py-2 pr-2 font-semibold">Start</th><th class="py-2 pr-2 font-semibold">Field</th><th class="py-2 pr-2 font-semibold">Matchup</th><th class="py-2 pr-2 font-semibold">Result</th>'
-          );
-          parts.push('</tr></thead><tbody>');
+          if (state.scheduleScoresLoading) {
+            parts.push(
+              '<span class="inline-block h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-taupe/40 border-t-orange" aria-hidden="true"></span>'
+            );
+          }
+          if (state.scheduleScoresLoadError) {
+            parts.push('<span class="max-w-[14rem] text-sm text-red-400 sm:max-w-xs">' + esc(state.scheduleScoresLoadError) + '</span>');
+          }
+        }
+        parts.push('</div></div>');
 
-          season.fixtures.forEach(function (fx) {
+        if (!season.fixtures || !season.fixtures.length) {
+          parts.push('<p class="text-taupe">Schedule not published yet.</p>');
+        } else {
+          var visibleFixtures = season.fixtures.filter(function (fx) {
             if (
               state.teamFilter &&
               fx.homeTeam !== state.teamFilter &&
               fx.awayTeam !== state.teamFilter
             ) {
-              return;
+              return false;
             }
-            parts.push('<tr class="border-b border-taupe/20 align-top text-white">');
-            parts.push('<td class="py-2 pr-2 whitespace-nowrap">' + formatDate(fx.date) + '</td>');
-            parts.push('<td class="py-2 pr-2 whitespace-nowrap">' + esc(fx.startTime || '') + '</td>');
-            parts.push('<td class="py-2 pr-2">' + esc(fx.fieldName) + '</td>');
-            parts.push(
-              '<td class="py-2 pr-2">' +
-                esc(fx.homeTeam) +
-                ' vs ' +
-                esc(fx.awayTeam) +
-                '</td>'
-            );
-            parts.push('<td class="py-2 pr-2">' + resultLine(fx) + '</td>');
-            parts.push('</tr>');
+            return fixtureVisibleForScheduleFilter(fx, anchorYmd);
           });
+          if (!visibleFixtures.length) {
+            parts.push(
+              '<p class="text-taupe">No games match the current team and show filters.</p>'
+            );
+          } else {
+            parts.push('<div class="no-print space-y-3 md:hidden">');
+            visibleFixtures.forEach(function (fx) {
+              parts.push(
+                '<article class="rounded-lg border border-taupe/20 bg-forest-dark/60 p-4 text-white">'
+              );
+              parts.push(
+                '<div class="text-md font-semibold">' +
+                  esc(fx.homeTeam) +
+                  ' vs ' +
+                  esc(fx.awayTeam) +
+                  '</div>'
+              );
+              parts.push('<div class="mt-2 space-y-1 text-sm text-taupe">');
+              parts.push(
+                '<div><span class="text-taupe/80">When: </span>' +
+                  formatDate(fx.date) +
+                  ' · ' +
+                  esc(fx.startTime || '') +
+                  '</div>'
+              );
+              parts.push(
+                '<div><span class="text-taupe/80">Field: </span>' + esc(fx.fieldName) + '</div>'
+              );
+              parts.push('</div>');
+              if (showSheetScoreCols) {
+                var cCard = state.gameScoreCache[fx.id];
+                var gameVerifiedCard = !!(cCard && cCard.gameStatus === 'verified');
+                var editDisabledCard = !state.scheduleScoresLoaded || gameVerifiedCard;
+                parts.push(
+                  '<div class="mt-3 flex flex-wrap items-center gap-2 border-t border-taupe/20 pt-3">'
+                );
+                parts.push('<span class="text-xs text-taupe">Status</span>');
+                parts.push(gameStatusBadge(fx));
+                parts.push('</div>');
+                parts.push(
+                  '<div class="mt-2 text-sm"><span class="text-taupe">Result: </span><span class="text-white">' +
+                    resultLine(fx) +
+                    '</span></div>'
+                );
+                parts.push(
+                  '<div class="mt-3"><button type="button" class="w-full rounded border border-taupe/40 px-3 py-2 text-sm font-semibold text-white hover:bg-forest-light/40 disabled:cursor-not-allowed disabled:opacity-50" data-score-edit="' +
+                    esc(fx.id) +
+                    '"' +
+                    (editDisabledCard ? ' disabled' : '') +
+                    '>Edit</button></div>'
+                );
+              } else if (!scoreFeaturesEnabled) {
+                parts.push(
+                  '<div class="mt-3 border-t border-taupe/20 pt-3 text-md">' + resultLine(fx) + '</div>'
+                );
+              }
+              parts.push('</article>');
+            });
+            parts.push('</div>');
 
-          parts.push('</tbody></table>');
+            parts.push('<div class="hidden overflow-x-auto md:block print:block">');
+            parts.push(
+              '<table class="w-full ' +
+                (showSheetScoreCols ? 'min-w-[56rem]' : 'min-w-[48rem]') +
+                ' border-collapse text-left text-md"><thead><tr class="border-b border-taupe/30 text-taupe">'
+            );
+            parts.push(
+              '<th class="py-2 pr-2 font-semibold">Date</th><th class="py-2 pr-2 font-semibold">Start</th><th class="py-2 pr-2 font-semibold">Field</th><th class="py-2 pr-2 font-semibold">Matchup</th>' +
+                (showSheetScoreCols
+                  ? '<th class="py-2 pr-2 font-semibold">Status</th><th class="py-2 pr-2 font-semibold">Result</th><th class="py-2 pr-2 font-semibold no-print">Score entry</th>'
+                  : scoreFeaturesEnabled
+                    ? ''
+                    : '<th class="py-2 pr-2 font-semibold">Result</th>')
+            );
+            parts.push('</tr></thead><tbody>');
+
+            visibleFixtures.forEach(function (fx) {
+              parts.push('<tr class="border-b border-taupe/20 align-top text-white">');
+              parts.push('<td class="py-2 pr-2 whitespace-nowrap">' + formatDate(fx.date) + '</td>');
+              parts.push('<td class="py-2 pr-2 whitespace-nowrap">' + esc(fx.startTime || '') + '</td>');
+              parts.push('<td class="py-2 pr-2">' + esc(fx.fieldName) + '</td>');
+              parts.push(
+                '<td class="py-2 pr-2">' +
+                  esc(fx.homeTeam) +
+                  ' vs ' +
+                  esc(fx.awayTeam) +
+                  '</td>'
+              );
+              if (showSheetScoreCols) {
+                var cRow = state.gameScoreCache[fx.id];
+                var gameVerified = !!(cRow && cRow.gameStatus === 'verified');
+                var editDisabled = !state.scheduleScoresLoaded || gameVerified;
+                parts.push('<td class="py-2 pr-2">' + gameStatusBadge(fx) + '</td>');
+                parts.push('<td class="py-2 pr-2">' + resultLine(fx) + '</td>');
+                parts.push(
+                  '<td class="py-2 pr-2 no-print"><button type="button" class="rounded border border-taupe/40 px-2 py-1 text-xs font-semibold text-white hover:bg-forest-light/40 disabled:cursor-not-allowed disabled:opacity-50" data-score-edit="' +
+                    esc(fx.id) +
+                    '"' +
+                    (editDisabled ? ' disabled' : '') +
+                    '>Edit</button></td>'
+                );
+              } else if (!scoreFeaturesEnabled) {
+                parts.push('<td class="py-2 pr-2">' + resultLine(fx) + '</td>');
+              }
+              parts.push('</tr>');
+            });
+
+            parts.push('</tbody></table>');
+            parts.push('</div>');
+          }
         }
         parts.push('</div></div>');
       }
@@ -343,28 +1183,95 @@ const seasonsJson = getSoccerSeasonsForClient();
         parts.push('<div id="print-soccer-standings" class="print-soccer-block">');
         parts.push('<div class="flex justify-end no-print"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-md font-semibold text-white" data-print="print-soccer-standings">Print standings</button></div>');
         parts.push('<div class="overflow-x-auto rounded-lg border border-taupe/30 bg-forest-dark/80 p-4">');
-        parts.push('<h3 class="font-heading mb-3 text-lg font-bold text-white">Standings</h3>');
-        parts.push('<p class="mb-3 text-xs text-taupe">Points: Win = 3, Tie = 1, Loss = 0. Spirit average is used as a hidden tie-breaker.</p>');
         parts.push(
-          '<table class="w-full min-w-[36rem] border-collapse text-left text-md"><thead><tr class="border-b border-taupe/30 text-taupe">'
+          '<div class="no-print mb-3 flex w-full flex-wrap items-center justify-between gap-2"><h3 class="font-heading text-lg font-bold text-white">Standings</h3>'
         );
-        parts.push(
-          '<th class="py-2 pr-2 font-semibold">#</th><th class="py-2 pr-2 font-semibold">Team</th><th class="py-2 pr-2 font-semibold">PTS</th><th class="py-2 pr-2 font-semibold">W</th><th class="py-2 pr-2 font-semibold">L</th><th class="py-2 pr-2 font-semibold">T</th><th class="py-2 pr-2 font-semibold">GF</th><th class="py-2 font-semibold">GA</th>'
-        );
-        parts.push('</tr></thead><tbody id="soccer-standings-tbody">');
-        standingsRows.forEach(function (r, idx) {
-          parts.push('<tr class="border-b border-taupe/20 text-white">');
-          parts.push('<td class="py-2 pr-2">' + (idx + 1) + '</td>');
-          parts.push('<td class="py-2 pr-2 font-semibold">' + esc(r.teamName) + '</td>');
-          parts.push('<td class="py-2 pr-2">' + r.points + '</td>');
-          parts.push('<td class="py-2 pr-2">' + r.wins + '</td>');
-          parts.push('<td class="py-2 pr-2">' + r.losses + '</td>');
-          parts.push('<td class="py-2 pr-2">' + r.ties + '</td>');
-          parts.push('<td class="py-2 pr-2">' + r.goalsFor + '</td>');
-          parts.push('<td class="py-2">' + r.goalsAgainst + '</td>');
-          parts.push('</tr>');
-        });
-        parts.push('</tbody></table>');
+        parts.push('<div class="flex flex-wrap items-center justify-end gap-2">');
+        if (useOfficialStandingsPanel) {
+          if (state.officialStandingsPhase === 'loaded' && state.officialStandings) {
+            parts.push(
+              '<button type="button" id="soccer-hide-official-standings" class="rounded-lg border border-taupe/40 px-3 py-1.5 text-sm font-semibold text-taupe hover:bg-forest-light/30">Hide standings</button>'
+            );
+          } else {
+            parts.push(
+              '<button type="button" id="soccer-view-official-standings" class="rounded-lg border border-orange/60 bg-orange/20 px-3 py-1.5 text-sm font-semibold text-white hover:bg-orange/30 disabled:opacity-60"' +
+                (state.officialStandingsPhase === 'loading' ? ' disabled' : '') +
+                '>Refresh Standings</button>'
+            );
+            if (state.officialStandingsPhase === 'loading') {
+              parts.push(
+                '<span class="inline-block h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-taupe/40 border-t-orange" aria-hidden="true"></span>'
+              );
+            }
+          }
+        }
+        parts.push('</div></div>');
+
+        if (useOfficialStandingsPanel) {
+          if (state.officialStandingsError) {
+            parts.push('<p class="mb-2 text-sm text-red-400">' + esc(state.officialStandingsError) + '</p>');
+          }
+          if (state.officialStandingsPhase === 'idle') {
+            parts.push(
+              '<p class="text-sm text-taupe">Use Refresh Standings to load the official table.</p>'
+            );
+          } else if (state.officialStandingsPhase === 'loading') {
+            parts.push('<p class="text-sm text-taupe">Refreshing standings…</p>');
+          } else if (state.officialStandingsPhase === 'loaded' && state.officialStandings) {
+            parts.push(
+              '<p class="mb-2 text-xs text-taupe">' + esc(state.officialStandings.footnote || '') + '</p>'
+            );
+            var officialRows = state.officialStandings.standings || [];
+            if (!officialRows.length) {
+              parts.push('<p class="text-taupe">No verified games yet.</p>');
+            } else {
+              parts.push(
+                '<table class="w-full min-w-[36rem] border-collapse text-left text-md"><thead><tr class="border-b border-taupe/30 text-taupe">'
+              );
+              parts.push(
+                '<th class="py-2 pr-2 font-semibold">#</th><th class="py-2 pr-2 font-semibold">Team</th><th class="py-2 pr-2 font-semibold">PTS</th><th class="py-2 pr-2 font-semibold">W</th><th class="py-2 pr-2 font-semibold">L</th><th class="py-2 pr-2 font-semibold">T</th><th class="py-2 pr-2 font-semibold">GF</th><th class="py-2 font-semibold">GA</th>'
+              );
+              parts.push('</tr></thead><tbody id="soccer-standings-tbody">');
+              officialRows.forEach(function (r, idx) {
+                parts.push('<tr class="border-b border-taupe/20 text-white">');
+                parts.push('<td class="py-2 pr-2">' + (idx + 1) + '</td>');
+                parts.push('<td class="py-2 pr-2 font-semibold">' + esc(r.teamName) + '</td>');
+                parts.push('<td class="py-2 pr-2">' + r.points + '</td>');
+                parts.push('<td class="py-2 pr-2">' + r.wins + '</td>');
+                parts.push('<td class="py-2 pr-2">' + r.losses + '</td>');
+                parts.push('<td class="py-2 pr-2">' + r.ties + '</td>');
+                parts.push('<td class="py-2 pr-2">' + r.goalsFor + '</td>');
+                parts.push('<td class="py-2">' + r.goalsAgainst + '</td>');
+                parts.push('</tr>');
+              });
+              parts.push('</tbody></table>');
+            }
+          }
+        } else {
+          parts.push(
+            '<p class="mb-2 text-xs text-taupe">Preview from the published schedule. Points: Win = 3, Tie = 1, Loss = 0. Spirit average is a tie-breaker.</p>'
+          );
+          parts.push(
+            '<table class="w-full min-w-[36rem] border-collapse text-left text-md"><thead><tr class="border-b border-taupe/30 text-taupe">'
+          );
+          parts.push(
+            '<th class="py-2 pr-2 font-semibold">#</th><th class="py-2 pr-2 font-semibold">Team</th><th class="py-2 pr-2 font-semibold">PTS</th><th class="py-2 pr-2 font-semibold">W</th><th class="py-2 pr-2 font-semibold">L</th><th class="py-2 pr-2 font-semibold">T</th><th class="py-2 pr-2 font-semibold">GF</th><th class="py-2 font-semibold">GA</th>'
+          );
+          parts.push('</tr></thead><tbody id="soccer-standings-tbody">');
+          catalogStandingsRows.forEach(function (r, idx) {
+            parts.push('<tr class="border-b border-taupe/20 text-white">');
+            parts.push('<td class="py-2 pr-2">' + (idx + 1) + '</td>');
+            parts.push('<td class="py-2 pr-2 font-semibold">' + esc(r.teamName) + '</td>');
+            parts.push('<td class="py-2 pr-2">' + r.points + '</td>');
+            parts.push('<td class="py-2 pr-2">' + r.wins + '</td>');
+            parts.push('<td class="py-2 pr-2">' + r.losses + '</td>');
+            parts.push('<td class="py-2 pr-2">' + r.ties + '</td>');
+            parts.push('<td class="py-2 pr-2">' + r.goalsFor + '</td>');
+            parts.push('<td class="py-2">' + r.goalsAgainst + '</td>');
+            parts.push('</tr>');
+          });
+          parts.push('</tbody></table>');
+        }
         parts.push('</div></div>');
       }
 
@@ -378,6 +1285,14 @@ const seasonsJson = getSoccerSeasonsForClient();
           if (selA.value) {
             state.seasonKey = selA.value;
             state.teamFilter = '';
+            state.gameScoreCache = {};
+            state.scheduleScoresLoaded = false;
+            state.scheduleScoresLoading = false;
+            state.scheduleScoresLoadError = '';
+            state.officialStandings = null;
+            state.officialStandingsPhase = 'idle';
+            state.officialStandingsError = '';
+            state.scheduleScope = 'next';
             if (selP) selP.value = '';
             render();
           }
@@ -387,6 +1302,14 @@ const seasonsJson = getSoccerSeasonsForClient();
           if (selP.value) {
             state.seasonKey = selP.value;
             state.teamFilter = '';
+            state.gameScoreCache = {};
+            state.scheduleScoresLoaded = false;
+            state.scheduleScoresLoading = false;
+            state.scheduleScoresLoadError = '';
+            state.officialStandings = null;
+            state.officialStandingsPhase = 'idle';
+            state.officialStandingsError = '';
+            state.scheduleScope = 'next';
             if (selA) selA.value = '';
             render();
           }
@@ -406,6 +1329,13 @@ const seasonsJson = getSoccerSeasonsForClient();
           render();
         });
 
+      var schedScope = document.getElementById('soccer-schedule-scope');
+      if (schedScope)
+        schedScope.addEventListener('change', function () {
+          state.scheduleScope = schedScope.value || 'next';
+          render();
+        });
+
       root.querySelectorAll('[data-print]').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var m = btn.getAttribute('data-print');
@@ -414,11 +1344,99 @@ const seasonsJson = getSoccerSeasonsForClient();
           else if (m === 'print-soccer-standings') printBlock('print-soccer-standings');
         });
       });
+
+      root.querySelectorAll('[data-score-edit]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (btn.disabled) return;
+          var gid = btn.getAttribute('data-score-edit');
+          if (gid) openScoreModal(gid);
+        });
+      });
+
+      var refreshSheetScores = document.getElementById('soccer-refresh-sheet-scores');
+      if (refreshSheetScores) {
+        refreshSheetScores.addEventListener('click', function () {
+          loadScoresFromSheet();
+        });
+      }
+
+      var viewOfficialBtn = document.getElementById('soccer-view-official-standings');
+      if (viewOfficialBtn) {
+        viewOfficialBtn.addEventListener('click', function () {
+          viewOfficialStandings();
+        });
+      }
+      var hideOfficialBtn = document.getElementById('soccer-hide-official-standings');
+      if (hideOfficialBtn) {
+        hideOfficialBtn.addEventListener('click', function () {
+          hideOfficialStandings();
+        });
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', render);
+    function initScoreFeaturesUi() {
+      if (!scoreFeaturesEnabled) return;
+      var overlay = document.getElementById('soccer-score-modal-overlay');
+      var closeBtn = document.getElementById('soccer-score-modal-close');
+      var form = document.getElementById('soccer-score-modal-form');
+      if (overlay) {
+        overlay.addEventListener('click', function (ev) {
+          if (ev.target === overlay) {
+            setModalVisible(false);
+            resetScoreV2Widget();
+          }
+        });
+        overlay.addEventListener('change', function (ev) {
+          var t = ev.target;
+          if (!t || t.id !== 'soccer-score-modal-team') return;
+          var gidEl = document.getElementById('soccer-score-modal-game-id');
+          if (!gidEl || !state.seasonKey) return;
+          var fx = getFixtureFromSeasonById(gidEl.value);
+          if (!fx) return;
+          var payload = state.gameScoreCache[gidEl.value];
+          syncModalFieldsFromTeam(fx, payload);
+        });
+      }
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+          setModalVisible(false);
+          resetScoreV2Widget();
+        });
+      }
+      if (form) form.addEventListener('submit', submitScoreModal);
+
+      var successDismiss = document.getElementById('soccer-score-success-dismiss');
+      if (successDismiss) {
+        successDismiss.addEventListener('click', function () {
+          setSuccessScoreModalVisible(false);
+        });
+      }
+      var successOverlay = document.getElementById('soccer-score-success-overlay');
+      if (successOverlay) {
+        successOverlay.addEventListener('click', function (ev) {
+          if (ev.target === successOverlay) setSuccessScoreModalVisible(false);
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      initScoreFeaturesUi();
+      render();
+    });
   })();
 </script>
+
+{scoreFeaturesEnabled && recaptchaSiteKeyV3 && (
+  <script async defer src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKeyV3}`}></script>
+)}
+{scoreFeaturesEnabled && recaptchaSiteKeyV2 && !recaptchaSiteKeyV3 && (
+  <script is:inline>
+    window.solkerScoreFormsV2Onload = function () {};
+  </script>
+)}
+{scoreFeaturesEnabled && recaptchaSiteKeyV2 && !recaptchaSiteKeyV3 && (
+  <script async defer src="https://www.google.com/recaptcha/api.js?onload=solkerScoreFormsV2Onload&render=explicit"></script>
+)}
 
 <style is:global>
   /**
