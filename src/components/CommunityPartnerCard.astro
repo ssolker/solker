@@ -3,10 +3,15 @@ interface Props {
   href: string;
   title: string;
   description: string;
-  imageSrc: { src: string } | string;
-  imageAlt: string;
+  /** Omit for a simple gradient header (no photo asset). */
+  imageSrc?: { src: string } | string;
+  imageAlt?: string;
   ctaText?: string;
   class?: string;
+  /** Small “Sponsor” label on the card. */
+  sponsored?: boolean;
+  /** Logo-style images: `object-contain` on white so nothing is cropped. */
+  imageContain?: boolean;
 }
 
 const {
@@ -16,10 +21,13 @@ const {
   imageSrc,
   imageAlt,
   ctaText = 'Visit website',
-  class: className = ''
+  class: className = '',
+  sponsored = false,
+  imageContain = false
 } = Astro.props;
 
-const resolvedImageSrc = typeof imageSrc === 'string' ? imageSrc : imageSrc.src;
+const resolvedImageSrc =
+  imageSrc != null ? (typeof imageSrc === 'string' ? imageSrc : imageSrc.src) : null;
 ---
 
 <a
@@ -30,14 +38,34 @@ const resolvedImageSrc = typeof imageSrc === 'string' ? imageSrc : imageSrc.src;
     'group relative block w-full max-w-md overflow-hidden rounded-xl border border-taupe/30 bg-sage-dark transition hover:border-taupe-light/50 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest',
     className
   ]}
-  aria-label={`Visit ${title} website`}
+  aria-label={sponsored ? `Visit ${title} website (sponsor)` : `Visit ${title} website`}
 >
-  <img
-    src={resolvedImageSrc}
-    alt={imageAlt}
-    class="h-32 w-full object-cover object-center sm:h-36"
-    loading="lazy"
-  />
+  {sponsored && (
+    <span
+      class="absolute right-2 top-2 z-10 rounded bg-black/45 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/95 backdrop-blur-sm"
+      aria-hidden="true"
+    >
+      Sponsor
+    </span>
+  )}
+  {resolvedImageSrc && imageAlt != null ? (
+    <img
+      src={resolvedImageSrc}
+      alt={imageAlt}
+      class:list={[
+        'h-32 w-full object-center sm:h-36',
+        imageContain ? 'bg-white object-contain px-6 py-3' : 'object-cover'
+      ]}
+      loading="lazy"
+    />
+  ) : (
+    <div
+      class="flex h-32 w-full items-center justify-center bg-gradient-to-br from-sage-dark to-forest sm:h-36"
+      aria-hidden="true"
+    >
+      <span class="font-heading text-2xl font-bold text-white/35">{title.slice(0, 1)}</span>
+    </div>
+  )}
   <div class="border-t border-taupe/20 bg-sage px-4 py-2 text-left">
     <h3 class="font-heading text-lg font-bold text-white sm:text-xl">{title}</h3>
     <p class="mt-1 text-sm text-white/90">{description}</p>
