@@ -1,4 +1,6 @@
 ---
+import ThemeSwitcher from './ThemeSwitcher.astro';
+
 const navLinkClass =
   "block rounded px-3 py-2 text-sm font-medium text-taupe hover:bg-sage-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark md:inline-block";
 const links = [
@@ -11,15 +13,24 @@ const links = [
 ];
 const menuId = 'league-nav-menu';
 const buttonId = 'league-nav-menu-button';
+const mobilePrimaryLink = links.find((link) => link.label === 'Soccer') ?? links[0];
 ---
 
-<div class="relative flex items-center">
+<div class="relative flex w-full items-center justify-end md:justify-center">
   <!-- Desktop: horizontal links -->
   <nav class="hidden items-center gap-1 md:flex md:gap-2" aria-label="Main">
     {links.map(({ href, label }) => (
       <a href={href} class={navLinkClass}>{label}</a>
     ))}
   </nav>
+
+  <!-- Mobile: keep Soccer visible -->
+  <a
+    href={mobilePrimaryLink.href}
+    class="mr-2 block rounded px-3 py-2 text-sm font-medium text-taupe hover:bg-sage-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark md:hidden"
+  >
+    {mobilePrimaryLink.label}
+  </a>
 
   <!-- Mobile: menu button -->
   <button
@@ -47,6 +58,9 @@ const buttonId = 'league-nav-menu-button';
   aria-label="Main menu"
   hidden
 >
+  <div class="px-4 pt-3">
+    <ThemeSwitcher />
+  </div>
   <nav class="flex flex-col px-4 py-3" aria-label="Main">
     {links.map(({ href, label }) => (
       <a href={href} class={navLinkClass} data-nav-close>{label}</a>

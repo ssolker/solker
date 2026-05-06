@@ -8,19 +8,16 @@ import SoccerLeagueStandings from '../../components/SoccerLeagueStandings.astro'
 import Footer from '../../components/Footer.astro';
 ---
 
-<Layout title="6v6 Co-Ed Soccer — League — Solker" description="Woodstock Adult Co-Ed Soccer. Rules, registration, waivers, and resources.">
+<Layout title="6v6 Co-Ed Soccer — League — Solker" description="Woodstock Adult Co-Ed Soccer. Rules, registration, waivers, and resources." showThemeSwitcher={false}>
   <Fragment slot="header-nav">
     <LeagueNav />
   </Fragment>
 
   <main class="flex-1 pt-0">
-    <div class="bg-orange/90 px-4 py-2 text-center text-sm font-medium text-white" role="status">
-      Under construction — we're getting things ready.
-    </div>
-    
-    <ActiveLeagues filter="soccer" heading="Active Soccer Leagues" />
     
     <LeagueQuickLinks />
+    
+    <ActiveLeagues filter="soccer" heading="Active Soccer Leagues" />
     
     <SoccerLeagueStandings />
 
