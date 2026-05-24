@@ -453,6 +453,18 @@ const defaultSeasonPrice = registrationSeasons.length ? registrationSeasons[0].p
         openRegistrationCompleteModal();
       };
 
+      window.__onRegistrationFreeAgentSuccess = function() {
+        // Free agents are placed on a waitlist; payment + waiver steps do not apply.
+        // Collapse the multi-step indicator so the user knows this flow is complete.
+        var dot2 = document.getElementById('stepDot2');
+        var dot3 = document.getElementById('stepDot3');
+        var label = document.getElementById('stepLabel');
+        if (dot2) dot2.classList.add('hidden');
+        if (dot3) dot3.classList.add('hidden');
+        if (label) label.textContent = 'Free agent waitlist — submitted';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
       window.__onRegistrationSuccess = function(opts) {
         opts = opts || {};
         var skipPaymentStep = !!opts.skipPaymentStep;

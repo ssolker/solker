@@ -14,13 +14,20 @@ const {
 } = Astro.props;
 const isFlow = context === 'flow';
 const showV2Initially = !recaptchaSiteKey && !!recaptchaSiteKeyV2;
-const registrationSeasons = getRegistrationSeasons().map((season) => ({
-  submissionValue: season.submissionValue,
-  displayLabel: season.displayLabel,
-  price: season.price,
-  registrationClosesAt: season.registrationClosesAt,
-  teams: season.teams
-}));
+// Only expose seasons that are still open for registration. Closed seasons are
+// excluded from the selection UI entirely. The client-side `isSeasonOpen`
+// checks remain as a safety net for cases where a season's close time passes
+// while a user already has the form loaded.
+const registrationSeasons = getRegistrationSeasons()
+  .filter((season) => season.isOpen)
+  .map((season) => ({
+    submissionValue: season.submissionValue,
+    displayLabel: season.displayLabel,
+    price: season.price,
+    registrationClosesAt: season.registrationClosesAt,
+    teams: season.teams
+  }));
+const hasOpenSeasons = registrationSeasons.length > 0;
 ---
 
 <form id="registration-form" class="mt-6 space-y-4" novalidate>
@@ -59,43 +66,52 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
   </div>
   <div>
     <span id="leagueSeasonsLabel" class="mb-2 block font-medium text-white"><span class="text-red-500">*</span> League / Season</span>
-    <div
-      id="leagueSeasons"
-      class="league-seasons-list space-y-1 rounded-lg border border-taupe/30 bg-forest-dark p-2"
-      role="group"
-      aria-labelledby="leagueSeasonsLabel"
-      aria-describedby="leagueSeasonsHelp"
-    >
-      {registrationSeasons.map((season, i) => (
-        <label
-          class="league-season-row flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-white/5 has-[:checked]:bg-orange/10 has-[:checked]:ring-1 has-[:checked]:ring-orange/50"
+    {hasOpenSeasons ? (
+      <Fragment>
+        <div
+          id="leagueSeasons"
+          class="league-seasons-list space-y-1 rounded-lg border border-taupe/30 bg-forest-dark p-2"
+          role="group"
+          aria-labelledby="leagueSeasonsLabel"
+          aria-describedby="leagueSeasonsHelp"
         >
-          <input
-            type="checkbox"
-            name="leagueSeason"
-            id={`league-season-${i}`}
-            value={season.submissionValue}
-            class="league-season-cb mt-1 h-4 w-4 shrink-0 accent-orange"
-            data-display-label={season.displayLabel}
-          />
-          <span class="min-w-0 flex-1 text-sm text-white">
-            <span class="font-medium">{season.displayLabel}</span>
-            <span class="ml-2 text-taupe">${season.price}</span>
-          </span>
-        </label>
-      ))}
-    </div>
-    <div
-      id="leagueSeasonsSelectedSummary"
-      class="league-seasons-selected mt-3 hidden rounded-lg border border-orange/40 bg-orange/10 px-3 py-2"
-      role="status"
-      aria-live="polite"
-    >
-      <p class="text-xs font-semibold uppercase tracking-wide text-orange-200">Selected</p>
-      <ul id="leagueSeasonsSelectedList" class="mt-1 list-none space-y-1 text-sm text-white"></ul>
-    </div>
-    <p id="leagueSeasonsHelp" class="mt-2 text-xs text-taupe">Select every season you are registering for. Your choices appear under Selected below.</p>
-    <p id="registrationClosedHelp" class="mt-1 hidden text-xs text-red-500">Registration is closed for one or more selected seasons.</p>
+          {registrationSeasons.map((season, i) => (
+            <label
+              class="league-season-row flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-white/5 has-[:checked]:bg-orange/10 has-[:checked]:ring-1 has-[:checked]:ring-orange/50"
+            >
+              <input
+                type="checkbox"
+                name="leagueSeason"
+                id={`league-season-${i}`}
+                value={season.submissionValue}
+                class="league-season-cb mt-1 h-4 w-4 shrink-0 accent-orange"
+                data-display-label={season.displayLabel}
+              />
+              <span class="min-w-0 flex-1 text-sm text-white">
+                <span class="font-medium">{season.displayLabel}</span>
+                <span class="ml-2 text-taupe">${season.price}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+        <div
+          id="leagueSeasonsSelectedSummary"
+          class="league-seasons-selected mt-3 hidden rounded-lg border border-orange/40 bg-orange/10 px-3 py-2"
+          role="status"
+          aria-live="polite"
+        >
+          <p class="text-xs font-semibold uppercase tracking-wide text-orange-200">Selected</p>
+          <ul id="leagueSeasonsSelectedList" class="mt-1 list-none space-y-1 text-sm text-white"></ul>
+        </div>
+        <p id="leagueSeasonsHelp" class="mt-2 text-xs text-taupe">Select every season you are registering for. Your choices appear under Selected below.</p>
+        <p id="registrationClosedHelp" class="mt-1 hidden text-xs text-red-500">Registration is closed for one or more selected seasons.</p>
+      </Fragment>
+    ) : (
+      <div class="rounded-lg border border-amber-600/80 bg-amber-900/40 px-4 py-3 text-amber-100" role="alert">
+        <p class="font-semibold">Registration is currently closed</p>
+        <p class="mt-1 text-sm">There are no seasons open for registration right now. Please check back later for upcoming seasons.</p>
+      </div>
+    )}
   </div>
   <div>
     <span class="mb-2 block font-medium text-white"><span class="text-red-500">*</span> Registration Choices</span>
@@ -110,7 +126,7 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
           <option value="">Select a team...</option>
         </select>
       </div>
-      <!-- <label class="flex cursor-pointer items-start gap-2">
+      <label class="flex cursor-pointer items-start gap-2">
         <input type="radio" id="regTypeFreeAgent" name="regType" value="freeAgent" class="mt-1 h-4 w-4 accent-orange" />
         <span class="text-white">I am signing up as an individual</span>
       </label>
@@ -119,7 +135,7 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
           <p class="font-semibold">WAITLIST NOTICE</p>
           <p class="mt-1 text-sm">Individual signups are placed on a waitlist. You will be contacted with team placement details.</p>
         </div>
-      </div> -->
+      </div>
       <!-- <label class="flex cursor-pointer items-start gap-2">
         <input type="radio" id="regTypeNewTeam" name="regType" value="newTeam" class="mt-1 h-4 w-4 accent-orange" />
         <span class="text-white">I am starting a NEW team (Captain)</span>
@@ -162,12 +178,24 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
     />
   )}
 
-  <button type="submit" id="registrationSubmitBtn" class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+  <button
+    type="submit"
+    id="registrationSubmitBtn"
+    class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70"
+    disabled={!hasOpenSeasons}
+    title={hasOpenSeasons ? '' : 'Registration is currently closed for all seasons.'}
+  >
     Submit Registration
   </button>
-  <!-- <button type="button" id="registrationMockSubmitBtn" class="mt-2 w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70">
+  <button
+    type="button"
+    id="registrationMockSubmitBtn"
+    class="mt-2 w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70"
+    disabled={!hasOpenSeasons}
+    title={hasOpenSeasons ? '' : 'Registration is currently closed for all seasons.'}
+  >
     Mocky Submit Registration
-  </button> -->
+  </button>
 </form>
 
 <div id="registrationStatusMessage" class="mt-4 min-h-[1.5em] flex flex-col items-center justify-center gap-2 text-center font-medium" aria-live="polite">
@@ -180,6 +208,54 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
     <div class="flex flex-wrap items-center justify-between gap-2">
       <button type="button" id="resetRegistrationBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Reset form</button>
       {!isFlow && <a href="/league/waiver" class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange">Continue to Waiver</a>}
+    </div>
+  </div>
+  <div id="registrationFreeAgentSuccess" class="mt-2 flex flex-col gap-3" style="display: none;" role="status" aria-live="polite">
+    <div class="rounded-lg border border-amber-600/80 bg-amber-900/80 px-4 py-3 text-amber-100" role="alert">
+      <p class="text-base font-bold">Free Agent registration was successful!</p>
+      <p class="mt-1 text-sm">You have been added to our waitlist. We will contact you if there is availability on a team.</p>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-2">
+      <button type="button" id="resetRegistrationFreeAgentBtn" class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange">Register another</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal popped on free agent registration success so the waitlist message
+     cannot be accidentally missed. Mirrors the registrationCompleteModal
+     pattern used by the parent flow page. -->
+<div
+  id="freeAgentSuccessModal"
+  class="free-agent-success-modal fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 p-4"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="freeAgentSuccessModalTitle"
+  aria-describedby="freeAgentSuccessModalBody"
+  aria-hidden="true"
+>
+  <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-amber-600/80 bg-forest-dark p-6 shadow-xl">
+    <h2 id="freeAgentSuccessModalTitle" class="font-heading text-xl font-bold text-amber-100">
+      Free Agent registration successful
+    </h2>
+    <div id="freeAgentSuccessModalBody" class="mt-3 space-y-2 text-sm text-white">
+      <p>You have been added to our <span class="font-semibold text-amber-100">free agent waitlist</span>.</p>
+      <p>We will contact you if there is availability on a team. No payment is required at this time.</p>
+    </div>
+    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
+      <button
+        type="button"
+        id="freeAgentSuccessModalCloseBtn"
+        class="rounded-lg border border-taupe/30 bg-forest-dark px-4 py-3 font-semibold text-white hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-orange"
+      >
+        Got it
+      </button>
+      <button
+        type="button"
+        id="freeAgentSuccessModalRestartBtn"
+        class="rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange"
+      >
+        Register another
+      </button>
     </div>
   </div>
 </div>
@@ -195,6 +271,9 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
   .league-seasons-list:focus-within {
     outline: 1px solid var(--theme-orange, #ea580c);
     outline-offset: 2px;
+  }
+  .free-agent-success-modal:not(.hidden) {
+    display: flex;
   }
 </style>
 
@@ -317,7 +396,21 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
     function updateRegistrationClosedState() {
       var closedHelpEl = document.getElementById('registrationClosedHelp');
       var submitBtn = document.getElementById('registrationSubmitBtn');
+      var mockBtn = document.getElementById('registrationMockSubmitBtn');
       if (!submitBtn) return;
+      // If there are no open seasons at all, the league selection UI is not
+      // rendered. Keep both submit buttons disabled and bail out early so we
+      // don't accidentally re-enable the server-disabled buttons.
+      if (!registrationSeasons || registrationSeasons.length === 0) {
+        submitBtn.disabled = true;
+        submitBtn.title = 'Registration is currently closed for all seasons.';
+        if (mockBtn) {
+          mockBtn.disabled = true;
+          mockBtn.title = 'Registration is currently closed for all seasons.';
+        }
+        if (closedHelpEl) closedHelpEl.classList.add('hidden');
+        return;
+      }
       var selected = getSelectedLeagueSeasonValues();
       var allOpen = areAllSelectedSeasonsOpen();
       var shouldDisable = selected.length > 0 && !allOpen;
@@ -538,15 +631,23 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
           if (statusSpinner) statusSpinner.style.display = 'none';
           if (json.success) {
             regV2Mode = false;
+            var isFreeAgentChoice = registrationChoice === 'freeAgent';
             var shouldAdvanceFlow = isFlow && registrationChoice === 'existingTeam';
             if (statusText) {
-              statusText.textContent = shouldAdvanceFlow
-                ? (json.message || 'Submitted.')
-                : 'Registration received. You will be contacted about your submission.';
+              if (isFreeAgentChoice) {
+                // Message is rendered inside the free-agent success block below for prominence.
+                statusText.textContent = '';
+              } else {
+                statusText.textContent = shouldAdvanceFlow
+                  ? (json.message || 'Submitted.')
+                  : 'Registration received. You will be contacted about your submission.';
+              }
               statusText.classList.remove('text-red-500', 'text-taupe');
               statusText.classList.add('text-green-600');
             }
             submitBtn.style.display = 'none';
+            var mockBtnEl = document.getElementById('registrationMockSubmitBtn');
+            if (mockBtnEl) mockBtnEl.style.display = 'none';
             var recWrap = document.getElementById('registration-recaptcha-wrap');
             if (recWrap) recWrap.innerHTML = '';
             var v2w = document.getElementById('registration-recaptcha-v2-wrap');
@@ -554,8 +655,15 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
               v2w.classList.add('hidden');
               v2w.setAttribute('aria-hidden', 'true');
             }
-            if (successActions) successActions.style.display = shouldAdvanceFlow ? 'flex' : 'none';
-            if (shouldAdvanceFlow && typeof window.__onRegistrationSuccess === 'function') {
+            var freeAgentSuccess = document.getElementById('registrationFreeAgentSuccess');
+            if (freeAgentSuccess) freeAgentSuccess.style.display = isFreeAgentChoice ? 'flex' : 'none';
+            if (successActions) successActions.style.display = !isFreeAgentChoice && shouldAdvanceFlow ? 'flex' : 'none';
+            if (isFreeAgentChoice) {
+              openFreeAgentSuccessModal();
+              if (typeof window.__onRegistrationFreeAgentSuccess === 'function') {
+                window.__onRegistrationFreeAgentSuccess();
+              }
+            } else if (shouldAdvanceFlow && typeof window.__onRegistrationSuccess === 'function') {
               window.__onRegistrationSuccess();
             }
           } else {
@@ -643,13 +751,75 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
     var resetRegistrationBtn = document.getElementById('resetRegistrationBtn');
     if (resetRegistrationBtn) resetRegistrationBtn.addEventListener('click', function() { location.reload(); });
 
+    var resetRegistrationFreeAgentBtn = document.getElementById('resetRegistrationFreeAgentBtn');
+    if (resetRegistrationFreeAgentBtn) resetRegistrationFreeAgentBtn.addEventListener('click', function() { location.reload(); });
+
+    var freeAgentModalPreviousFocus = null;
+    function openFreeAgentSuccessModal() {
+      var modal = document.getElementById('freeAgentSuccessModal');
+      if (!modal) return;
+      freeAgentModalPreviousFocus = document.activeElement;
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      var closeBtn = document.getElementById('freeAgentSuccessModalCloseBtn');
+      if (closeBtn) closeBtn.focus();
+      else modal.focus();
+    }
+    function closeFreeAgentSuccessModal() {
+      var modal = document.getElementById('freeAgentSuccessModal');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+      if (freeAgentModalPreviousFocus && typeof freeAgentModalPreviousFocus.focus === 'function') {
+        freeAgentModalPreviousFocus.focus();
+      }
+      freeAgentModalPreviousFocus = null;
+    }
+
+    var freeAgentModalCloseBtn = document.getElementById('freeAgentSuccessModalCloseBtn');
+    if (freeAgentModalCloseBtn) freeAgentModalCloseBtn.addEventListener('click', closeFreeAgentSuccessModal);
+
+    var freeAgentModalRestartBtn = document.getElementById('freeAgentSuccessModalRestartBtn');
+    if (freeAgentModalRestartBtn) freeAgentModalRestartBtn.addEventListener('click', function() { location.reload(); });
+
+    document.addEventListener('keydown', function(ev) {
+      var modal = document.getElementById('freeAgentSuccessModal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        closeFreeAgentSuccessModal();
+        return;
+      }
+      if (ev.key !== 'Tab') return;
+      var closeBtn = document.getElementById('freeAgentSuccessModalCloseBtn');
+      var restartBtn = document.getElementById('freeAgentSuccessModalRestartBtn');
+      if (!closeBtn || !restartBtn) return;
+      var focusables = [closeBtn, restartBtn];
+      var active = document.activeElement;
+      var ix = focusables.indexOf(active);
+      if (ev.shiftKey) {
+        if (ix <= 0) {
+          ev.preventDefault();
+          restartBtn.focus();
+        }
+      } else {
+        if (ix < 0 || ix === focusables.length - 1) {
+          ev.preventDefault();
+          closeBtn.focus();
+        }
+      }
+    });
+
     var mockBtn = document.getElementById('registrationMockSubmitBtn');
     if (mockBtn) {
       mockBtn.addEventListener('click', function() {
         var statusSpinner = document.getElementById('registrationStatusSpinner');
         var statusText = document.getElementById('registrationStatusText');
         var successActions = document.getElementById('registrationSuccessActions');
+        var freeAgentSuccess = document.getElementById('registrationFreeAgentSuccess');
         var submitBtn = document.getElementById('registrationSubmitBtn');
+        var freeAgentRadio = document.getElementById('regTypeFreeAgent');
+        var isFreeAgentChoice = !!(freeAgentRadio && freeAgentRadio.checked);
         if (!statusText) return;
         mockBtn.disabled = true;
         if (submitBtn) submitBtn.style.display = 'none';
@@ -657,15 +827,24 @@ const registrationSeasons = getRegistrationSeasons().map((season) => ({
         statusText.textContent = 'Submitting…';
         statusText.classList.remove('text-red-500', 'text-green-600');
         if (successActions) successActions.style.display = 'none';
+        if (freeAgentSuccess) freeAgentSuccess.style.display = 'none';
         window.setTimeout(function() {
           if (statusSpinner) statusSpinner.style.display = 'none';
-          statusText.textContent = 'Registration submitted successfully.';
-          statusText.classList.add('text-green-600');
           var recWrap = document.getElementById('registration-recaptcha-wrap');
           if (recWrap) recWrap.innerHTML = '';
-          if (successActions) successActions.style.display = 'flex';
-          mockBtn.disabled = false;
-          if (isFlow && typeof window.__onRegistrationSuccess === 'function') window.__onRegistrationSuccess();
+          if (isFreeAgentChoice) {
+            statusText.textContent = '';
+            if (freeAgentSuccess) freeAgentSuccess.style.display = 'flex';
+            mockBtn.style.display = 'none';
+            openFreeAgentSuccessModal();
+            if (typeof window.__onRegistrationFreeAgentSuccess === 'function') window.__onRegistrationFreeAgentSuccess();
+          } else {
+            statusText.textContent = 'Registration submitted successfully.';
+            statusText.classList.add('text-green-600');
+            if (successActions) successActions.style.display = 'flex';
+            mockBtn.disabled = false;
+            if (isFlow && typeof window.__onRegistrationSuccess === 'function') window.__onRegistrationSuccess();
+          }
         }, 1500);
       });
     }
