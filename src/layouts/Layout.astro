@@ -46,15 +46,34 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
 				<img src={logoDark.src} alt="Solker" class="logo logo-dark h-10 w-auto md:h-12" width="115" height="48" />
 			</a>
 			<script>
-				document.querySelector('.logo-link')?.addEventListener('click', (e) => {
-					const link = e.currentTarget as HTMLAnchorElement | null;
+				(function () {
+					const link = document.querySelector('.logo-link') as HTMLAnchorElement | null;
 					if (!link) return;
-					const count = parseInt(link.getAttribute('data-logo-clicks') ?? '0', 10) + 1;
-					link.setAttribute('data-logo-clicks', String(count));
-					if (count < 12) {
-						e.preventDefault();
+
+					const path = window.location.pathname;
+					const clean = path.length > 1 ? path.replace(/\/+$/, '') : path;
+					const segments = clean.split('/').filter(Boolean);
+					const sectionRoot = segments.length ? '/' + segments[0] : '/';
+					// "Deeper" means we are below a section root (e.g. /league/soccer under /league).
+					const isDeeper = segments.length > 1;
+
+					if (isDeeper) {
+						// One click returns to the active section's home page.
+						link.setAttribute('href', sectionRoot);
+						link.setAttribute('aria-label', 'Section home');
+						return;
 					}
-				});
+
+					// Already at the section/top level: keep the multi-click easter egg to the site home.
+					link.setAttribute('href', '/');
+					link.addEventListener('click', (e) => {
+						const count = parseInt(link.getAttribute('data-logo-clicks') ?? '0', 10) + 1;
+						link.setAttribute('data-logo-clicks', String(count));
+						if (count < 12) {
+							e.preventDefault();
+						}
+					});
+				})();
 			</script>
 			<div class="flex min-w-0 flex-1 justify-center">
 				<slot name="header-nav" />

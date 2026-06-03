@@ -7,6 +7,9 @@ import CommunityPartnerCard from '../../components/CommunityPartnerCard.astro';
 import beOriginalImage from '../../assets/community/beoriginal.png';
 import powLaboratoriesLogo from '../../assets/community/pow-laboratories.png';
 import Footer from '../../components/Footer.astro';
+import { getLeagueLinks } from '../../data/leagueCatalog';
+
+const leagueLinks = getLeagueLinks();
 ---
 
 <Layout title="Solker - League" description="Solker: League in Woodstock. Active leagues, rules, waivers, and resources." showThemeSwitcher={false}>
@@ -19,7 +22,7 @@ import Footer from '../../components/Footer.astro';
       headline="Providing Recreational Sports Leagues in Woodstock"
       subhead="Spirit of the Game."
       ctaText="View Leagues"
-      ctaHref="#active-leagues-heading"
+      ctaLinks={leagueLinks}
     />
 
     <ActiveLeagues />

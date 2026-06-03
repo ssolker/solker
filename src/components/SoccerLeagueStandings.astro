@@ -194,6 +194,19 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
       );
     }
 
+    var FIELD_SPONSORS = {
+      'Field G': 'Rotary Club of Woodstock',
+      'Field H': 'Picards Peanuts',
+      'Field J': 'The Comfort Guy',
+      'Field K': 'Ted & Lucy VanWyk'
+    };
+
+    /** Field label including its sponsor name, e.g. "Field J — The Comfort Guy". */
+    function fieldDisplay(fieldName) {
+      var sponsor = FIELD_SPONSORS[fieldName];
+      return esc(fieldName) + (sponsor ? ' — ' + esc(sponsor) : '');
+    }
+
     function getSeason(key) {
       for (var i = 0; i < seasons.length; i++) {
         if (seasons[i].seasonKey === key) return seasons[i];
@@ -841,6 +854,7 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
       document.body.classList.remove(
         'print-soccer-basic',
         'print-soccer-full',
+        'print-soccer-map',
         'print-soccer-standings'
       );
       document.body.classList.add(mode);
@@ -948,6 +962,13 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
             ? 'bg-orange text-white'
             : 'border border-taupe/30 bg-forest-dark text-white') +
           '" data-schedule-mode="full">Schedule</button>'
+      );
+      parts.push(
+        '<button type="button" class="rounded-lg px-3 py-1.5 text-md font-semibold ' +
+          (state.scheduleMode === 'map'
+            ? 'bg-orange text-white'
+            : 'border border-taupe/30 bg-forest-dark text-white') +
+          '" data-schedule-mode="map">Map</button>'
       );
       parts.push('</div>');
 
@@ -1091,7 +1112,7 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
                   '</div>'
               );
               parts.push(
-                '<div><span class="text-taupe/80">Field: </span>' + esc(fx.fieldName) + '</div>'
+                '<div><span class="text-taupe/80">Field: </span>' + fieldDisplay(fx.fieldName) + '</div>'
               );
               parts.push('</div>');
               if (showSheetScoreCols) {
@@ -1146,7 +1167,7 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
               parts.push('<tr class="border-b border-taupe/20 align-top text-white">');
               parts.push('<td class="py-2 pr-2 whitespace-nowrap">' + formatDate(fx.date) + '</td>');
               parts.push('<td class="py-2 pr-2 whitespace-nowrap">' + esc(fx.startTime || '') + '</td>');
-              parts.push('<td class="py-2 pr-2">' + esc(fx.fieldName) + '</td>');
+              parts.push('<td class="py-2 pr-2">' + fieldDisplay(fx.fieldName) + '</td>');
               parts.push(
                 '<td class="py-2 pr-2">' +
                   esc(fx.homeTeam) +
@@ -1178,6 +1199,18 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
             parts.push('</div>');
           }
         }
+        parts.push('</div></div>');
+      }
+
+      if (state.scheduleMode === 'map') {
+        parts.push('<div id="print-soccer-map" class="print-soccer-block">');
+        parts.push('<div class="flex justify-end no-print"><button type="button" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-1.5 text-md font-semibold text-white" data-print="print-soccer-map">Print</button></div>');
+        parts.push('<div class="mt-2 overflow-x-auto rounded-lg border border-taupe/30 bg-forest-dark/80 p-4">');
+        parts.push('<h3 class="font-heading mb-3 text-lg font-bold text-white">Field Map — Cowan Park</h3>');
+        parts.push(
+          '<img src="/cowan-park-map.png" alt="Map of Cowan Park showing the proposed multi-purpose field layout and the soccer fields G, H, J, and K." class="mx-auto w-full max-w-3xl rounded-lg border border-taupe/20" loading="lazy" />'
+        );
+        parts.push('<p class="mt-3 text-xs text-taupe">Fields G, H, J, and K (marked in red) are used for league games.</p>');
         parts.push('</div></div>');
       }
 
@@ -1349,6 +1382,7 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
           var m = btn.getAttribute('data-print');
           if (m === 'print-soccer-basic') printBlock('print-soccer-basic');
           else if (m === 'print-soccer-full') printBlock('print-soccer-full');
+          else if (m === 'print-soccer-map') printBlock('print-soccer-map');
           else if (m === 'print-soccer-standings') printBlock('print-soccer-standings');
         });
       });
@@ -1460,6 +1494,8 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
     body.print-soccer-basic html,
     body.print-soccer-full,
     body.print-soccer-full html,
+    body.print-soccer-map,
+    body.print-soccer-map html,
     body.print-soccer-standings,
     body.print-soccer-standings html {
       min-height: 0 !important;
@@ -1471,6 +1507,7 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
 
     body.print-soccer-basic > div,
     body.print-soccer-full > div,
+    body.print-soccer-map > div,
     body.print-soccer-standings > div {
       min-height: 0 !important;
       height: auto !important;
@@ -1479,6 +1516,7 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
 
     body.print-soccer-basic main,
     body.print-soccer-full main,
+    body.print-soccer-map main,
     body.print-soccer-standings main {
       min-height: 0 !important;
       height: auto !important;
@@ -1488,6 +1526,8 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
     body.print-soccer-basic footer,
     body.print-soccer-full header,
     body.print-soccer-full footer,
+    body.print-soccer-map header,
+    body.print-soccer-map footer,
     body.print-soccer-standings header,
     body.print-soccer-standings footer {
       display: none !important;
@@ -1496,12 +1536,14 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
     /* Everything in the page shell except the standings & schedule section */
     body.print-soccer-basic > div > main > *:not(#standings-and-schedule),
     body.print-soccer-full > div > main > *:not(#standings-and-schedule),
+    body.print-soccer-map > div > main > *:not(#standings-and-schedule),
     body.print-soccer-standings > div > main > *:not(#standings-and-schedule) {
       display: none !important;
     }
 
     body.print-soccer-basic > div > footer,
     body.print-soccer-full > div > footer,
+    body.print-soccer-map > div > footer,
     body.print-soccer-standings > div > footer {
       display: none !important;
     }
@@ -1509,12 +1551,14 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
     /* Section chrome: hide heading; show only the printable block inside the root */
     body.print-soccer-basic #standings-and-schedule > div > h2,
     body.print-soccer-full #standings-and-schedule > div > h2,
+    body.print-soccer-map #standings-and-schedule > div > h2,
     body.print-soccer-standings #standings-and-schedule > div > h2 {
       display: none !important;
     }
 
     body.print-soccer-basic #standings-and-schedule,
     body.print-soccer-full #standings-and-schedule,
+    body.print-soccer-map #standings-and-schedule,
     body.print-soccer-standings #standings-and-schedule {
       padding: 0 !important;
       margin: 0 !important;
@@ -1523,12 +1567,14 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
 
     body.print-soccer-basic #soccer-league-root > div > *:not(#print-soccer-basic),
     body.print-soccer-full #soccer-league-root > div > *:not(#print-soccer-full),
+    body.print-soccer-map #soccer-league-root > div > *:not(#print-soccer-map),
     body.print-soccer-standings #soccer-league-root > div > *:not(#print-soccer-standings) {
       display: none !important;
     }
 
     body.print-soccer-basic #print-soccer-basic,
     body.print-soccer-full #print-soccer-full,
+    body.print-soccer-map #print-soccer-map,
     body.print-soccer-standings #print-soccer-standings {
       position: static !important;
       width: 100% !important;

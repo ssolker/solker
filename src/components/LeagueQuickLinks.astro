@@ -8,18 +8,7 @@ const iconClass = 'h-6 w-6 shrink-0 text-taupe';
     <h2 id="quick-links-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
       Quick Links
     </h2>
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      <QuickLinkCard
-        title="Active Leagues"
-        description="Jump to current soccer league details."
-        buttonText="View leagues"
-        href="#active-leagues-heading"
-      >
-        <svg slot="icon" class={iconClass} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25A2.25 2.25 0 015.25 6h13.5A2.25 2.25 0 0121 8.25v7.5A2.25 2.25 0 0118.75 18H5.25A2.25 2.25 0 013 15.75v-7.5z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8" />
-        </svg>
-      </QuickLinkCard>
+    <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
       <QuickLinkCard
         title="Registration"
         description="Register your team or join as a free agent."
@@ -41,6 +30,37 @@ const iconClass = 'h-6 w-6 shrink-0 text-taupe';
         </svg>
       </QuickLinkCard>
       <QuickLinkCard
+        title="Standings & Schedule"
+        description="View standings and game schedule."
+        buttonText="View"
+        href="#standings-and-schedule"
+      >
+        <svg slot="icon" class={iconClass} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      </QuickLinkCard>
+      <QuickLinkCard
+        title="Active Leagues"
+        description="Jump to current soccer league details."
+        buttonText="View leagues"
+        href="#active-leagues-heading"
+      >
+        <svg slot="icon" class={iconClass} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25A2.25 2.25 0 015.25 6h13.5A2.25 2.25 0 0121 8.25v7.5A2.25 2.25 0 0118.75 18H5.25A2.25 2.25 0 013 15.75v-7.5z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8" />
+        </svg>
+      </QuickLinkCard>
+      <QuickLinkCard
+        title="Rules & Resources"
+        description="Read league rules, captain info, and FAQ."
+        buttonText="Open rules"
+        href="#rules"
+      >
+        <svg slot="icon" class={iconClass} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+        </svg>
+      </QuickLinkCard>
+      <QuickLinkCard
         title="Payment Info"
         description="View payment instructions and waiver next steps."
         buttonText="Payment details"
@@ -58,26 +78,6 @@ const iconClass = 'h-6 w-6 shrink-0 text-taupe';
       >
         <svg slot="icon" class={iconClass} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      </QuickLinkCard>
-      <QuickLinkCard
-        title="Standings & Schedule"
-        description="View standings and game schedule."
-        buttonText="View"
-        href="#standings-and-schedule"
-      >
-        <svg slot="icon" class={iconClass} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-        </svg>
-      </QuickLinkCard>
-      <QuickLinkCard
-        title="Rules & Resources"
-        description="Read league rules, captain info, and FAQ."
-        buttonText="Open rules"
-        href="#rules"
-      >
-        <svg slot="icon" class={iconClass} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
         </svg>
       </QuickLinkCard>
     </div>

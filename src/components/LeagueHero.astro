@@ -5,10 +5,23 @@ interface Props {
   subhead: string;
   ctaText: string;
   ctaHref?: string;
+  /** When provided, the primary CTA becomes a dropdown of league pages instead of a single link. */
+  ctaLinks?: { label: string; href: string }[];
   secondaryText?: string;
   secondaryHref?: string;
 }
-const { headline, subhead, ctaText, ctaHref = '#', secondaryText, secondaryHref = '#' } = Astro.props;
+const {
+  headline,
+  subhead,
+  ctaText,
+  ctaHref = '#',
+  ctaLinks,
+  secondaryText,
+  secondaryHref = '#'
+} = Astro.props;
+const ctaClass =
+  'inline-block rounded bg-gradient-cta px-6 py-3 text-base font-semibold text-white-constant hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest';
+const useDropdown = Array.isArray(ctaLinks) && ctaLinks.length > 0;
 ---
 
 <section class="relative hero-section flex flex-col items-center justify-center px-4 py-24 text-center md:py-32" aria-label="Hero">
@@ -26,12 +39,41 @@ const { headline, subhead, ctaText, ctaHref = '#', secondaryText, secondaryHref 
       {subhead}
     </p>
     <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-      <a
-        href={ctaHref}
-        class="inline-block rounded bg-gradient-cta px-6 py-3 text-base font-semibold text-white-constant hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
-      >
-        {ctaText}
-      </a>
+      {useDropdown ? (
+        <div class="relative" data-league-dropdown>
+          <button
+            type="button"
+            class={ctaClass + ' inline-flex items-center gap-2'}
+            aria-haspopup="true"
+            aria-expanded="false"
+            data-league-dropdown-toggle
+          >
+            {ctaText}
+            <svg class="h-4 w-4 transition-transform" data-league-dropdown-icon fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div
+            class="absolute left-1/2 z-20 mt-2 hidden w-64 -translate-x-1/2 overflow-hidden rounded-lg border border-taupe/20 bg-forest-dark shadow-xl"
+            role="menu"
+            data-league-dropdown-menu
+          >
+            {ctaLinks!.map((link) => (
+              <a
+                href={link.href}
+                role="menuitem"
+                class="block px-4 py-3 text-left text-base font-medium text-white hover:bg-sage-dark focus:bg-sage-dark focus:outline-none"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <a href={ctaHref} class={ctaClass}>
+          {ctaText}
+        </a>
+      )}
       {secondaryText && (
         <a
           href={secondaryHref}
@@ -62,3 +104,38 @@ const { headline, subhead, ctaText, ctaHref = '#', secondaryText, secondaryHref 
     background-repeat: no-repeat;
   }
 </style>
+
+<script>
+  (function () {
+    const root = document.querySelector('[data-league-dropdown]');
+    if (!root) return;
+    const toggle = root.querySelector('[data-league-dropdown-toggle]');
+    const menu = root.querySelector('[data-league-dropdown-menu]');
+    const icon = root.querySelector('[data-league-dropdown-icon]');
+    if (!toggle || !menu) return;
+
+    const open = () => {
+      menu.classList.remove('hidden');
+      toggle.setAttribute('aria-expanded', 'true');
+      if (icon) icon.classList.add('rotate-180');
+    };
+    const close = () => {
+      menu.classList.add('hidden');
+      toggle.setAttribute('aria-expanded', 'false');
+      if (icon) icon.classList.remove('rotate-180');
+    };
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggle.getAttribute('aria-expanded') === 'true' ? close() : open();
+    });
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as Node | null;
+      if (target && !root.contains(target)) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  })();
+</script>

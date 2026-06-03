@@ -72,6 +72,8 @@ export interface LeagueSeason {
 export interface LeagueCatalogEntry {
   leagueKey: string;
   leagueSportName: string;
+  /** Dedicated page for this sport/league (e.g. "/league/soccer"). */
+  pagePath: string;
   gameDay: string;
   gameTime: string;
   seasons: LeagueSeason[];
@@ -206,6 +208,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
   {
     leagueKey: 'soccer-6v6-coed',
     leagueSportName: '6v6 Co-Ed Soccer',
+    pagePath: '/league/soccer',
     gameDay: 'Monday',
     gameTime: 'Evenings',
     seasons: [
@@ -237,7 +240,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         price: 50,
         startDate: '2026-07-06',
         endDate: '2026-08-31',
-        registrationClosesAt: '2026-06-01T23:59:59-04:00',
+        registrationClosesAt: '2026-07-07T23:59:59-04:00',
         teams: soccerS1Teams.map((t) => ({ ...t })),
         isActive: true,
         address: SOC_ADDRESS,
@@ -250,6 +253,14 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
     ]
   }
 ];
+
+/** Links to each sport/league page, for the league home "View Leagues" dropdown. */
+export function getLeagueLinks(): { label: string; href: string }[] {
+  return leagueCatalog.map((league) => ({
+    label: league.leagueSportName,
+    href: league.pagePath
+  }));
+}
 
 export function isRegistrationOpen(registrationClosesAt: string, now: Date = new Date()): boolean {
   if (!registrationClosesAt) return true;
