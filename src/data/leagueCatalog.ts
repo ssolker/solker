@@ -116,6 +116,17 @@ const soccerSeason1Weekly: WeeklyScheduleRow[] = [
   { weekLabel: 'Week 8', dateLabel: 'Monday, June 29', status: 'Finals / Championship Night' }
 ];
 
+const soccerS2Teams: TeamInfo[] = [
+  { teamName: 'Batth', captainName: 'Ruban Batth' },
+  { teamName: 'Bender', captainName: 'Aiden Bender' },
+  { teamName: 'Butler', captainName: 'Darcey Butler' },
+  { teamName: 'O\'Leary', captainName: 'Nash O\'Leary' },
+  { teamName: 'Solker', captainName: 'Shuaib Solker' },
+  { teamName: 'Taylor', captainName: 'Zack Taylor' },
+  { teamName: 'Thomas', captainName: 'Jonathan Thomas' },
+  { teamName: 'Thompson', captainName: 'Annika Thompson' }
+];
+
 const soccerSeason2Weekly: WeeklyScheduleRow[] = [
   { weekLabel: 'Proposed Dates', dateLabel: '—', status: 'Not Firmed Yet' },
   { weekLabel: 'Week 1', dateLabel: 'Monday, July 6', status: 'Season Opener' },
@@ -241,14 +252,14 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         startDate: '2026-07-06',
         endDate: '2026-08-31',
         registrationClosesAt: '2026-07-07T23:59:59-04:00',
-        teams: soccerS1Teams.map((t) => ({ ...t })),
+        teams: soccerS2Teams.map((t) => ({ ...t })),
         isActive: true,
         address: SOC_ADDRESS,
         gameTimeDetail: 'Game 1: 6:30pm–7:15pm, Game 2: 7:30pm-8:15pm',
         weeklySchedule: soccerSeason2Weekly,
         fixtures: [],
         standingsMode: 'comingSoon',
-        standings: emptyStandings(soccerS1Teams.map((t) => t.teamName))
+        standings: emptyStandings(soccerS2Teams.map((t) => t.teamName))
       }
     ]
   }
