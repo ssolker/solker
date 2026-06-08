@@ -5,8 +5,10 @@ interface Props {
   contactHref?: string;
   contactText?: string;
   copyrightYear?: number;
+  /** Show the company copyright line. Hidden on the personal home page; shown on organization pages. */
+  showCopyright?: boolean;
 }
-const { companyName = 'SOLKER RD COMPANY INC.', companyShortName = 'Solker', contactHref = '/contact', contactText = 'Contact', copyrightYear = new Date().getFullYear() } = Astro.props;
+const { companyName = 'SOLKER RD COMPANY INC.', companyShortName = 'Solker', contactHref = '/contact', contactText = 'Contact', copyrightYear = new Date().getFullYear(), showCopyright = true } = Astro.props;
 ---
 
 <footer class="shrink-0 border-t border-taupe/20 bg-forest-dark px-4 py-8 md:px-6">
@@ -20,7 +22,7 @@ const { companyName = 'SOLKER RD COMPANY INC.', companyShortName = 'Solker', con
     <div class="flex flex-wrap items-center gap-4 text-sm text-taupe">
       <a href="/legal#privacy" class="hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">Privacy Policy</a>
       <a href="/legal#terms" class="hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">Terms of Service</a>
-      <span>© {copyrightYear} {companyName}</span>
+      {showCopyright && <span>© {copyrightYear} {companyName}</span>}
     </div>
   </div>
 </footer>

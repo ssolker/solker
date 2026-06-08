@@ -7,7 +7,28 @@ import Footer from '../components/Footer.astro';
 
 <Layout title="Solker" description="Solker — Public.">
   <main class="flex-1">
-    <Hero title="Solker" tagline="Public Github." />
+    <Hero title="Solker" tagline="Public Github.">
+      <div class="mt-6 flex justify-center">
+        <a
+          href="https://ko-fi.com/B2E62107DD"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white-constant shadow-md transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-forest"
+          style="background-color:#72a4f2;"
+          aria-label="Support Solker on Ko-fi"
+        >
+          <img
+            src="https://storage.ko-fi.com/cdn/cup-border.png"
+            alt=""
+            class="h-5 w-5"
+            width="20"
+            height="20"
+            loading="lazy"
+          />
+          Support me on Ko-fi
+        </a>
+      </div>
+    </Hero>
     <section class="px-4 pb-16 md:pb-24" aria-label="Projects">
       <div class="mx-auto max-w-5xl space-y-12">
         <div>
@@ -46,5 +67,5 @@ import Footer from '../components/Footer.astro';
       </div>
     </section>
   </main>
-  <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
+  <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} showCopyright={false} />
 </Layout>
