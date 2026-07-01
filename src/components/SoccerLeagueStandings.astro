@@ -19,6 +19,10 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
       <code class="rounded bg-forest-dark px-1 text-xs">src/data/leagueCatalog.ts</code>.
     </p> -->
 
+    <p class="mt-2 text-center text-md text-taupe">
+      Choose the active league or a previous season to view standings and schedule.
+    </p>
+
     <div id="soccer-league-root" class="mt-8 min-h-[12rem] text-left"></div>
     {
       scoreFeaturesEnabled && (
@@ -897,6 +901,13 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
         season.fixtures.length &&
         season.standingsMode !== 'comingSoon';
 
+      var isActiveSeason = active.some(function (s) {
+        return s.seasonKey === state.seasonKey;
+      });
+      var isPrevSeason = prev.some(function (s) {
+        return s.seasonKey === state.seasonKey;
+      });
+
       var parts = [];
       parts.push('<div class="space-y-8">');
 
@@ -906,7 +917,7 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
       parts.push(
         '<select id="soccer-select-active" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white">'
       );
-      parts.push('<option value="">—</option>');
+      parts.push('<option value=""' + (!isActiveSeason ? ' selected' : '') + '>—</option>');
       active.forEach(function (s) {
         parts.push(
           '<option value="' +
@@ -920,24 +931,27 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
       });
       parts.push('</select></div>');
 
-      parts.push('<div class="flex flex-col gap-1">');
-      // parts.push('<label for="soccer-select-previous" class="text-md font-medium text-taupe">Previous league</label>');
-      // parts.push(
-      //   '<select id="soccer-select-previous" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white">'
-      // );
-      // parts.push('<option value="">—</option>');
-      // prev.forEach(function (s) {
-      //   parts.push(
-      //     '<option value="' +
-      //       esc(s.seasonKey) +
-      //       '"' +
-      //       (state.seasonKey === s.seasonKey ? ' selected' : '') +
-      //       '>' +
-      //       esc(s.displayLabel) +
-      //       '</option>'
-      //   );
-      // });
-      parts.push('</select></div></div>');
+      if (prev.length) {
+        parts.push('<div class="flex flex-col gap-1">');
+        parts.push('<label for="soccer-select-previous" class="text-lg font-medium text-taupe">Previous league</label>');
+        parts.push(
+          '<select id="soccer-select-previous" class="rounded-lg border border-taupe/30 bg-forest-dark px-3 py-2 text-white">'
+        );
+        parts.push('<option value=""' + (!isPrevSeason ? ' selected' : '') + '>—</option>');
+        prev.forEach(function (s) {
+          parts.push(
+            '<option value="' +
+              esc(s.seasonKey) +
+              '"' +
+              (state.seasonKey === s.seasonKey ? ' selected' : '') +
+              '>' +
+              esc(s.leagueLabel) +
+              '</option>'
+          );
+        });
+        parts.push('</select></div>');
+      }
+      parts.push('</div>');
 
       parts.push('<div class="rounded-lg border border-taupe/20 bg-forest-dark/50 p-4 text-md text-taupe">');
       parts.push('<p><strong class="text-white">Location:</strong> ' + esc(season.address) + '</p>');
@@ -1350,7 +1364,7 @@ const scoreFeaturesEnabled = !!(formsApiUrl && (recaptchaSiteKeyV3 || recaptchaS
             state.officialStandings = null;
             state.officialStandingsPhase = 'idle';
             state.officialStandingsError = '';
-            state.scheduleScope = 'next';
+            state.scheduleScope = 'all';
             if (selA) selA.value = '';
             render();
           }
