@@ -1,165 +1,160 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import WeddingLayout from '../../layouts/WeddingLayout.astro';
 import WeddingNav from '../../components/WeddingNav.astro';
-import WeddingHero from '../../components/WeddingHero.astro';
-import Footer from '../../components/Footer.astro';
-
-const wedding = {
-  headline: 'Shuaib & Hanna',
-  subhead: 'Saturday, October 10, 2026 | London, Ontario',
-  heroImage: null as string | { src: string } | null,
-  howWeMet: 'We met through friends and quickly knew we had something special. Our story is still being written — more to come.',
-  proposal: 'He asked, she said yes. We\'re so excited to celebrate with you.',
-  venueName: 'Bellamere Winery',
-  venueAddress: '1260 Gainsborough Rd, London, ON N6H 5K8',
-  venueMapUrl: 'https://www.google.com/maps/search/?api=1&query=1260+Gainsborough+Rd,+London,+ON+N6H+5K8',
-  venueUrl: 'https://www.bellamere.com/',
-  ceremonyTime: 'To be announced',
-  receptionTime: 'To be announced',
-  attire: 'Semi-Formal',
-  hotelName: 'To be announced',
-  hotelGroupCode: '',
-  hotelDeadline: '',
-  transportation: 'Details on parking and shuttles will be shared closer to the date.',
-  presenceNote: 'Your presence is the greatest gift. If you wish to honor us with a contribution, we have registered at the following.',
-  registries: [] as Array<{ name: string; url: string }>,
-};
+import WeddingSection from '../../components/wedding/WeddingSection.astro';
+import {
+  weddingMeta,
+  story,
+  schedule,
+  dressCode,
+  accommodations,
+  registry,
+  faq,
+} from '../../data/wedding';
 ---
 
-<Layout
-  title="Wedding — Solker"
+<WeddingLayout
+  title="Wedding — Shuaib & Hanna"
   description="Shuaib & Hanna Solker — October 10, 2026 at Bellamere Winery, London, Ontario."
+  showCountdown={true}
 >
   <Fragment slot="header-nav">
     <WeddingNav />
   </Fragment>
 
-  <main class="flex-1 pt-0">
-    <div class="bg-orange/90 px-4 py-2 text-center text-sm font-medium text-white" role="status">
-      Under construction — we're getting things ready.
-    </div>
-
-    <WeddingHero
-      headline={wedding.headline}
-      subhead={wedding.subhead}
-      imageSrc={wedding.heroImage ?? undefined}
-      textBlockOffsetY={200}
-    />
-
-    <section id="our-story" class="px-4 py-12 md:py-16" aria-labelledby="our-story-heading">
-      <div class="mx-auto max-w-5xl">
-        <h2 id="our-story-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
-          Our Story
-        </h2>
-        <div class="grid gap-8 md:grid-cols-2 md:gap-12">
-          <div class="space-y-6 text-taupe-light">
-            <div>
-              <h3 class="font-heading text-lg font-semibold text-white">How We Met</h3>
-              <p class="mt-2">{wedding.howWeMet}</p>
-            </div>
-            <div>
-              <h3 class="font-heading text-lg font-semibold text-white">The Proposal</h3>
-              <p class="mt-2">{wedding.proposal}</p>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Photo gallery">
-            <div class="aspect-square rounded-lg bg-sage-dark" aria-hidden="true" />
-            <div class="aspect-square rounded-lg bg-sage-dark" aria-hidden="true" />
-            <div class="aspect-square rounded-lg bg-sage-dark col-span-2 sm:col-span-1" aria-hidden="true" />
-          </div>
-        </div>
+  <WeddingSection id="our-story" title="Our Story">
+    <div class="space-y-6">
+      <div>
+        <h3 class="font-heading text-lg font-semibold text-white">How We Met</h3>
+        <p class="mt-2">{story.howWeMet}</p>
       </div>
-    </section>
+      <div>
+        <h3 class="font-heading text-lg font-semibold text-white">The Proposal</h3>
+        <p class="mt-2">{story.proposal}</p>
+      </div>
+    </div>
+  </WeddingSection>
 
-    <section id="event-details" class="bg-sage-light/40 px-4 py-12 md:py-16" aria-labelledby="event-details-heading">
-      <div class="mx-auto max-w-5xl">
-        <h2 id="event-details-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
-          Event Details
-        </h2>
-        <div class="space-y-8 text-taupe-light">
-          <div>
-            <h3 class="font-heading text-lg font-semibold text-white">Ceremony</h3>
-            <p class="mt-1">{wedding.ceremonyTime}</p>
-            <p class="mt-1">
-              <a
-                href={wedding.venueUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
-              >
-                {wedding.venueName}
-              </a>
-            </p>
-            <p class="mt-1">{wedding.venueAddress}</p>
+  <WeddingSection id="location" title="Location" variant="muted">
+    <div class="space-y-2">
+      <p>
+        <a
+          href={weddingMeta.venueUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-heading text-lg font-semibold text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange"
+        >
+          {weddingMeta.venueName}
+        </a>
+      </p>
+      <p>{weddingMeta.venueAddress}</p>
+      <div class="mt-4 overflow-hidden rounded-lg border border-taupe/20 shadow-sm">
+        <iframe
+          title={`Map showing ${weddingMeta.venueName}`}
+          src={weddingMeta.venueMapEmbedUrl}
+          class="h-56 w-full border-0 sm:h-64"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen
+        />
+      </div>
+      <a
+        href={weddingMeta.venueMapUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-3 inline-block font-medium text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange"
+      >
+        Open in Google Maps →
+      </a>
+    </div>
+  </WeddingSection>
+
+  <WeddingSection id="schedule" title="Schedule">
+    <ol class="space-y-4">
+      {
+        schedule.map((item) => (
+          <li class="flex gap-4 border-l-2 border-orange/40 pl-4">
+            <span class="w-24 shrink-0 text-base font-semibold text-orange">{item.time}</span>
+            <div>
+              <p class="text-base font-medium text-white">{item.label}</p>
+              {item.description && <p class="mt-1">{item.description}</p>}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </WeddingSection>
+
+  <WeddingSection id="dress-code" title="Dress Code" variant="muted">
+    <h3 class="font-heading text-lg font-semibold text-white">{dressCode.label}</h3>
+    <p class="mt-2">{dressCode.description}</p>
+  </WeddingSection>
+
+  <WeddingSection id="accommodations" title="Accommodations">
+    <p class="mb-6">{accommodations.busingNote}</p>
+    <div class="space-y-4">
+      {
+        accommodations.hotels.map((hotel) => (
+          <article class="rounded-lg border border-taupe/20 bg-forest-dark/50 p-4">
+            <h3 class="font-heading text-lg font-semibold text-white">{hotel.name}</h3>
+            {hotel.address && <p class="mt-1">{hotel.address}</p>}
+            {hotel.groupCode && <p class="mt-1">Group code: {hotel.groupCode}</p>}
+            {hotel.bookBy && <p class="mt-1">Book by: {hotel.bookBy}</p>}
+            {hotel.notes && <p class="mt-2">{hotel.notes}</p>}
+            {
+              hotel.url && (
+                <a
+                  href={hotel.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-2 inline-block font-medium text-orange hover:text-orange-light"
+                >
+                  Book →
+                </a>
+              )
+            }
+          </article>
+        ))
+      }
+    </div>
+  </WeddingSection>
+
+  <WeddingSection id="registry" title="Registry" variant="muted">
+    <p>{registry.presenceNote}</p>
+    {
+      registry.links.length > 0 ? (
+        <div class="mt-6 flex flex-wrap gap-3">
+          {registry.links.map(({ name, url }) => (
             <a
-              href={wedding.venueMapUrl}
+              href={url}
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-2 inline-block text-sm font-medium text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
+              class="rounded-lg bg-orange px-5 py-2.5 text-base font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange"
             >
-              View Map →
+              {name}
             </a>
-          </div>
-          <div>
-            <h3 class="font-heading text-lg font-semibold text-white">Cocktail Hour & Reception</h3>
-            <p class="mt-1">{wedding.receptionTime}</p>
-            <p class="mt-1">{wedding.venueName} — {wedding.venueAddress}</p>
-          </div>
-          <div>
-            <h3 class="font-heading text-lg font-semibold text-white">Attire</h3>
-            <p class="mt-1">{wedding.attire}</p>
-          </div>
+          ))}
         </div>
-      </div>
-    </section>
+      ) : (
+        <p class="mt-4">Registry links coming soon.</p>
+      )
+    }
+  </WeddingSection>
 
-    <section id="travel-stay" class="px-4 py-12 md:py-16" aria-labelledby="travel-stay-heading">
-      <div class="mx-auto max-w-5xl">
-        <h2 id="travel-stay-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
-          Travel & Stay
-        </h2>
-        <div class="grid gap-8 md:grid-cols-2">
+  <WeddingSection id="faq" title="Q & A">
+    <dl class="space-y-6">
+      {
+        faq.map((item) => (
           <div>
-            <h3 class="font-heading text-lg font-semibold text-white">Accommodation</h3>
-            <p class="mt-2 text-taupe-light">{wedding.hotelName}</p>
-            {wedding.hotelGroupCode && <p class="mt-1 text-sm text-taupe-light">Group code: {wedding.hotelGroupCode}</p>}
-            {wedding.hotelDeadline && <p class="mt-1 text-sm text-taupe-light">Book by: {wedding.hotelDeadline}</p>}
+            <dt class="font-heading text-lg font-semibold text-white">{item.question}</dt>
+            <dd class="mt-2">{item.answer}</dd>
           </div>
-          <div>
-            <h3 class="font-heading text-lg font-semibold text-white">Transportation</h3>
-            <p class="mt-2 text-taupe-light">{wedding.transportation}</p>
-          </div>
-        </div>
-      </div>
-    </section>
+        ))
+      }
+    </dl>
+  </WeddingSection>
 
-    <section id="registry" class="bg-sage-light/40 px-4 py-12 md:py-16" aria-labelledby="registry-heading">
-      <div class="mx-auto max-w-5xl">
-        <h2 id="registry-heading" class="font-heading mb-8 text-center text-2xl font-bold text-white md:text-3xl">
-          Registry
-        </h2>
-        <p class="mx-auto max-w-2xl text-center text-taupe-light">
-          {wedding.presenceNote}
-        </p>
-        {wedding.registries.length > 0 && (
-          <div class="mt-8 flex flex-wrap justify-center gap-4">
-            {wedding.registries.map(({ name, url }) => (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="rounded bg-orange px-6 py-3 text-sm font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest"
-              >
-                {name}
-              </a>
-            ))}
-          </div>
-        )}
-        {wedding.registries.length === 0 && (
-          <p class="mt-4 text-center text-sm text-taupe-light">Registry links will be added soon.</p>
-        )}
-      </div>
-    </section>
-  </main>
-  <Footer contactHref="/contact" contactText="Contact" copyrightYear={2026} />
-</Layout>
+  <div class="mt-6 border-t border-taupe/20 pt-6 text-center">
+    <p>We can't wait to celebrate with you.</p>
+  </div>
+</WeddingLayout>

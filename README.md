@@ -8,7 +8,8 @@ Personal site and ventures hub for [solker.ca](https://solker.ca). Built with [A
 | --- | ----------- |
 | **solker.ca** | Main site (homepage). |
 | **solker.ca/league** | League — rules, registration, waivers. |
-| **solker.ca/wedding** | Wedding — Shuaib & Hanna, event details, travel, registry. |
+| **solker.ca/wedding** | Wedding — Shuaib & Hanna, event details, travel, registry, Q&A. |
+| **solker.ca/wedding/guest-details** | Wedding guest details form — attendance, meals, hotel rooms. |
 | **solker.ca/color-palette** | Color palette (dev reference). |
 | **solker.ca/legal** | Privacy Policy and Terms of Service (single page, anchor links). |
 | **solker.ca/404** | 404 page (linked when a route is not found). |
@@ -73,18 +74,22 @@ npm run preview
 
 ## Environment variables (forms + reCAPTCHA)
 
-The league registration flow, standalone waiver, and contact form read from `src/env/publicForms.ts`.
+League forms use `src/env/publicForms.ts`. Wedding guest details use `src/env/weddingForms.ts`. Both reuse the same reCAPTCHA site keys.
 
 | Variable | When |
 | -------- | ---- |
-| `PUBLIC_FORMS_API_URL` | **Required** for production builds (`npm run build` / GitHub Actions). Apps Script Web App URL. |
-| `PUBLIC_FORMS_API_URL_DEV` | Optional. Used only in **`astro dev`** if set; otherwise dev falls back to `PUBLIC_FORMS_API_URL`. |
-| `PUBLIC_RECAPTCHA_SITE_KEY_V3` | **Recommended.** reCAPTCHA v3 site key (`api.js?render=…`, `grecaptcha.execute`). |
-| `PUBLIC_RECAPTCHA_SITE_KEY` | Optional **v2** site key (checkbox). If the API returns `recaptchaV2Required` after a low v3 score, the site shows this checkbox and resubmits with a v2 token. Must pair with `RECAPTCHA_SECRET` in Apps Script. |
+| `PUBLIC_FORMS_API_URL` | **Required** for league/contact forms in production. League Apps Script Web App URL. |
+| `PUBLIC_FORMS_API_URL_DEV` | Optional. Used only in **`astro dev`** for league forms. |
+| `PUBLIC_WEDDING_FORMS_API_URL` | **Required** for wedding guest details form in production. Wedding Apps Script Web App URL. |
+| `PUBLIC_WEDDING_FORMS_API_URL_DEV` | Optional. Used only in **`astro dev`** for wedding forms. |
+| `PUBLIC_RECAPTCHA_SITE_KEY_V3` | **Recommended.** reCAPTCHA v3 site key — **shared** by league and wedding forms. |
+| `PUBLIC_RECAPTCHA_SITE_KEY` | Optional **v2** site key (checkbox). Shared by league and wedding. Must pair with `RECAPTCHA_SECRET` in Apps Script (set the same value in both `league_forms_api` and `wedding_forms_api`). |
 
-When `PUBLIC_FORMS_API_URL` and `PUBLIC_RECAPTCHA_SITE_KEY_V3` (or v2-only) are set, the **Soccer** page’s Standings & Schedule section can load captain scores and official standings from the same Web App (`gamescorerow`, `gamescoresubmit`, `gamestandings`). Configure `GAME_SCORES_SHEET_ID` in Apps Script per `google-workspace-apps` README (schedule fields are sent from the site with each submit).
+When `PUBLIC_FORMS_API_URL` and reCAPTCHA keys are set, the **Soccer** page’s Standings & Schedule section can load captain scores from the league Web App. Configure `GAME_SCORES_SHEET_ID` in Apps Script per `google-workspace-apps` README.
 
-**GitHub Actions:** Repository **secrets** `PUBLIC_RECAPTCHA_SITE_KEY_V3` and optionally `PUBLIC_RECAPTCHA_SITE_KEY` (v2). Repository **variable** `PUBLIC_FORMS_API_URL`. See `.github/workflows/deploy.yml`.
+**GitHub Actions:** Repository **secrets** `PUBLIC_RECAPTCHA_SITE_KEY_V3` and optionally `PUBLIC_RECAPTCHA_SITE_KEY` (v2). Repository **variables** `PUBLIC_FORMS_API_URL` and `PUBLIC_WEDDING_FORMS_API_URL`. See `.github/workflows/deploy.yml`.
+
+Copy `.env.example` to `.env` for local development (`.env` is gitignored).
 
 ## Deploy
 

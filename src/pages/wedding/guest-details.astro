@@ -1,0 +1,46 @@
+---
+import WeddingLayout from '../../layouts/WeddingLayout.astro';
+import WeddingNav from '../../components/WeddingNav.astro';
+import WeddingGuestForm from '../../components/wedding/WeddingGuestForm.astro';
+import WeddingMealOptions from '../../components/wedding/WeddingMealOptions.astro';
+import {
+  getWeddingFormsApiUrl,
+  getRecaptchaSiteKeyV3,
+  getRecaptchaSiteKeyV2,
+} from '../../env/weddingForms';
+
+const apiUrl = getWeddingFormsApiUrl();
+const recaptchaSiteKey = getRecaptchaSiteKeyV3();
+const recaptchaSiteKeyV2 = getRecaptchaSiteKeyV2();
+---
+
+<WeddingLayout
+  title="Guest Details — Shuaib & Hanna"
+  description="Submit your guest details, meal choices, and hotel room needs for Shuaib & Hanna's wedding."
+  showGuestDetailsFab={false}
+>
+  <Fragment slot="header-nav">
+    <WeddingNav />
+  </Fragment>
+
+  <header class="mb-8 border-b border-taupe/20 pb-8">
+    <p class="text-sm font-medium uppercase tracking-widest text-orange">Guest Details</p>
+    <h1 class="font-heading mt-2 text-2xl font-bold text-white md:text-3xl">Tell us who's coming</h1>
+    <p class="mt-3 text-base leading-relaxed text-taupe-light">
+      Use your email to share who's attending, meal choices, dietary needs, and whether you need a hotel room. This helps us plan seating, meals, and room blocks.
+    </p>
+    <p class="mt-2 text-sm text-taupe">
+      <a href="/wedding" class="text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange">
+        ← Back to wedding homepage
+      </a>
+    </p>
+  </header>
+
+  <WeddingMealOptions />
+
+  <WeddingGuestForm
+    apiUrl={apiUrl}
+    recaptchaSiteKey={recaptchaSiteKey}
+    recaptchaSiteKeyV2={recaptchaSiteKeyV2}
+  />
+</WeddingLayout>

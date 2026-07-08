@@ -1,0 +1,161 @@
+---
+import { weddingMeta } from '../../data/wedding';
+import WeddingCountdown from './WeddingCountdown.astro';
+
+interface Props {
+  showCountdown?: boolean;
+}
+
+const { showCountdown = false } = Astro.props;
+
+const BACKGROUND_OPTIONS = [
+  '#203A31',
+  '#3E5F4B',
+  '#7E4A35',
+  '#5c5248',
+  '#2D5247',
+  '#5A7D66',
+  '#152820',
+  '#2E4738',
+  '#BC6439',
+];
+
+const globs = [
+  import.meta.glob<{ default: string }>('../../assets/wedding/*.jpg', { eager: true }),
+  import.meta.glob<{ default: string }>('../../assets/wedding/*.jpeg', { eager: true }),
+  import.meta.glob<{ default: string }>('../../assets/wedding/*.png', { eager: true }),
+  import.meta.glob<{ default: string }>('../../assets/wedding/*.webp', { eager: true }),
+];
+
+function getUrl(m: unknown): string {
+  if (typeof m === 'string') return m;
+  const d = (m as { default?: string | { src?: string } }).default;
+  return typeof d === 'string' ? d : (d?.src ?? '');
+}
+
+type Entry = { path: string; url: string };
+const allEntries: Entry[] = globs
+  .flatMap((g) =>
+    Object.entries(g)
+      .map(([path, mod]) => ({ path, url: getUrl(mod) }))
+      .filter((e) => e.url)
+  )
+  .filter((e, i, arr) => arr.findIndex((x) => x.url === e.url) === i);
+
+function filename(path: string): string {
+  return path.split('/').pop()?.toLowerCase() ?? '';
+}
+
+// Always show imddle.jpg (the "middle" photo) first, then rotate through the
+// rest in a deterministic (alphabetical) order.
+const seedEntry = allEntries.find((e) => filename(e.path).includes('imddle'));
+const restEntries = allEntries
+  .filter((e) => e !== seedEntry)
+  .sort((a, b) => filename(a.path).localeCompare(filename(b.path)));
+const orderedEntries = seedEntry ? [seedEntry, ...restEntries] : restEntries;
+
+const photoUrls = orderedEntries.map((e) => e.url);
+const primaryPhoto = photoUrls[0] ?? '';
+---
+
+<aside
+  class="relative h-[42vh] min-h-[280px] w-full shrink-0 overflow-hidden lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:w-[55vw] lg:min-h-0 lg:self-start"
+  aria-label="Wedding photos"
+>
+  {
+    primaryPhoto ? (
+      <div class="absolute inset-0" data-photo-rotator>
+        <img
+          id="wedding-photo-a"
+          src={primaryPhoto}
+          alt=""
+          class="absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-1000 ease-in-out"
+          loading="eager"
+          decoding="async"
+        />
+        <img
+          id="wedding-photo-b"
+          src=""
+          alt=""
+          class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-1000 ease-in-out"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </div>
+    ) : (
+      <div class="h-full w-full bg-forest" aria-hidden="true" />
+    )
+  }
+  <div
+    class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20 lg:bg-gradient-to-r lg:from-black/40 lg:via-black/20 lg:to-black/50"
+    aria-hidden="true"
+  />
+  <div class="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+    <h1 class="font-heading text-4xl font-bold leading-tight text-white-constant drop-shadow-lg md:text-5xl lg:text-6xl">
+      {weddingMeta.headline}
+    </h1>
+    <p class="mt-4 max-w-md text-base leading-relaxed text-white-constant/90 drop-shadow md:text-lg">
+      {weddingMeta.tagline}
+    </p>
+    <p class="mt-6 font-heading text-xl font-semibold text-white-constant drop-shadow md:text-2xl lg:text-3xl">
+      {weddingMeta.dateLabel}
+    </p>
+    <p class="mt-2 font-heading text-xl font-semibold text-white-constant drop-shadow md:text-2xl lg:text-3xl">
+      {weddingMeta.locationLabel}
+    </p>
+    {showCountdown && <WeddingCountdown />}
+  </div>
+</aside>
+
+{
+  !primaryPhoto && (
+    <script define:vars={{ backgroundOptions: BACKGROUND_OPTIONS }}>
+      const panel = document.querySelector('[aria-label="Wedding photos"]');
+      if (panel instanceof HTMLElement) {
+        const color = backgroundOptions[Math.floor(Math.random() * backgroundOptions.length)];
+        panel.style.background = color;
+      }
+    </script>
+  )
+}
+
+{
+  primaryPhoto && photoUrls.length > 1 && (
+    <script define:vars={{ photoUrls, rotateMs: 10000 }}>
+      (function () {
+        var urls = photoUrls;
+        var a = document.getElementById('wedding-photo-a');
+        var b = document.getElementById('wedding-photo-b');
+        if (!a || !b || urls.length < 2) return;
+
+        // Always start on the first image (imddle / middle), then rotate.
+        var idx = 0;
+        var front = a;
+        var back = b;
+
+        // Preload all images so crossfades are smooth.
+        urls.forEach(function (u) {
+          var img = new Image();
+          img.src = u;
+        });
+
+        function advance() {
+          idx = (idx + 1) % urls.length;
+          var nextUrl = urls[idx];
+          var loader = new Image();
+          loader.onload = function () {
+            back.src = nextUrl;
+            back.style.opacity = '1';
+            front.style.opacity = '0';
+            var tmp = front;
+            front = back;
+            back = tmp;
+          };
+          loader.src = nextUrl;
+        }
+
+        window.setInterval(advance, rotateMs);
+      })();
+    </script>
+  )
+}

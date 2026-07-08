@@ -1,0 +1,81 @@
+---
+import { weddingMeta } from '../../data/wedding';
+
+interface Props {
+  eventDateIso?: string;
+}
+const { eventDateIso = weddingMeta.eventDateIso } = Astro.props;
+---
+
+<div
+  id="wedding-countdown"
+  class="mt-6 flex flex-wrap justify-center gap-3 text-center sm:gap-4"
+  data-event-date={eventDateIso}
+  aria-live="polite"
+>
+  <div class="min-w-[4.5rem] rounded-lg bg-black/40 px-3 py-2 backdrop-blur-sm">
+    <span id="wedding-countdown-days" class="block font-heading text-2xl font-bold text-white-constant">—</span>
+    <span class="text-xs uppercase tracking-wide text-white-constant/80">Days</span>
+  </div>
+  <div class="min-w-[4.5rem] rounded-lg bg-black/40 px-3 py-2 backdrop-blur-sm">
+    <span id="wedding-countdown-hours" class="block font-heading text-2xl font-bold text-white-constant">—</span>
+    <span class="text-xs uppercase tracking-wide text-white-constant/80">Hours</span>
+  </div>
+  <div class="min-w-[4.5rem] rounded-lg bg-black/40 px-3 py-2 backdrop-blur-sm">
+    <span id="wedding-countdown-minutes" class="block font-heading text-2xl font-bold text-white-constant">—</span>
+    <span class="text-xs uppercase tracking-wide text-white-constant/80">Mins</span>
+  </div>
+  <div class="min-w-[4.5rem] rounded-lg bg-black/40 px-3 py-2 backdrop-blur-sm">
+    <span id="wedding-countdown-seconds" class="block font-heading text-2xl font-bold text-white-constant">—</span>
+    <span class="text-xs uppercase tracking-wide text-white-constant/80">Secs</span>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const root = document.getElementById('wedding-countdown');
+    if (!root) return;
+
+    const eventDate = root.getAttribute('data-event-date');
+    if (!eventDate) return;
+
+    const target = new Date(eventDate).getTime();
+    const daysEl = document.getElementById('wedding-countdown-days');
+    const hoursEl = document.getElementById('wedding-countdown-hours');
+    const minutesEl = document.getElementById('wedding-countdown-minutes');
+    const secondsEl = document.getElementById('wedding-countdown-seconds');
+
+    function pad(n: number) {
+      return String(n).padStart(2, '0');
+    }
+
+    function tick() {
+      const now = Date.now();
+      let diff = target - now;
+
+      if (diff <= 0) {
+        if (daysEl) daysEl.textContent = '0';
+        if (hoursEl) hoursEl.textContent = '00';
+        if (minutesEl) minutesEl.textContent = '00';
+        if (secondsEl) secondsEl.textContent = '00';
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      diff -= days * 1000 * 60 * 60 * 24;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      diff -= hours * 1000 * 60 * 60;
+      const minutes = Math.floor(diff / (1000 * 60));
+      diff -= minutes * 1000 * 60;
+      const seconds = Math.floor(diff / 1000);
+
+      if (daysEl) daysEl.textContent = String(days);
+      if (hoursEl) hoursEl.textContent = pad(hours);
+      if (minutesEl) minutesEl.textContent = pad(minutes);
+      if (secondsEl) secondsEl.textContent = pad(seconds);
+    }
+
+    tick();
+    window.setInterval(tick, 1000);
+  })();
+</script>

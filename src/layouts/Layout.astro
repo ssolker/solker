@@ -8,23 +8,34 @@ interface Props {
   description?: string;
   canonical?: string;
   showThemeSwitcher?: boolean;
+  /** When set, locks the site to this theme and ignores stored preference. */
+  forcedTheme?: 'light' | 'dark';
 }
-const { title = 'Solker', description, canonical, showThemeSwitcher = true } = Astro.props;
+const {
+  title = 'Solker',
+  description,
+  canonical,
+  showThemeSwitcher = true,
+  forcedTheme,
+} = Astro.props;
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
+const effectiveShowThemeSwitcher = showThemeSwitcher && !forcedTheme;
 ---
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<script is:inline>
+		<script is:inline define:vars={{ forcedTheme }}>
 			(function() {
-			 var theme = 'light', palette = 'new';
-			 try {
-			   var stored = localStorage.getItem('solker-theme');
-			   if (stored === 'light' || stored === 'dark') { theme = stored; }
-			   else if (typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches) { theme = 'dark'; }
-			 } catch (e) {}
+			 var theme = forcedTheme || 'light', palette = 'new';
+			 if (!forcedTheme) {
+			   try {
+			     var stored = localStorage.getItem('solker-theme');
+			     if (stored === 'light' || stored === 'dark') { theme = stored; }
+			     else if (typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches) { theme = 'dark'; }
+			   } catch (e) {}
+			 }
 			 document.documentElement.setAttribute('data-theme', theme);
 			 document.documentElement.setAttribute('data-palette', palette);
 			})();
@@ -81,7 +92,7 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
 				<!-- Log in / Register (commented out)
 				<a href="#" class="rounded bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest-dark">Log in / Register</a>
 				-->
-				{showThemeSwitcher && <ThemeSwitcher />}
+				{effectiveShowThemeSwitcher && <ThemeSwitcher />}
 			</div>
 		</header>
 		<div class="flex min-h-0 flex-1 flex-col pt-16">

@@ -1,0 +1,19 @@
+---
+const links = [
+  { href: '#our-story', label: 'Our Story' },
+  { href: '#schedule', label: 'Schedule' },
+  { href: '#accommodations', label: 'Accommodations' },
+  { href: '#registry', label: 'Registry' },
+  { href: '#faq', label: 'Q&A' },
+];
+const linkClass =
+  'rounded-full border border-taupe/30 px-3 py-1.5 text-sm font-medium text-taupe-light hover:border-orange/50 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 focus:ring-offset-forest';
+---
+
+<nav class="flex flex-wrap gap-2" aria-label="Wedding sections">
+  {links.map(({ href, label }) => (
+    <a href={href} class={linkClass}>
+      {label}
+    </a>
+  ))}
+</nav>
