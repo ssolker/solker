@@ -323,7 +323,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         price: 50,
         startDate: '2026-07-06',
         endDate: '2026-08-31',
-        registrationClosesAt: '2026-07-07T23:59:59-04:00',
+        registrationClosesAt: '2026-08-31T23:59:59-04:00',
         teams: soccerS2Teams,
         isActive: true,
         address: SOC_ADDRESS,
