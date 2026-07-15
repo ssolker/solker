@@ -124,6 +124,20 @@ export const faq: WeddingFaqItem[] = [
     answer:
       'The ceremony will be held outside on the grass. If it rains, it will be moved inside the building.',
   },
+  {
+    question: 'Which hotel will the shuttle be going to?',
+    answer:
+      'The Lamplighter Inn (Best Western Plus) in London — 591 Wellington Rd, London, ON N6C 4R3.',
+  },
+  {
+    question: 'Which hotel will rooms be blocked out at?',
+    answer:
+      'The Lamplighter Inn (Best Western Plus) in London — 591 Wellington Rd, London, ON N6C 4R3.',
+  },
+  {
+    question: 'From Kendra — how hard should everyone party?',
+    answer: 'Hard AF.',
+  },
 ];
 
 export const mealOptions: WeddingMealOption[] = [
