@@ -18,7 +18,7 @@ const recaptchaSiteKeyV2 = getRecaptchaSiteKeyV2();
   description="Submit your guest details, meal choices, and hotel room needs for Shuaib & Hanna's wedding."
   showGuestDetailsFab={false}
 >
-  <header class="mb-8 border-b border-taupe/20 pb-8">
+  <header class="wedding-reveal mb-8 border-b border-taupe/20 pb-8">
     <p class="text-sm font-medium uppercase tracking-widest text-orange">Guest Details</p>
     <h1 class="font-heading mt-2 text-2xl font-bold text-white md:text-3xl">Tell us who's coming</h1>
     <p class="mt-3 text-base leading-relaxed text-taupe-dark">
@@ -31,11 +31,15 @@ const recaptchaSiteKeyV2 = getRecaptchaSiteKeyV2();
     </p>
   </header>
 
-  <WeddingMealOptions />
+  <div class="wedding-reveal">
+    <WeddingMealOptions />
+  </div>
 
-  <WeddingGuestForm
-    apiUrl={apiUrl}
-    recaptchaSiteKey={recaptchaSiteKey}
-    recaptchaSiteKeyV2={recaptchaSiteKeyV2}
-  />
+  <div class="wedding-reveal">
+    <WeddingGuestForm
+      apiUrl={apiUrl}
+      recaptchaSiteKey={recaptchaSiteKey}
+      recaptchaSiteKeyV2={recaptchaSiteKeyV2}
+    />
+  </div>
 </WeddingLayout>
