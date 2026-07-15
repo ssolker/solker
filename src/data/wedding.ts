@@ -99,7 +99,7 @@ export const accommodations: { busingNote: string; hotels: WeddingHotel[] } = {
 
 export const registry = {
   presenceNote:
-    "Your love, laughter, and presence on our special day are the greatest gifts we could ever ask for. If you wish to honor us with a gift, a contribution toward our future together would be sincerely appreciated as we begin this next chapter. For those who prefer, we've also created a registry with a few items to help us build our home together. Whatever you choose, please know that your kindness and generosity mean the world to us.",
+    "Your love, laughter, and presence on our special day are the greatest gifts we could ever ask for. If you wish to honor us with a gift, a monetary contribution toward our future together would be sincerely appreciated as we begin this next chapter. For those who prefer, we've also created a registry with a few items to help us build our home together. Whatever you choose, please know that your kindness and generosity mean the world to us.",
   links: [
     {
       name: 'Amazon Registry',
