@@ -10,6 +10,8 @@ interface Props {
   showThemeSwitcher?: boolean;
   /** When set, locks the site to this theme and ignores stored preference. */
   forcedTheme?: 'light' | 'dark';
+  /** Hide the fixed site header (e.g. wedding pages provide their own menu). */
+  showHeader?: boolean;
 }
 const {
   title = 'Solker',
@@ -17,6 +19,7 @@ const {
   canonical,
   showThemeSwitcher = true,
   forcedTheme,
+  showHeader = true,
 } = Astro.props;
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
 const effectiveShowThemeSwitcher = showThemeSwitcher && !forcedTheme;
@@ -51,6 +54,7 @@ const effectiveShowThemeSwitcher = showThemeSwitcher && !forcedTheme;
 		<title>{title}</title>
 	</head>
 	<body class="flex min-h-screen flex-col bg-forest text-white font-sans antialiased">
+		{showHeader && (
 		<header class="fixed left-0 right-0 top-0 z-50 flex shrink-0 items-center justify-between border-b border-taupe/20 bg-forest-dark/95 px-4 py-3 backdrop-blur-sm md:px-6">
 			<a href="/" class="logo-link flex shrink-0 focus:outline-none" aria-label="Home" data-logo-clicks="0">
 				<img src={logoLight.src} alt="Solker" class="logo logo-light h-10 w-auto md:h-12" width="115" height="48" />
@@ -95,7 +99,8 @@ const effectiveShowThemeSwitcher = showThemeSwitcher && !forcedTheme;
 				{effectiveShowThemeSwitcher && <ThemeSwitcher />}
 			</div>
 		</header>
-		<div class="flex min-h-0 flex-1 flex-col pt-16">
+		)}
+		<div class:list={['flex min-h-0 flex-1 flex-col', showHeader && 'pt-16']}>
 			<slot />
 		</div>
 	</body>

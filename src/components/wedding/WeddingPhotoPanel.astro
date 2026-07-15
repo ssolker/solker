@@ -59,7 +59,7 @@ const primaryPhoto = photoUrls[0] ?? '';
 ---
 
 <aside
-  class="relative h-[42vh] min-h-[280px] w-full shrink-0 overflow-hidden lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:w-[55vw] lg:min-h-0 lg:self-start"
+  class="relative h-svh w-full shrink-0 lg:sticky lg:top-0 lg:h-screen lg:w-[55vw] lg:self-start"
   aria-label="Wedding photos"
 >
   {
@@ -90,13 +90,13 @@ const primaryPhoto = photoUrls[0] ?? '';
     class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20 lg:bg-gradient-to-r lg:from-black/40 lg:via-black/20 lg:to-black/50"
     aria-hidden="true"
   />
+  <div class="absolute left-4 top-4 z-20 lg:left-6 lg:top-6">
+    <slot name="menu" />
+  </div>
   <div class="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
     <h1 class="font-heading text-4xl font-bold leading-tight text-white-constant drop-shadow-lg md:text-5xl lg:text-6xl">
       {weddingMeta.headline}
     </h1>
-    <p class="mt-4 max-w-md text-base leading-relaxed text-white-constant/90 drop-shadow md:text-lg">
-      {weddingMeta.tagline}
-    </p>
     <p class="mt-6 font-heading text-xl font-semibold text-white-constant drop-shadow md:text-2xl lg:text-3xl">
       {weddingMeta.dateLabel}
     </p>
@@ -104,8 +104,28 @@ const primaryPhoto = photoUrls[0] ?? '';
       {weddingMeta.locationLabel}
     </p>
     {showCountdown && <WeddingCountdown />}
+    <button
+      type="button"
+      id="wedding-scroll-down"
+      class="mt-8 flex h-11 w-11 animate-bounce items-center justify-center rounded-full bg-black/40 text-white-constant shadow-lg shadow-black/20 backdrop-blur-sm transition hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-orange lg:hidden"
+      aria-label="Scroll down to see more"
+    >
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
   </div>
 </aside>
+
+<script>
+  const scrollBtn = document.getElementById('wedding-scroll-down');
+  const panel = scrollBtn?.closest('aside');
+  if (scrollBtn && panel) {
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: panel.offsetHeight, behavior: 'smooth' });
+    });
+  }
+</script>
 
 {
   !primaryPhoto && (

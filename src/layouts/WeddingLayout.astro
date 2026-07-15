@@ -1,6 +1,7 @@
 ---
 import Layout from './Layout.astro';
 import Footer from '../components/Footer.astro';
+import WeddingNav from '../components/WeddingNav.astro';
 import WeddingPhotoPanel from '../components/wedding/WeddingPhotoPanel.astro';
 import { weddingMeta } from '../data/wedding';
 
@@ -21,13 +22,19 @@ const {
 } = Astro.props;
 ---
 
-<Layout title={title} description={description} showThemeSwitcher={false} forcedTheme="light">
-  <Fragment slot="header-nav">
-    <slot name="header-nav" />
-  </Fragment>
-
-  <div class="flex min-h-[calc(100vh-4rem)] flex-col lg:flex-row">
-    <WeddingPhotoPanel showCountdown={showCountdown} />
+<Layout
+  title={title}
+  description={description}
+  showThemeSwitcher={false}
+  forcedTheme="light"
+  showHeader={false}
+>
+  <div class="flex min-h-screen flex-col lg:flex-row">
+    <WeddingPhotoPanel showCountdown={showCountdown}>
+      <Fragment slot="menu">
+        <WeddingNav />
+      </Fragment>
+    </WeddingPhotoPanel>
     <div class="flex flex-1 flex-col">
       <main class="flex-1 px-4 py-8 lg:overflow-y-auto lg:px-10 lg:py-12">
         <div class="mx-auto max-w-2xl">
