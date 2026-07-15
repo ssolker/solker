@@ -1,5 +1,7 @@
 ---
-import { mealOptions, guestFormLimits } from '../../data/wedding';
+import { mealOptions, guestFormLimits, accommodations } from '../../data/wedding';
+
+const hotel = accommodations.hotels[0];
 
 const {
   apiUrl,
@@ -18,6 +20,17 @@ const mealOptionsJson = JSON.stringify(mealOptions);
   <p class="text-sm text-taupe-dark">
     Fields marked with <span class="text-red-500 font-medium">*</span> are required. One submission per household — include everyone attending with you.
   </p>
+
+  <section
+    class="space-y-6 rounded-lg border border-taupe/20 bg-sage-light/20 p-4 sm:p-5"
+    aria-labelledby="household-info-heading"
+  >
+    <div>
+      <h3 id="household-info-heading" class="font-heading text-lg font-semibold text-white">
+        Household info
+      </h3>
+      <p class="mt-0.5 text-xs text-taupe-dark">One per submission — applies to your whole party.</p>
+    </div>
 
   <div>
     <label for="guest-email" class="mb-1 block font-medium text-white">
@@ -74,8 +87,23 @@ const mealOptionsJson = JSON.stringify(mealOptions);
       <span class="text-red-500">*</span> How many rooms do you need?
     </label>
     <p class="mb-2 text-sm text-taupe-dark">
-      Hanna will email you a link and information so you can book at the Lamplighter Inn with our
-      wedding group and receive the group discounted rates.
+      Hanna will email you a link and information so you can book at the
+      {
+        hotel?.url ? (
+          <a
+            href={hotel.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-medium text-orange underline hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange"
+          >
+            Lamplighter Inn
+          </a>
+        ) : (
+          'Lamplighter Inn'
+        )
+      }
+      with our wedding group and receive the group discounted rates. We'll use this info to block
+      out rooms for our group.
     </p>
     <select
       id="hotel-rooms"
@@ -89,11 +117,20 @@ const mealOptionsJson = JSON.stringify(mealOptions);
       }
     </select>
   </div>
+  </section>
 
-  <div>
-    <h3 class="font-heading mb-3 text-lg font-semibold text-white">Guest details</h3>
+  <section
+    class="space-y-4 rounded-lg border border-taupe/20 bg-sage-light/20 p-4 sm:p-5"
+    aria-labelledby="guest-details-heading"
+  >
+    <div>
+      <h3 id="guest-details-heading" class="font-heading text-lg font-semibold text-white">
+        Guest details
+      </h3>
+      <p class="mt-0.5 text-xs text-taupe-dark">One per guest — name, meal, and dietary needs for each person attending.</p>
+    </div>
     <div id="guest-rows" class="space-y-4" role="group" aria-label="Guest list"></div>
-  </div>
+  </section>
 
   <div id="recaptcha-wrap" class="min-h-0" aria-hidden="true"></div>
   {

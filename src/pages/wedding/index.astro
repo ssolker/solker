@@ -78,7 +78,27 @@ import {
           {weddingMeta.venueName}
         </a>
       </p>
-      <p>{weddingMeta.venueAddress}</p>
+      <div class="flex flex-wrap items-center gap-2">
+        <svg class="h-5 w-5 shrink-0 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>{weddingMeta.venueAddress}</span>
+        <button
+          type="button"
+          class="wedding-copy-btn inline-flex items-center gap-1 rounded-md border border-taupe/30 px-2 py-1 text-xs font-medium text-taupe-dark transition hover:border-orange hover:text-orange focus:outline-none focus:ring-2 focus:ring-orange"
+          data-copy={weddingMeta.venueAddress}
+          aria-label={`Copy address: ${weddingMeta.venueAddress}`}
+        >
+          <svg class="wedding-copy-icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          <svg class="wedding-copied-icon hidden h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span class="wedding-copy-label">Copy</span>
+        </button>
+      </div>
       <div class="mt-4 overflow-hidden rounded-lg border border-taupe/20 shadow-sm">
         <iframe
           title={`Map showing ${weddingMeta.venueName}`}
@@ -93,9 +113,12 @@ import {
         href={weddingMeta.venueMapUrl}
         target="_blank"
         rel="noopener noreferrer"
-        class="mt-3 inline-block font-medium text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange"
+        class="mt-3 inline-flex items-center gap-1.5 font-medium text-orange hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange"
       >
-        Open in Google Maps →
+        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        Open in Google Maps
       </a>
     </div>
   </WeddingSection>
@@ -128,7 +151,29 @@ import {
         accommodations.hotels.map((hotel) => (
           <article class="rounded-lg border border-taupe/20 bg-forest-dark/50 p-4">
             <h3 class="font-heading text-lg font-semibold text-white">{hotel.name}</h3>
-            {hotel.address && <p class="mt-1">{hotel.address}</p>}
+            {hotel.address && (
+              <div class="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-orange/30 bg-orange/10 px-3 py-2">
+                <svg class="h-5 w-5 shrink-0 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="font-medium text-white">{hotel.address}</span>
+                <button
+                  type="button"
+                  class="wedding-copy-btn inline-flex items-center gap-1 rounded-md border border-taupe/30 px-2 py-1 text-xs font-medium text-taupe-dark transition hover:border-orange hover:text-orange focus:outline-none focus:ring-2 focus:ring-orange"
+                  data-copy={hotel.address}
+                  aria-label={`Copy address: ${hotel.address}`}
+                >
+                  <svg class="wedding-copy-icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <svg class="wedding-copied-icon hidden h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="wedding-copy-label">Copy</span>
+                </button>
+              </div>
+            )}
             {hotel.groupCode && <p class="mt-1">Group code: {hotel.groupCode}</p>}
             {hotel.bookBy && <p class="mt-1">Book by: {hotel.bookBy}</p>}
             {hotel.notes && <p class="mt-2">{hotel.notes}</p>}
@@ -139,9 +184,12 @@ import {
                     href={hotel.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="mt-2 inline-block font-medium text-orange hover:text-orange-light"
+                    class="mt-2 inline-flex items-center gap-1.5 font-medium text-orange hover:text-orange-light"
                   >
-                    Visit website →
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                    Visit website
                   </a>
                 )
               }
@@ -151,9 +199,12 @@ import {
                     href={hotel.mapUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="mt-2 inline-block font-medium text-orange hover:text-orange-light"
+                    class="mt-2 inline-flex items-center gap-1.5 font-medium text-orange hover:text-orange-light"
                   >
-                    Open in Google Maps →
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    Open in Google Maps
                   </a>
                 )
               }
@@ -168,14 +219,17 @@ import {
     <p>{registry.presenceNote}</p>
     {
       registry.links.length > 0 ? (
-        <div class="mt-6 flex flex-wrap gap-3">
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
           {registry.links.map(({ name, url }) => (
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              class="rounded-lg bg-orange px-5 py-2.5 text-base font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange"
+              class="inline-flex items-center gap-2.5 rounded-lg bg-orange px-5 py-2.5 text-base font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange"
             >
+              <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.743-2.64 1.316-4.185 1.726a17.617 17.617 0 01-10.951-.577 17.88 17.88 0 01-5.43-3.35c-.1-.074-.151-.15-.151-.22 0-.047.021-.09.051-.13zm6.565-6.218c0-1.005.247-1.863.743-2.577.495-.71 1.17-1.25 2.04-1.615.796-.335 1.756-.575 2.912-.72.39-.046 1.033-.103 1.92-.174v-.37c0-.93-.105-1.558-.3-1.875-.302-.43-.78-.65-1.44-.65h-.182c-.48.046-.896.196-1.246.46-.35.27-.575.63-.675 1.096-.06.3-.206.465-.435.51l-2.52-.315c-.248-.06-.372-.18-.372-.39 0-.046.007-.09.022-.15.247-1.29.855-2.25 1.82-2.88.976-.616 2.1-.975 3.39-1.05h.54c1.65 0 2.957.434 3.888 1.29.135.15.27.3.405.48.12.165.224.314.283.45.075.134.15.33.195.57.06.254.105.42.135.51.03.104.062.3.076.615.01.313.02.493.02.553v5.28c0 .376.06.72.165 1.036.105.313.21.54.315.674l.51.674c.09.136.136.256.136.36 0 .12-.06.226-.18.314-1.2 1.05-1.86 1.62-1.963 1.71-.165.135-.375.15-.63.045a6.062 6.062 0 01-.526-.496l-.31-.347a9.391 9.391 0 01-.317-.42l-.3-.435c-.81.886-1.603 1.44-2.4 1.665-.494.15-1.093.227-1.83.227-1.11 0-2.04-.343-2.76-1.034-.72-.69-1.08-1.665-1.08-2.94l-.05-.076zm3.753-.438c0 .566.14 1.02.425 1.364.285.34.675.512 1.155.512.045 0 .106-.007.195-.02.09-.016.134-.023.166-.023.614-.16 1.08-.553 1.424-1.178.165-.28.285-.58.36-.91.09-.32.12-.59.135-.8.015-.195.015-.54.015-1.005v-.54c-.84 0-1.484.06-1.92.18-1.275.36-1.92 1.17-1.92 2.43l-.035-.02zm9.162 7.027c.03-.06.075-.11.132-.17.362-.243.714-.41 1.05-.5a8.094 8.094 0 011.612-.24c.14-.012.28 0 .41.03.65.06 1.05.168 1.172.33.063.09.099.228.099.39v.15c0 .51-.149 1.11-.424 1.8-.278.69-.664 1.248-1.156 1.68-.073.06-.14.09-.197.09-.03 0-.06 0-.09-.012-.09-.044-.107-.12-.064-.24.54-1.26.806-2.143.806-2.64 0-.15-.03-.27-.087-.344-.145-.166-.55-.257-1.224-.257-.243 0-.533.016-.87.046-.363.045-.7.09-1 .135-.09 0-.148-.014-.18-.044-.03-.03-.036-.047-.02-.077 0-.017.006-.03.02-.063v-.06z" />
+              </svg>
               {name}
             </a>
           ))}
@@ -202,4 +256,28 @@ import {
   <div class="mt-6 border-t border-taupe/20 pt-6 text-center">
     <p>We can't wait to celebrate with you.</p>
   </div>
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>('.wedding-copy-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const text = btn.getAttribute('data-copy') || '';
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          return;
+        }
+        const copyIcon = btn.querySelector('.wedding-copy-icon');
+        const copiedIcon = btn.querySelector('.wedding-copied-icon');
+        const label = btn.querySelector('.wedding-copy-label');
+        copyIcon?.classList.add('hidden');
+        copiedIcon?.classList.remove('hidden');
+        if (label) label.textContent = 'Copied!';
+        window.setTimeout(() => {
+          copyIcon?.classList.remove('hidden');
+          copiedIcon?.classList.add('hidden');
+          if (label) label.textContent = 'Copy';
+        }, 2000);
+      });
+    });
+  </script>
 </WeddingLayout>

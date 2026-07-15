@@ -120,12 +120,9 @@ export const faq: WeddingFaqItem[] = [
       'Yes — VOYAGO transportation will run two shuttles from Bellamere to the Lamplighter Inn, at 10:30 PM and 11:30 PM.',
   },
   {
-    question: 'Question',
-    answer: 'Answer.',
-  },
-  {
-    question: 'Hanna',
-    answer: 'Fill this in!!',
+    question: 'Is the ceremony indoors or outdoors?',
+    answer:
+      'The ceremony will be held outside on the grass. If it rains, it will be moved inside the building.',
   },
 ];
 
