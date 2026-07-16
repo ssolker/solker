@@ -135,6 +135,21 @@ export const faq: WeddingFaqItem[] = [
       'The Lamplighter Inn (Best Western Plus) in London — 591 Wellington Rd, London, ON N6C 4R3.',
   },
   {
+    question: 'What is the invite code on the guest details form?',
+    answer:
+      'Each invitation includes a unique 6-digit code. Enter it on the guest details page to unlock the form — it also loads the number of guests your invitation covers. If you did not receive a code or cannot find it, please contact Hanna or Shuaib.',
+  },
+  {
+    question: 'Can I update my guest details after submitting?',
+    answer:
+      'Yes — return to the guest details page and enter your invite code again. Your previous answers will be loaded so you can edit them and resubmit. You will receive a new confirmation email with the updated details.',
+  },
+  {
+    question: 'What if the number of guests shown for my invite code is incorrect?',
+    answer:
+      'The guest count is set by your invitation. If it does not look right, please contact Hanna or Shuaib and we will update it.',
+  },
+  {
     question: 'From Kendra — how hard should everyone party?',
     answer: 'Hard AF.',
   },
@@ -175,5 +190,5 @@ export const guestFormLimits = {
   maxNameLength: 150,
   maxEmailLength: 254,
   maxDietaryLength: 500,
-  maxHotelRooms: 10,
+  maxHotelRooms: 4,
 } as const;

@@ -15,14 +15,65 @@ const mealOptionsJson = JSON.stringify(mealOptions);
 ---
 
 <form id="guest-details-form" class="space-y-6" novalidate>
-  <input type="text" name="_gotcha" id="guest-gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute left-[-9999px]" />
+  <!-- Honeypot: checkbox (not text) so browser autofill does not fill it when entering email -->
+  <input
+    type="checkbox"
+    name="_gotcha"
+    id="guest-gotcha"
+    tabindex="-1"
+    autocomplete="off"
+    aria-hidden="true"
+    class="absolute left-[-9999px] h-0 w-0 opacity-0"
+  />
 
   <p class="text-sm text-taupe-dark">
     Fields marked with <span class="text-red-500 font-medium">*</span> are required. One submission per household — include everyone attending with you.
   </p>
 
   <section
-    class="space-y-6 rounded-lg border border-taupe/20 bg-sage-light/20 p-4 sm:p-5"
+    class="space-y-4 rounded-lg border border-taupe/20 bg-sage-light/20 p-4 sm:p-5"
+    aria-labelledby="invite-code-heading"
+  >
+    <div>
+      <h3 id="invite-code-heading" class="font-heading text-lg font-semibold text-white">
+        Invite code
+      </h3>
+      <p class="mt-0.5 text-xs text-taupe-dark">
+        Enter the 6-digit code from your invitation to unlock the form. If you've submitted
+        before, your previous answers will be loaded so you can update them.
+      </p>
+    </div>
+
+    <div>
+      <label for="invite-code" class="mb-1 block font-medium text-white">
+        <span class="text-red-500">*</span> Your 6-digit invite code
+      </label>
+      <div class="flex gap-2">
+        <input
+          type="text"
+          id="invite-code"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          pattern="[0-9]{6}"
+          placeholder="000000"
+          class="w-full max-w-[12rem] rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-center text-xl tracking-[0.35em] text-white placeholder:text-taupe/60 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+        />
+        <button
+          type="button"
+          id="invite-code-verify-btn"
+          class="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          Verify
+        </button>
+      </div>
+      <p id="invite-code-status" class="mt-2 min-h-[1.25em] text-sm text-taupe-dark" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section
+    id="household-section"
+    class="hidden space-y-6 rounded-lg border border-taupe/20 bg-sage-light/20 p-4 sm:p-5"
     aria-labelledby="household-info-heading"
   >
     <div>
@@ -64,6 +115,10 @@ const mealOptionsJson = JSON.stringify(mealOptions);
         ))
       }
     </select>
+    <p class="mt-1 text-xs text-taupe-dark">
+      Your invitation covers up to <span id="party-size-max" class="font-semibold text-white">-</span>
+      guest(s). If this looks wrong, please contact Hanna or Shuaib.
+    </p>
   </div>
 
   <fieldset class="space-y-3">
@@ -120,7 +175,8 @@ const mealOptionsJson = JSON.stringify(mealOptions);
   </section>
 
   <section
-    class="space-y-4 rounded-lg border border-taupe/20 bg-sage-light/20 p-4 sm:p-5"
+    id="guest-details-section"
+    class="hidden space-y-4 rounded-lg border border-taupe/20 bg-sage-light/20 p-4 sm:p-5"
     aria-labelledby="guest-details-heading"
   >
     <div>
@@ -146,9 +202,9 @@ const mealOptionsJson = JSON.stringify(mealOptions);
   <button
     type="submit"
     id="guest-submit-btn"
-    class="w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70"
+    class="hidden w-full rounded-lg bg-orange px-4 py-3 font-semibold text-white hover:bg-orange-dark focus:outline-none focus:ring-2 focus:ring-orange disabled:cursor-not-allowed disabled:opacity-70"
   >
-    Submit guest details
+    <span id="guest-submit-btn-text">Submit guest details</span>
   </button>
 </form>
 
@@ -212,15 +268,36 @@ const mealOptionsJson = JSON.stringify(mealOptions);
     var mealOptions = JSON.parse(mealOptionsJson);
     var form = document.getElementById('guest-details-form');
     var partySizeEl = document.getElementById('party-size');
+    var partySizeMaxEl = document.getElementById('party-size-max');
     var guestRowsEl = document.getElementById('guest-rows');
     var hotelWrap = document.getElementById('hotel-rooms-wrap');
     var submitBtn = document.getElementById('guest-submit-btn');
+    var submitBtnText = document.getElementById('guest-submit-btn-text');
     var statusSpinner = document.getElementById('guest-status-spinner');
     var statusText = document.getElementById('guest-status-text');
+    var codeInput = document.getElementById('invite-code');
+    var codeVerifyBtn = document.getElementById('invite-code-verify-btn');
+    var codeStatus = document.getElementById('invite-code-status');
+    var householdSection = document.getElementById('household-section');
+    var guestDetailsSection = document.getElementById('guest-details-section');
     var guestV2Mode = false;
     var guestV2WidgetId = null;
 
-    if (!form || !partySizeEl || !guestRowsEl) return;
+    var inviteVerified = false;
+    var verifiedCode = '';
+    var allowedPartySize = 0;
+    var isVerifying = false;
+
+    if (!form || !partySizeEl || !guestRowsEl || !codeInput) {
+      console.error('[Wedding Form] Setup failed - missing elements:', {
+        form: !!form,
+        partySizeEl: !!partySizeEl,
+        guestRowsEl: !!guestRowsEl,
+        codeInput: !!codeInput,
+      });
+      return;
+    }
+    console.log('[Wedding Form] Setup complete, attaching listeners');
 
     function escapeHtml(s) {
       return String(s)
@@ -349,6 +426,227 @@ const mealOptionsJson = JSON.stringify(mealOptions);
     });
     updateHotelVisibility();
 
+    function setCodeStatus(message, tone) {
+      if (!codeStatus) return;
+      codeStatus.textContent = message;
+      codeStatus.classList.remove('text-red-500', 'text-green-600', 'text-taupe-dark');
+      codeStatus.classList.add(
+        tone === 'error' ? 'text-red-500' : tone === 'success' ? 'text-green-600' : 'text-taupe-dark'
+      );
+    }
+
+    function limitPartySizeOptions(maxAllowed) {
+      var options = partySizeEl.querySelectorAll('option');
+      options.forEach(function (opt) {
+        var n = parseInt(opt.value, 10);
+        opt.disabled = n > maxAllowed;
+        opt.hidden = n > maxAllowed;
+      });
+      partySizeEl.value = String(maxAllowed);
+      if (partySizeMaxEl) partySizeMaxEl.textContent = String(maxAllowed);
+    }
+
+    function prefillExisting(data) {
+      var existing = data.existingSubmission;
+      if (!existing) return;
+
+      var emailEl = document.getElementById('guest-email');
+      if (emailEl && existing.email) emailEl.value = existing.email;
+
+      if (existing.partySize >= 1 && existing.partySize <= allowedPartySize) {
+        partySizeEl.value = String(existing.partySize);
+      }
+
+      var hotelValue = existing.needsHotel ? 'yes' : 'no';
+      var hotelRadio = form.querySelector('input[name="needsHotel"][value="' + hotelValue + '"]');
+      if (hotelRadio) hotelRadio.checked = true;
+      updateHotelVisibility();
+      if (existing.needsHotel && existing.hotelRooms >= 1) {
+        var hotelRoomsEl = document.getElementById('hotel-rooms');
+        if (hotelRoomsEl) hotelRoomsEl.value = String(existing.hotelRooms);
+      }
+
+      syncGuestRows();
+      var guests = data.guests || [];
+      for (var i = 0; i < guests.length; i++) {
+        var nameEl = document.getElementById('guest-name-' + i);
+        var mealEl = document.getElementById('guest-meal-' + i);
+        var dietaryEl = document.getElementById('guest-dietary-' + i);
+        if (nameEl) nameEl.value = guests[i].name || '';
+        if (mealEl) {
+          mealEl.value = guests[i].mealChoice || '';
+          mealEl.dispatchEvent(new Event('change'));
+        }
+        if (dietaryEl) dietaryEl.value = guests[i].dietary || '';
+      }
+
+      if (submitBtnText) submitBtnText.textContent = 'Update guest details';
+      setCodeStatus(
+        'Code verified — we found your earlier submission and loaded it below. Update anything and resubmit.',
+        'success'
+      );
+    }
+
+    function applyInviteData(data, code) {
+      inviteVerified = true;
+      verifiedCode = code;
+      allowedPartySize = data.allowedPartySize;
+
+      codeInput.disabled = true;
+      if (codeVerifyBtn) codeVerifyBtn.classList.add('hidden');
+
+      limitPartySizeOptions(allowedPartySize);
+      syncGuestRows();
+
+      if (data.existingSubmission) {
+        prefillExisting(data);
+      } else {
+        setCodeStatus('Code verified! Fill in your details below.', 'success');
+      }
+
+      if (householdSection) householdSection.classList.remove('hidden');
+      if (guestDetailsSection) guestDetailsSection.classList.remove('hidden');
+      if (submitBtn) submitBtn.classList.remove('hidden');
+
+      var emailEl = document.getElementById('guest-email');
+      if (emailEl && !emailEl.value) emailEl.focus();
+    }
+
+    function postCheckCode(code, token) {
+      fetch(apiUrl, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'checkcode',
+          data: { code: code },
+          recaptchaToken: token,
+        }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        redirect: 'follow',
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (json) {
+          isVerifying = false;
+          codeInput.disabled = false;
+          if (codeVerifyBtn) codeVerifyBtn.disabled = false;
+          // v2 tokens are single-use — reset the widget so the guest can
+          // complete it again for the actual submission (or a retry)
+          if (guestV2WidgetId !== null && typeof grecaptcha !== 'undefined') {
+            try {
+              grecaptcha.reset(guestV2WidgetId);
+            } catch (resetErr) {
+              /* widget may not be rendered yet */
+            }
+          }
+          if (json.success && json.data) {
+            applyInviteData(json.data, code);
+          } else if (json.recaptchaV2Required && recaptchaSiteKeyV2) {
+            var wid = ensureGuestV2WidgetVisible();
+            if (wid !== null && !isNaN(wid)) {
+              guestV2Mode = true;
+              setCodeStatus('Please complete the checkbox below, then press Verify.', 'info');
+              return;
+            }
+            setCodeStatus(json.error || 'Verification failed. Please try again.', 'error');
+          } else {
+            setCodeStatus(
+              json.error ||
+                'We could not find that invite code. Please double-check it, or contact Hanna or Shuaib.',
+              'error'
+            );
+          }
+        })
+        .catch(function () {
+          isVerifying = false;
+          codeInput.disabled = false;
+          if (codeVerifyBtn) codeVerifyBtn.disabled = false;
+          setCodeStatus('Network error while checking your code. Please try again.', 'error');
+        });
+    }
+
+    function requestCodeVerify() {
+      if (inviteVerified || isVerifying) return;
+
+      var code = codeInput.value.replace(/\D/g, '');
+      if (code.length !== 6) {
+        setCodeStatus('Please enter all 6 digits of your invite code.', 'error');
+        return;
+      }
+      if (!apiUrl) {
+        setCodeStatus('Form is not configured. Set PUBLIC_WEDDING_FORMS_API_URL.', 'error');
+        return;
+      }
+      if (typeof grecaptcha === 'undefined' || (!recaptchaSiteKey && !recaptchaSiteKeyV2)) {
+        setCodeStatus('Spam protection could not load. Please refresh and try again.', 'error');
+        return;
+      }
+
+      isVerifying = true;
+      codeInput.disabled = true;
+      if (codeVerifyBtn) codeVerifyBtn.disabled = true;
+      setCodeStatus('Checking your code…', 'info');
+
+      var useV2Token = !!recaptchaSiteKeyV2 && (!recaptchaSiteKey || guestV2Mode);
+      if (useV2Token) {
+        var v2id = getGuestV2WidgetId();
+        var v2token = v2id !== null && !isNaN(v2id) ? grecaptcha.getResponse(v2id) : '';
+        if (!v2token) {
+          isVerifying = false;
+          codeInput.disabled = false;
+          if (codeVerifyBtn) codeVerifyBtn.disabled = false;
+          ensureGuestV2WidgetVisible();
+          setCodeStatus('Please complete the checkbox below, then press Verify.', 'error');
+          return;
+        }
+        postCheckCode(code, v2token);
+        return;
+      }
+
+      grecaptcha.ready(function () {
+        grecaptcha
+          .execute(recaptchaSiteKey, { action: 'wedding_check_code' })
+          .then(function (token) {
+            if (!token) {
+              isVerifying = false;
+              codeInput.disabled = false;
+              if (codeVerifyBtn) codeVerifyBtn.disabled = false;
+              setCodeStatus('Spam protection check failed. Please try again.', 'error');
+              return;
+            }
+            postCheckCode(code, token);
+          })
+          .catch(function () {
+            isVerifying = false;
+            codeInput.disabled = false;
+            if (codeVerifyBtn) codeVerifyBtn.disabled = false;
+            setCodeStatus('Spam protection check failed. Please try again.', 'error');
+          });
+      });
+    }
+
+    // Digits only; auto-verify as soon as the 6th digit is typed or pasted
+    codeInput.addEventListener('input', function () {
+      var digits = codeInput.value.replace(/\D/g, '').slice(0, 6);
+      if (codeInput.value !== digits) codeInput.value = digits;
+      if (digits.length < 6) {
+        setCodeStatus('', 'info');
+        return;
+      }
+      requestCodeVerify();
+    });
+
+    codeInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        requestCodeVerify();
+      }
+    });
+
+    if (codeVerifyBtn) {
+      codeVerifyBtn.addEventListener('click', requestCodeVerify);
+    }
+
     function getGuestV2WidgetId() {
       if (guestV2WidgetId !== null) return guestV2WidgetId;
       var wrap = document.getElementById('guest-recaptcha-v2-wrap');
@@ -383,8 +681,39 @@ const mealOptionsJson = JSON.stringify(mealOptions);
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      console.log('[Wedding Form] Submit triggered');
       var gotcha = document.getElementById('guest-gotcha');
-      if (gotcha && gotcha.value) return;
+      // Checkbox honeypot — only bots typically check it; ignore autofill on text fields
+      if (gotcha && gotcha.checked) {
+        console.log('[Wedding Form] Honeypot caught bot');
+        return;
+      }
+
+      // Always reset button/spinner so a prior failed attempt cannot leave the form stuck
+      if (submitBtn) submitBtn.disabled = false;
+      if (statusSpinner) statusSpinner.style.display = 'none';
+
+      function failValidation(msg, focusEl) {
+        if (statusSpinner) statusSpinner.style.display = 'none';
+        if (statusText) {
+          statusText.textContent = msg;
+          statusText.classList.remove('text-green-600', 'text-taupe-dark');
+          statusText.classList.add('text-red-500');
+        }
+        if (submitBtn) submitBtn.disabled = false;
+        if (focusEl && typeof focusEl.focus === 'function') {
+          try {
+            focusEl.focus();
+          } catch (focusErr) {
+            /* ignore */
+          }
+        }
+      }
+
+      if (!inviteVerified || !verifiedCode) {
+        failValidation('Please enter your 6-digit invite code first.', codeInput);
+        return;
+      }
 
       var emailEl = document.getElementById('guest-email');
       var email = emailEl ? emailEl.value.trim() : '';
@@ -395,38 +724,26 @@ const mealOptionsJson = JSON.stringify(mealOptions);
       var hotelRooms = needsHotel && hotelRoomsEl ? parseInt(hotelRoomsEl.value, 10) : 0;
 
       if (!email) {
-        if (statusText) {
-          statusText.textContent = 'Please enter your email.';
-          statusText.classList.add('text-red-500');
-        }
+        failValidation('Please enter your email.', emailEl);
         return;
       }
 
       var guests = collectGuests(partySize);
       if (!guests || guests.length !== partySize) {
-        if (statusText) {
-          statusText.textContent = 'Please complete a name and meal choice for each guest.';
-          statusText.classList.add('text-red-500');
-        }
+        failValidation('Please complete a name and meal choice for each guest.', document.getElementById('guest-name-0'));
         return;
       }
 
       if (!recaptchaSiteKey && !recaptchaSiteKeyV2) {
-        if (statusText) {
-          statusText.textContent = 'Form is not configured. Set reCAPTCHA keys.';
-          statusText.classList.add('text-red-500');
-        }
+        failValidation('Form is not configured. Set reCAPTCHA keys.');
         return;
       }
       if (!apiUrl) {
-        if (statusText) {
-          statusText.textContent = 'Form is not configured. Set PUBLIC_WEDDING_FORMS_API_URL.';
-          statusText.classList.add('text-red-500');
-        }
+        failValidation('Form is not configured. Set PUBLIC_WEDDING_FORMS_API_URL.');
         return;
       }
 
-      submitBtn.disabled = true;
+      if (submitBtn) submitBtn.disabled = true;
       if (statusSpinner) statusSpinner.style.display = 'block';
       if (statusText) {
         statusText.textContent = 'Submitting…';
@@ -434,12 +751,7 @@ const mealOptionsJson = JSON.stringify(mealOptions);
       }
 
       function failGuest(msg) {
-        if (statusSpinner) statusSpinner.style.display = 'none';
-        if (statusText) {
-          statusText.textContent = msg;
-          statusText.classList.add('text-red-500');
-        }
-        submitBtn.disabled = false;
+        failValidation(msg);
       }
 
       if (typeof grecaptcha === 'undefined') {
@@ -472,7 +784,7 @@ const mealOptionsJson = JSON.stringify(mealOptions);
                 statusText.classList.remove('text-red-500', 'text-green-600');
                 statusText.classList.add('text-taupe-dark');
               }
-              submitBtn.disabled = false;
+              if (submitBtn) submitBtn.disabled = false;
               return;
             }
           }
@@ -480,15 +792,18 @@ const mealOptionsJson = JSON.stringify(mealOptions);
             statusText.textContent = json.error || 'Something went wrong.';
             statusText.classList.add('text-red-500');
           }
-          submitBtn.disabled = false;
+          if (submitBtn) submitBtn.disabled = false;
         }
       }
 
       function postGuest(token) {
+        // Re-read email at send time so a late edit is never lost
+        var latestEmail = emailEl ? emailEl.value.trim() : email;
         var payload = {
           action: 'guestdetails',
           data: {
-            email: email,
+            email: latestEmail,
+            inviteCode: verifiedCode,
             partySize: partySize,
             needsHotel: needsHotel,
             hotelRooms: needsHotel ? hotelRooms : 0,
