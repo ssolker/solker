@@ -137,12 +137,9 @@ const mealOptionsJson = JSON.stringify(mealOptions);
     </div>
   </fieldset>
 
-  <div id="hotel-rooms-wrap" class="hidden">
-    <label for="hotel-rooms" class="mb-1 block font-medium text-white">
-      <span class="text-red-500">*</span> How many rooms do you need?
-    </label>
-    <p class="mb-2 text-sm text-taupe-dark">
-      Hanna will email you a link and information so you can book at the
+  <div id="hotel-booking-info" class="hidden rounded-lg border border-taupe/30 bg-forest-dark/60 p-3 text-sm text-taupe-dark">
+    <p>
+      Rooms are blocked for <span class="font-medium text-white">Saturday night only</span>. To book at the
       {
         hotel?.url ? (
           <a
@@ -157,20 +154,15 @@ const mealOptionsJson = JSON.stringify(mealOptions);
           'Lamplighter Inn'
         )
       }
-      with our wedding group and receive the group discounted rates. We'll use this info to block
-      out rooms for our group.
+      , call{' '}
+      <a
+        href="tel:519-681-7151"
+        class="font-medium text-orange underline hover:text-orange-light focus:outline-none focus:ring-2 focus:ring-orange"
+      >
+        519-681-7151
+      </a>{' '}
+      and tell them you are booking a room in the reserved room block for <span class="font-medium text-white">"The Solker Wedding"</span>.
     </p>
-    <select
-      id="hotel-rooms"
-      name="hotelRooms"
-      class="w-full rounded-lg border border-taupe/30 bg-forest-dark px-4 py-2 text-white focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-    >
-      {
-        Array.from({ length: guestFormLimits.maxHotelRooms }, (_, i) => i + 1).map((n) => (
-          <option value={n}>{n}</option>
-        ))
-      }
-    </select>
   </div>
   </section>
 
@@ -270,7 +262,7 @@ const mealOptionsJson = JSON.stringify(mealOptions);
     var partySizeEl = document.getElementById('party-size');
     var partySizeMaxEl = document.getElementById('party-size-max');
     var guestRowsEl = document.getElementById('guest-rows');
-    var hotelWrap = document.getElementById('hotel-rooms-wrap');
+    var hotelWrap = document.getElementById('hotel-booking-info');
     var submitBtn = document.getElementById('guest-submit-btn');
     var submitBtnText = document.getElementById('guest-submit-btn-text');
     var statusSpinner = document.getElementById('guest-status-spinner');
@@ -288,16 +280,7 @@ const mealOptionsJson = JSON.stringify(mealOptions);
     var allowedPartySize = 0;
     var isVerifying = false;
 
-    if (!form || !partySizeEl || !guestRowsEl || !codeInput) {
-      console.error('[Wedding Form] Setup failed - missing elements:', {
-        form: !!form,
-        partySizeEl: !!partySizeEl,
-        guestRowsEl: !!guestRowsEl,
-        codeInput: !!codeInput,
-      });
-      return;
-    }
-    console.log('[Wedding Form] Setup complete, attaching listeners');
+    if (!form || !partySizeEl || !guestRowsEl || !codeInput) return;
 
     function escapeHtml(s) {
       return String(s)
@@ -417,8 +400,6 @@ const mealOptionsJson = JSON.stringify(mealOptions);
       if (hotelWrap) {
         hotelWrap.classList.toggle('hidden', !show);
       }
-      var hotelRooms = document.getElementById('hotel-rooms');
-      if (hotelRooms) hotelRooms.required = !!show;
     }
 
     form.querySelectorAll('input[name="needsHotel"]').forEach(function (el) {
@@ -461,10 +442,6 @@ const mealOptionsJson = JSON.stringify(mealOptions);
       var hotelRadio = form.querySelector('input[name="needsHotel"][value="' + hotelValue + '"]');
       if (hotelRadio) hotelRadio.checked = true;
       updateHotelVisibility();
-      if (existing.needsHotel && existing.hotelRooms >= 1) {
-        var hotelRoomsEl = document.getElementById('hotel-rooms');
-        if (hotelRoomsEl) hotelRoomsEl.value = String(existing.hotelRooms);
-      }
 
       syncGuestRows();
       var guests = data.guests || [];
@@ -681,13 +658,9 @@ const mealOptionsJson = JSON.stringify(mealOptions);
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      console.log('[Wedding Form] Submit triggered');
       var gotcha = document.getElementById('guest-gotcha');
       // Checkbox honeypot — only bots typically check it; ignore autofill on text fields
-      if (gotcha && gotcha.checked) {
-        console.log('[Wedding Form] Honeypot caught bot');
-        return;
-      }
+      if (gotcha && gotcha.checked) return;
 
       // Always reset button/spinner so a prior failed attempt cannot leave the form stuck
       if (submitBtn) submitBtn.disabled = false;
@@ -720,8 +693,6 @@ const mealOptionsJson = JSON.stringify(mealOptions);
       var partySize = parseInt(partySizeEl.value, 10) || 0;
       var needsHotelEl = form.querySelector('input[name="needsHotel"]:checked');
       var needsHotel = needsHotelEl && needsHotelEl.value === 'yes';
-      var hotelRoomsEl = document.getElementById('hotel-rooms');
-      var hotelRooms = needsHotel && hotelRoomsEl ? parseInt(hotelRoomsEl.value, 10) : 0;
 
       if (!email) {
         failValidation('Please enter your email.', emailEl);
@@ -806,7 +777,6 @@ const mealOptionsJson = JSON.stringify(mealOptions);
             inviteCode: verifiedCode,
             partySize: partySize,
             needsHotel: needsHotel,
-            hotelRooms: needsHotel ? hotelRooms : 0,
             guests: guests,
           },
           recaptchaToken: token,

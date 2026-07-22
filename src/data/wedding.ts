@@ -83,7 +83,7 @@ export const dressCode = {
 
 export const accommodations: { busingNote: string; hotels: WeddingHotel[] } = {
   busingNote:
-    'We will be using VOYAGO transportation to shuttle guests from the venue back to the Lamplighter Inn in two runs, at 10:30 PM and 11:30 PM.',
+    'We will have transportation to shuttle guests from the venue back to the Lamplighter Inn in two runs, at 10:30 PM and 11:30 PM.',
   hotels: [
     {
       name: 'Lamplighter Inn',
@@ -92,7 +92,8 @@ export const accommodations: { busingNote: string; hotels: WeddingHotel[] } = {
       mapUrl:
         'https://www.google.com/maps/search/?api=1&query=Best+Western+Plus+Lamplighter+Inn+591+Wellington+Rd,+London,+ON+N6C+4R3',
       notes:
-        'If you selected yes to needing a hotel for the night of the wedding in the guest details questionnaire, Hanna will send you a link and information via email so you can book with our wedding group and receive the group discounted rates.',
+        'Rooms are blocked for Saturday night only. To book, call the Lamplighter Inn at 519-681-7151 and tell them you are booking a room in the reserved room block for "The Solker Wedding".',
+      phone: '519-681-7151',
     },
   ],
 };
@@ -117,7 +118,7 @@ export const faq: WeddingFaqItem[] = [
   {
     question: 'Is there a shuttle back to the hotel?',
     answer:
-      'Yes — VOYAGO transportation will run two shuttles from Bellamere to the Lamplighter Inn, at 10:30 PM and 11:30 PM.',
+      'Yes — transportation will run two shuttles from Bellamere to the Lamplighter Inn, at 10:30 PM and 11:30 PM.',
   },
   {
     question: 'Is the ceremony indoors or outdoors?',
@@ -132,7 +133,12 @@ export const faq: WeddingFaqItem[] = [
   {
     question: 'Which hotel will rooms be blocked out at?',
     answer:
-      'The Lamplighter Inn (Best Western Plus) in London — 591 Wellington Rd, London, ON N6C 4R3.',
+      'The Lamplighter Inn (Best Western Plus) in London — 591 Wellington Rd, London, ON N6C 4R3. To book, call 519-681-7151 and tell them you are booking a room in the reserved room block for "The Solker Wedding".',
+  },
+  {
+    question: 'Which nights are hotel rooms blocked for?',
+    answer:
+      'Rooms are only blocked out for Saturday night (October 10, 2026). If you need additional nights, please ask the hotel when you call.',
   },
   {
     question: 'What is the invite code on the guest details form?',
@@ -190,5 +196,4 @@ export const guestFormLimits = {
   maxNameLength: 150,
   maxEmailLength: 254,
   maxDietaryLength: 500,
-  maxHotelRooms: 4,
 } as const;
