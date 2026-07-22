@@ -1,5 +1,6 @@
 ---
 import { mealOptions, guestFormLimits, accommodations } from '../../data/wedding';
+import WeddingMealOptions from './WeddingMealOptions.astro';
 
 const hotel = accommodations.hotels[0];
 
@@ -167,6 +168,10 @@ const mealOptionsJson = JSON.stringify(mealOptions);
   </div>
   </section>
 
+  <div id="meal-options-section" class="hidden">
+    <WeddingMealOptions />
+  </div>
+
   <section
     id="guest-details-section"
     class="hidden space-y-4 rounded-lg border border-taupe/20 bg-sage-light/20 p-4 sm:p-5"
@@ -272,6 +277,7 @@ const mealOptionsJson = JSON.stringify(mealOptions);
     var codeVerifyBtn = document.getElementById('invite-code-verify-btn');
     var codeStatus = document.getElementById('invite-code-status');
     var householdSection = document.getElementById('household-section');
+    var mealOptionsSection = document.getElementById('meal-options-section');
     var guestDetailsSection = document.getElementById('guest-details-section');
     var guestV2Mode = false;
     var guestV2WidgetId = null;
@@ -483,6 +489,7 @@ const mealOptionsJson = JSON.stringify(mealOptions);
       }
 
       if (householdSection) householdSection.classList.remove('hidden');
+      if (mealOptionsSection) mealOptionsSection.classList.remove('hidden');
       if (guestDetailsSection) guestDetailsSection.classList.remove('hidden');
       if (submitBtn) submitBtn.classList.remove('hidden');
 

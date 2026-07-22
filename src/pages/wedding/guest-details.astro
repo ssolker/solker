@@ -1,7 +1,6 @@
 ---
 import WeddingLayout from '../../layouts/WeddingLayout.astro';
 import WeddingGuestForm from '../../components/wedding/WeddingGuestForm.astro';
-import WeddingMealOptions from '../../components/wedding/WeddingMealOptions.astro';
 import {
   getWeddingFormsApiUrl,
   getRecaptchaSiteKeyV3,
@@ -42,10 +41,6 @@ const recaptchaSiteKeyV2 = getRecaptchaSiteKeyV2();
       choices, dietary needs, and whether you need a hotel room.
     </p>
   </header>
-
-  <div class="wedding-reveal">
-    <WeddingMealOptions />
-  </div>
 
   <div class="wedding-reveal">
     <WeddingGuestForm
