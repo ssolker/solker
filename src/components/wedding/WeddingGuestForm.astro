@@ -39,8 +39,9 @@ const mealOptionsJson = JSON.stringify(mealOptions);
         Invite code
       </h3>
       <p class="mt-0.5 text-xs text-taupe-dark">
-        Enter the 6-digit code from your invitation to unlock the form. If you've submitted
-        before, your previous answers will be loaded so you can update them.
+        Enter the 6-digit code from your invitation to unlock the form. If you opened a personal
+        link, your code may already be filled in. If you've submitted before, your previous answers
+        will be loaded so you can update them.
       </p>
     </div>
 
@@ -623,6 +624,45 @@ const mealOptionsJson = JSON.stringify(mealOptions);
     if (codeVerifyBtn) {
       codeVerifyBtn.addEventListener('click', requestCodeVerify);
     }
+
+    // Prefill + auto-verify from ?code=123211 (invite deep links)
+    (function tryAutofillFromUrl() {
+      var params;
+      try {
+        params = new URLSearchParams(window.location.search);
+      } catch (err) {
+        return;
+      }
+      var codeParam = String(params.get('code') || '')
+        .replace(/\D/g, '')
+        .slice(0, 6);
+      if (codeParam.length !== 6) return;
+
+      codeInput.value = codeParam;
+      setCodeStatus('Checking your invite code…', 'info');
+
+      function startVerify() {
+        requestCodeVerify();
+      }
+
+      if (typeof grecaptcha !== 'undefined') {
+        startVerify();
+        return;
+      }
+
+      // Wait briefly for the reCAPTCHA script to load
+      var tries = 0;
+      var timer = setInterval(function () {
+        tries += 1;
+        if (typeof grecaptcha !== 'undefined') {
+          clearInterval(timer);
+          startVerify();
+        } else if (tries >= 40) {
+          clearInterval(timer);
+          setCodeStatus('Spam protection could not load. Please refresh and try again.', 'error');
+        }
+      }, 250);
+    })();
 
     function getGuestV2WidgetId() {
       if (guestV2WidgetId !== null) return guestV2WidgetId;
