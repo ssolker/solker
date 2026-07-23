@@ -61,6 +61,11 @@ export const story = {
 } as const;
 
 export const schedule: WeddingScheduleItem[] = [
+  {
+    time: '2:00 PM',
+    label: 'Bus from hotel to venue',
+    description: 'Leaves from the Lamplighter Inn',
+  },
   { time: '2:30 PM', label: 'Guest arrival' },
   { time: '3:00 PM', label: 'Ceremony begins', description: 'Gazebo at Bellamere' },
   {
@@ -83,7 +88,7 @@ export const dressCode = {
 
 export const accommodations: { busingNote: string; hotels: WeddingHotel[] } = {
   busingNote:
-    'We will have transportation to shuttle guests from the venue back to the Lamplighter Inn in two runs, at 10:30 PM and 11:30 PM.',
+    'A bus leaves the Lamplighter Inn for Bellamere at 2:00 PM. Return shuttles from the venue back to the Lamplighter Inn run at 10:30 PM and 11:30 PM.',
   hotels: [
     {
       name: 'Lamplighter Inn',
@@ -114,6 +119,11 @@ export const faq: WeddingFaqItem[] = [
     question: 'Is there parking at the venue?',
     answer:
       'Yes — there is parking at Bellamere, and you are welcome to leave your car there overnight.',
+  },
+  {
+    question: 'Is there a shuttle from the hotel to the venue?',
+    answer:
+      'Yes — a bus leaves the Lamplighter Inn for Bellamere at 2:00 PM.',
   },
   {
     question: 'Is there a shuttle back to the hotel?',
