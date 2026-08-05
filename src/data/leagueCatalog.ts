@@ -135,8 +135,8 @@ const soccerSeason2Weekly: WeeklyScheduleRow[] = [
   { weekLabel: '—', dateLabel: 'Monday, August 3', status: 'NO GAMES (Civic Holiday)' },
   { weekLabel: 'Week 5', dateLabel: 'Monday, August 10', status: 'Regular Season' },
   { weekLabel: 'Week 6', dateLabel: 'Monday, August 17', status: 'Regular Season' },
-  { weekLabel: 'Week 7', dateLabel: 'Monday, August 24', status: 'TBD' },
-  { weekLabel: 'Week 8', dateLabel: 'Monday, August 31', status: 'TBD' }
+  { weekLabel: 'Week 7', dateLabel: 'Monday, August 24', status: 'Regular Season' },
+  { weekLabel: 'Week 8', dateLabel: 'Monday, August 31', status: 'Finals / Championship Night' }
 ];
 
 /**
@@ -216,8 +216,10 @@ const SOCCER_SEASON_1_FIXTURES: SeasonFixture[] = [
 
 /**
  * Season 2: balanced schedule (Summer 2026). Civic Holiday off week Aug 3.
- * From Week 3 onward: Fields G & H (outdoor) + Indoor Turf B & C.
- * Weeks 7–8 (after Aug 17) are TBD pending schedule changes.
+ * Weeks 3–6: Fields G & H (outdoor) + Indoor Turf B & C.
+ * Weeks 7–8: Fields A (Midas Auto Service), F (Doug & Yvonne Eckel), G, H.
+ * Week 7 pairings prioritize opponents who had only met once through Week 6.
+ * Finals night: 6:30 semis; 7:30 championship on Field A; 3rd on F; bottom 4 on G/H.
  */
 const SOCCER_SEASON_2_FIXTURES: SeasonFixture[] = [
   { id: 'soccer-season-2-g01', date: '2026-07-06', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Butler', awayTeam: 'O\'Leary' },
@@ -265,17 +267,31 @@ const SOCCER_SEASON_2_FIXTURES: SeasonFixture[] = [
   { id: 'soccer-season-2-g40', date: '2026-08-10', startTime: '7:30 PM', fieldName: 'Indoor Turf B', homeTeam: 'Batth', awayTeam: 'Bender' },
   // Week 6 — August 17
   { id: 'soccer-season-2-g41', date: '2026-08-17', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Abouzeenni', awayTeam: 'Thompson' },
-  { id: 'soccer-season-2-g42', date: '2026-08-17', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Baer', awayTeam: 'Batth' },
-  { id: 'soccer-season-2-g43', date: '2026-08-17', startTime: '6:30 PM', fieldName: 'Indoor Turf C', homeTeam: 'Bender', awayTeam: 'O\'Leary' },
+  { id: 'soccer-season-2-g42', date: '2026-08-17', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Batth' },
+  { id: 'soccer-season-2-g43', date: '2026-08-17', startTime: '6:30 PM', fieldName: 'Indoor Turf C', homeTeam: 'Baer', awayTeam: 'O\'Leary' },
   { id: 'soccer-season-2-g44', date: '2026-08-17', startTime: '6:30 PM', fieldName: 'Indoor Turf B', homeTeam: 'Butler', awayTeam: 'Taylor' },
-  { id: 'soccer-season-2-g45', date: '2026-08-17', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Abouzeenni', awayTeam: 'Baer' },
+  { id: 'soccer-season-2-g45', date: '2026-08-17', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Abouzeenni', awayTeam: 'Bender' },
   { id: 'soccer-season-2-g46', date: '2026-08-17', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Batth', awayTeam: 'Thompson' },
-  { id: 'soccer-season-2-g47', date: '2026-08-17', startTime: '7:30 PM', fieldName: 'Indoor Turf C', homeTeam: 'Bender', awayTeam: 'Butler' },
+  { id: 'soccer-season-2-g47', date: '2026-08-17', startTime: '7:30 PM', fieldName: 'Indoor Turf C', homeTeam: 'Baer', awayTeam: 'Butler' },
   { id: 'soccer-season-2-g48', date: '2026-08-17', startTime: '7:30 PM', fieldName: 'Indoor Turf B', homeTeam: 'O\'Leary', awayTeam: 'Taylor' },
-  // Week 7 — August 24 (TBD)
-  { id: 'soccer-season-2-g49', date: '2026-08-24', startTime: 'TBD', fieldName: 'TBD', homeTeam: 'TBD', awayTeam: 'TBD', result: 'TBD' },
-  // Week 8 — August 31 (TBD)
-  { id: 'soccer-season-2-g50', date: '2026-08-31', startTime: 'TBD', fieldName: 'TBD', homeTeam: 'TBD', awayTeam: 'TBD', countsForStandings: false, result: 'TBD' },
+  // Week 7 — August 24 (least-played rematches through Week 6)
+  { id: 'soccer-season-2-g49', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field A', homeTeam: 'Abouzeenni', awayTeam: 'Baer' },
+  { id: 'soccer-season-2-g50', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field F', homeTeam: 'Batth', awayTeam: 'Taylor' },
+  { id: 'soccer-season-2-g51', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Bender', awayTeam: 'O\'Leary' },
+  { id: 'soccer-season-2-g52', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Butler', awayTeam: 'Thompson' },
+  { id: 'soccer-season-2-g53', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field A', homeTeam: 'Abouzeenni', awayTeam: 'Taylor' },
+  { id: 'soccer-season-2-g54', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field F', homeTeam: 'Batth', awayTeam: 'Butler' },
+  { id: 'soccer-season-2-g55', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Bender', awayTeam: 'Baer' },
+  { id: 'soccer-season-2-g56', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'O\'Leary', awayTeam: 'Thompson' },
+  // Week 8 — August 31 (Finals / Championship Night)
+  { id: 'soccer-season-2-g57', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field A', homeTeam: 'Seed 1', awayTeam: 'Seed 4', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g58', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field F', homeTeam: 'Seed 2', awayTeam: 'Seed 3', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g59', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Seed 5', awayTeam: 'Seed 8', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g60', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Seed 6', awayTeam: 'Seed 7', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g61', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field A', homeTeam: 'Winner (1 v 4)', awayTeam: 'Winner (2 v 3)', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g62', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field F', homeTeam: 'Loser (1 v 4)', awayTeam: 'Loser (2 v 3)', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g63', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Winner (5 v 8)', awayTeam: 'Winner (6 v 7)', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g64', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Loser (5 v 8)', awayTeam: 'Loser (6 v 7)', countsForStandings: false, result: 'TBD' },
 ];
 
 export const leagueCatalog: LeagueCatalogEntry[] = [
@@ -318,7 +334,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         teams: soccerS2Teams,
         isActive: true,
         address: SOC_ADDRESS,
-        gameTimeDetail: 'Regular season: two waves (6:30 and 7:30), four games per wave on Fields G/H and Indoor Turf B/C. Weeks after Aug 17 TBD.',
+        gameTimeDetail: 'Regular season: two waves (6:30 and 7:30), four games per wave. Weeks 3–6 on Fields G/H and Indoor Turf B/C; Weeks 7–8 on Fields A/F/G/H. Championship night: semis 6:30; 7:30 has championship on Field A, 3rd on F, and 5th/7th on G/H.',
         weeklySchedule: soccerSeason2Weekly,
         fixtures: SOCCER_SEASON_2_FIXTURES,
         standingsMode: 'table',
