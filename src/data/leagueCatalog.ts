@@ -217,11 +217,11 @@ const SOCCER_SEASON_1_FIXTURES: SeasonFixture[] = [
 /**
  * Season 2: balanced schedule (Summer 2026). Civic Holiday off week Aug 3.
  * Weeks 3–6: Fields G & H (outdoor) + Indoor Turf B & C.
- * Weeks 7–8: Fields A (Midas Auto Service), F (Doug & Yvonne Eckel), G, H.
+ * Weeks 7–8: Fields A - Midas, F - Doug & Yvonne Eckel, G, H.
  * Weeks 6–7 avoid an Abouzeenni–Batth rematch (they just met Week 5); indoor teams stay indoor both waves.
  * Note: Bender–Taylor already met 3× in Weeks 1/3/4, so a perfect double RR is impossible
  * without rewriting past weeks; Weeks 6–7 get as close as possible (Baer–Batth is the extra 3×).
- * Finals night: 6:30 semis; 7:30 championship on Field A; 3rd on F; bottom 4 on G/H.
+ * Finals night: 6:30 semis; 7:30 championship on Field A - Midas; 3rd on F - Doug & Yvonne Eckel; bottom 4 on G/H.
  */
 const SOCCER_SEASON_2_FIXTURES: SeasonFixture[] = [
   { id: 'soccer-season-2-g01', date: '2026-07-06', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Butler', awayTeam: 'O\'Leary' },
@@ -277,21 +277,21 @@ const SOCCER_SEASON_2_FIXTURES: SeasonFixture[] = [
   { id: 'soccer-season-2-g47', date: '2026-08-17', startTime: '7:30 PM', fieldName: 'Indoor Turf C', homeTeam: 'Abouzeenni', awayTeam: 'Bender' },
   { id: 'soccer-season-2-g48', date: '2026-08-17', startTime: '7:30 PM', fieldName: 'Indoor Turf B', homeTeam: 'Baer', awayTeam: 'Batth' },
   // Week 7 — August 24
-  { id: 'soccer-season-2-g49', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field A', homeTeam: 'Abouzeenni', awayTeam: 'Taylor' },
-  { id: 'soccer-season-2-g50', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field F', homeTeam: 'Baer', awayTeam: 'Butler' },
+  { id: 'soccer-season-2-g49', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field A - Midas', homeTeam: 'Abouzeenni', awayTeam: 'Taylor' },
+  { id: 'soccer-season-2-g50', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field F - Doug & Yvonne Eckel', homeTeam: 'Baer', awayTeam: 'Butler' },
   { id: 'soccer-season-2-g51', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Batth', awayTeam: 'O\'Leary' },
   { id: 'soccer-season-2-g52', date: '2026-08-24', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'Thompson' },
-  { id: 'soccer-season-2-g53', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field A', homeTeam: 'Abouzeenni', awayTeam: 'Thompson' },
-  { id: 'soccer-season-2-g54', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field F', homeTeam: 'Baer', awayTeam: 'Taylor' },
+  { id: 'soccer-season-2-g53', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field A - Midas', homeTeam: 'Abouzeenni', awayTeam: 'Thompson' },
+  { id: 'soccer-season-2-g54', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field F - Doug & Yvonne Eckel', homeTeam: 'Baer', awayTeam: 'Taylor' },
   { id: 'soccer-season-2-g55', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Batth', awayTeam: 'Butler' },
   { id: 'soccer-season-2-g56', date: '2026-08-24', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Bender', awayTeam: 'O\'Leary' },
   // Week 8 — August 31 (Finals / Championship Night)
-  { id: 'soccer-season-2-g57', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field A', homeTeam: 'Seed 1', awayTeam: 'Seed 4', countsForStandings: false, result: 'TBD' },
-  { id: 'soccer-season-2-g58', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field F', homeTeam: 'Seed 2', awayTeam: 'Seed 3', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g57', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field A - Midas', homeTeam: 'Seed 1', awayTeam: 'Seed 4', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g58', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field F - Doug & Yvonne Eckel', homeTeam: 'Seed 2', awayTeam: 'Seed 3', countsForStandings: false, result: 'TBD' },
   { id: 'soccer-season-2-g59', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field G', homeTeam: 'Seed 5', awayTeam: 'Seed 8', countsForStandings: false, result: 'TBD' },
   { id: 'soccer-season-2-g60', date: '2026-08-31', startTime: '6:30 PM', fieldName: 'Field H', homeTeam: 'Seed 6', awayTeam: 'Seed 7', countsForStandings: false, result: 'TBD' },
-  { id: 'soccer-season-2-g61', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field A', homeTeam: 'Winner (1 v 4)', awayTeam: 'Winner (2 v 3)', countsForStandings: false, result: 'TBD' },
-  { id: 'soccer-season-2-g62', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field F', homeTeam: 'Loser (1 v 4)', awayTeam: 'Loser (2 v 3)', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g61', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field A - Midas', homeTeam: 'Winner (1 v 4)', awayTeam: 'Winner (2 v 3)', countsForStandings: false, result: 'TBD' },
+  { id: 'soccer-season-2-g62', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field F - Doug & Yvonne Eckel', homeTeam: 'Loser (1 v 4)', awayTeam: 'Loser (2 v 3)', countsForStandings: false, result: 'TBD' },
   { id: 'soccer-season-2-g63', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field G', homeTeam: 'Winner (5 v 8)', awayTeam: 'Winner (6 v 7)', countsForStandings: false, result: 'TBD' },
   { id: 'soccer-season-2-g64', date: '2026-08-31', startTime: '7:30 PM', fieldName: 'Field H', homeTeam: 'Loser (5 v 8)', awayTeam: 'Loser (6 v 7)', countsForStandings: false, result: 'TBD' },
 ];
@@ -336,7 +336,7 @@ export const leagueCatalog: LeagueCatalogEntry[] = [
         teams: soccerS2Teams,
         isActive: true,
         address: SOC_ADDRESS,
-        gameTimeDetail: 'Regular season: two waves (6:30 and 7:30), four games per wave. Weeks 3–6 on Fields G/H and Indoor Turf B/C; Weeks 7–8 on Fields A/F/G/H. Championship night: semis 6:30; 7:30 has championship on Field A, 3rd on F, and 5th/7th on G/H.',
+        gameTimeDetail: 'Regular season: two waves (6:30 and 7:30), four games per wave. Weeks 3–6 on Fields G/H and Indoor Turf B/C; Weeks 7–8 on Fields A - Midas, F - Doug & Yvonne Eckel, G/H. Championship night: semis 6:30; 7:30 has championship on Field A - Midas, 3rd on F - Doug & Yvonne Eckel, and 5th/7th on G/H.',
         weeklySchedule: soccerSeason2Weekly,
         fixtures: SOCCER_SEASON_2_FIXTURES,
         standingsMode: 'table',
